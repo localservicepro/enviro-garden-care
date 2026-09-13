@@ -75,9 +75,12 @@
   }
 
   /* ---------- Services megamenu (desktop) -------------------------------- */
+  // Bound via the data-nav hook, not a URL — an href change must not be able to
+  // silently unbind the dropdown (it did once, when .html was dropped from URLs).
   var mega = $('#megamenu');
-  var servicesLink = $('.nav__list a[href$="services.html"]');
-  if (mega && servicesLink && header) {
+  var servicesItem = $('[data-nav="services"]');
+  var servicesLink = servicesItem && servicesItem.querySelector('a');
+  if (mega && servicesItem && servicesLink && header) {
     var megaTimer = null;
     var showMega = function (show) {
       window.clearTimeout(megaTimer);
@@ -88,7 +91,7 @@
       }
     };
     var desktop = function () { return window.matchMedia('(min-width: 981px)').matches; };
-    servicesLink.parentElement.addEventListener('mouseenter', function () {
+    servicesItem.addEventListener('mouseenter', function () {
       if (desktop()) showMega(true);
     });
     header.addEventListener('mouseleave', function () { showMega(false); });

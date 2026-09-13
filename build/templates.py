@@ -240,14 +240,26 @@ def head(page):
 
 def header(active=""):
     """active: the NAV href of the current page, e.g. "/about/"."""
+    # Nested service links. Hidden on desktop (the megamenu panel covers that);
+    # shown inside the off-canvas drawer on mobile, where there is no hover.
+    sub = "".join('<li><a href="%s">%s%s</a></li>'
+                  % (svc_url(s["slug"]), icon(s["icon"], "icon icon--sm"), s["nav"])
+                  for s in SERVICES)
+
     links = []
     for label, href in NAV:
         is_active = (href == active)
-        links.append('<li><a href="%s"%s>%s</a></li>' % (
-            href, ' class="is-active" aria-current="page"' if is_active else "", label))
+        cls = ' class="is-active" aria-current="page"' if is_active else ""
+        if href == "/services/":
+            # data-nav is the hook main.js binds the dropdown to — deliberately
+            # not a URL, so changing the nav href cannot silently kill it.
+            links.append('<li data-nav="services"><a href="%s"%s>%s</a>'
+                         '<ul class="nav__sub">%s</ul></li>' % (href, cls, label, sub))
+        else:
+            links.append('<li><a href="%s"%s>%s</a></li>' % (href, cls, label))
 
     svc_items = "".join(
-        '<li><a href="%s">%s%s<span>%s</span></a></li>' % (
+        '<li><a href="%s">%s<strong>%s</strong><span>%s</span></a></li>' % (
             svc_url(s["slug"]), icon(s["icon"], "icon icon--sm"), s["nav"], s["tagline"])
         for s in SERVICES)
 
