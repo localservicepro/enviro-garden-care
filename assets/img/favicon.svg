@@ -1,0 +1,5 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64" role="img" aria-label="Enviro Garden Care">
+  <rect width="64" height="64" rx="14" fill="#123b28"/>
+  <path d="M14 50c0-20 14-33 38-35 0 26-15 35-30 35H14z" fill="#7ac943"/>
+  <path d="M19 46c7-12 16-19 26-22" stroke="#123b28" stroke-width="3.2" stroke-linecap="round" fill="none"/>
+</svg>

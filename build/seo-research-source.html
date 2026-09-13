@@ -1,0 +1,397 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Enviro Garden Care &amp; Odd Jobs — SEO Research &amp; Strategy | Local Service Pro</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+:root{--bg:#080808;--bg-1:#0f0f0f;--bg-2:#141414;--bg-3:#1a1a1a;--border:#242424;--border-2:#2e2e2e;--text:#f5f5f5;--text-2:#a3a3a3;--text-3:#666;--blue:#3b82f6;--blue-2:#60a5fa;--blue-bg:rgba(59,130,246,0.08);--blue-bd:rgba(59,130,246,0.2);--green:#22c55e;--green-bg:rgba(34,197,94,0.08);--green-bd:rgba(34,197,94,0.2);--red:#ef4444;--red-2:#f87171;--red-bg:rgba(239,68,68,0.08);--red-bd:rgba(239,68,68,0.22);--amber:#f59e0b;--amber-2:#fbbf24;--amber-bg:rgba(245,158,11,0.08);--amber-bd:rgba(245,158,11,0.22)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:var(--bg);color:var(--text);font-family:Inter,system-ui,sans-serif;font-size:14px;font-weight:300;line-height:1.65;-webkit-font-smoothing:antialiased}
+.mono{font-family:'JetBrains Mono',monospace}
+nav{position:sticky;top:0;z-index:10;height:56px;display:flex;align-items:center;justify-content:space-between;padding:0 48px;border-bottom:1px solid var(--border);background:var(--bg)}
+.brand{display:flex;align-items:center;gap:10px;font-weight:700;font-size:13px;letter-spacing:-0.01em}
+.mark{width:22px;height:22px;border-radius:6px;background:var(--blue);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:900;color:#fff}
+.navr{display:flex;align-items:center;gap:14px;font-size:11px;color:var(--text-3)}
+.badge{font-size:9px;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;padding:4px 9px;border-radius:99px;border:1px solid var(--blue-bd);background:var(--blue-bg);color:var(--blue-2)}
+.hero{position:relative;padding:64px 48px 56px;border-bottom:1px solid var(--border);overflow:hidden}
+.hero:before{content:"";position:absolute;inset:0;background-image:radial-gradient(circle,rgba(255,255,255,0.06) 1px,transparent 1px);background-size:28px 28px;-webkit-mask-image:radial-gradient(ellipse 800px 600px at 80% 50%,black 0%,transparent 80%);mask-image:radial-gradient(ellipse 800px 600px at 80% 50%,black 0%,transparent 80%)}
+.hero>*{position:relative}
+.eyebrow{display:flex;align-items:center;gap:8px;font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-3);margin-bottom:18px}
+.dot{width:6px;height:6px;border-radius:50%;background:var(--green);animation:blink 1.6s infinite}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.25}}
+h1{font-size:40px;font-weight:900;letter-spacing:-0.04em;line-height:1.05;max-width:760px}
+.sub{color:var(--text-2);margin-top:14px;max-width:640px;font-size:15px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:36px;max-width:1000px}
+.kpi{background:var(--bg-1);border:1px solid var(--border);border-radius:10px;padding:16px 20px}
+.kpi .l{font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-3);font-weight:600}
+.kpi .v{font-size:22px;font-weight:800;margin-top:6px}
+.kpi .s{font-size:11px;color:var(--text-3);margin-top:2px}
+.alert{margin:32px 48px 0;padding:14px 18px;border-radius:10px;background:var(--amber-bg);border:1px solid var(--amber-bd);font-size:13px;line-height:1.6;max-width:1000px}
+.alert b{color:var(--amber-2);font-weight:600}
+main{max-width:1000px;margin:0 auto;padding:0 48px}
+section{padding:48px 0;border-bottom:1px solid var(--border)}
+.sn{font-size:10px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;color:var(--text-3);margin-bottom:8px}
+h2{font-size:24px;font-weight:800;letter-spacing:-0.03em;margin-bottom:8px}
+h3{font-size:15px;font-weight:700;letter-spacing:-0.02em;margin:28px 0 12px}
+p{color:var(--text-2);max-width:760px}
+p+p{margin-top:10px}
+.lead{color:var(--text);font-size:15px}
+ul.b{list-style:none;margin-top:10px}
+ul.b li{position:relative;padding-left:18px;color:var(--text-2);margin-bottom:6px}
+ul.b li:before{content:"";position:absolute;left:0;top:9px;width:6px;height:6px;border-radius:2px;background:var(--blue)}
+ul.b.g li:before{background:var(--green)}
+ul.b li b{color:var(--text);font-weight:600}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.card{background:var(--bg-1);border:1px solid var(--border);border-radius:10px;padding:18px 20px}
+.card .l{font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-3);font-weight:600;margin-bottom:8px}
+.gaps{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:20px}
+.gap{background:var(--bg-1);border:1px solid var(--border);border-radius:10px;padding:16px 18px}
+.gap .n{font-size:11px;font-weight:600;color:var(--text-2)}
+.gap .s{font-size:32px;font-weight:900;margin:6px 0 8px;line-height:1}
+.gap .s small{font-size:12px;color:var(--text-3);font-weight:500}
+.bar{height:3px;border-radius:99px;background:var(--bg-3);overflow:hidden}
+.bar i{display:block;height:100%;border-radius:99px}
+.gap .d{font-size:11px;color:var(--text-3);margin-top:8px;line-height:1.5}
+.r{color:var(--red-2)}.a{color:var(--amber-2)}.g{color:var(--green)}.bl{color:var(--blue-2)}
+.bg-r{background:var(--red)}.bg-a{background:var(--amber)}.bg-g{background:var(--green)}
+.find{display:grid;grid-template-columns:36px 1fr;background:var(--bg-1);border:1px solid var(--border);border-radius:10px;padding:14px 16px 14px 0;margin-bottom:10px;border-left:2px solid var(--red)}
+.find.am{border-left-color:var(--amber)}.find.ok{border-left-color:var(--green)}
+.find .num{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-3);text-align:center;padding-top:2px}
+.find .t{display:flex;align-items:center;gap:10px;font-size:13px;font-weight:600;letter-spacing:-0.01em}
+.pill{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:0.06em;padding:2px 7px;border-radius:99px;border:1px solid}
+.pill.r{border-color:var(--red-bd);background:var(--red-bg)}.pill.a{border-color:var(--amber-bd);background:var(--amber-bg)}.pill.g{border-color:var(--green-bd);background:var(--green-bg)}.pill.bl{border-color:var(--blue-bd);background:var(--blue-bg)}
+.find .x{color:var(--text-2);margin-top:6px;font-size:13px}
+.ev{background:var(--bg-3);border-radius:7px;padding:10px 14px;margin-top:10px;display:grid;grid-template-columns:160px 1fr;row-gap:5px;font-size:11.5px}
+.ev .k{font-family:'JetBrains Mono',monospace;color:var(--text-3)}
+table{width:100%;border-collapse:collapse;background:var(--bg-1);border:1px solid var(--border);border-radius:10px;overflow:hidden;font-size:12.5px;margin-top:12px}
+th{text-align:left;font-size:10px;text-transform:uppercase;letter-spacing:0.08em;color:var(--text-3);font-weight:600;padding:10px 14px;border-bottom:1px solid var(--border);background:var(--bg-2)}
+td{padding:10px 14px;border-bottom:1px solid var(--border);vertical-align:top;color:var(--text-2)}
+tr:last-child td{border-bottom:0}
+td.k{color:var(--text);font-weight:500}
+td .mono{font-size:12px}
+tr.me td{background:rgba(239,68,68,0.05)}
+tr.me{outline:1px solid var(--red-bd)}
+.dp{display:inline-block;font-family:'JetBrains Mono',monospace;font-size:11px;padding:1px 7px;border-radius:99px;border:1px solid}
+.dp.g{border-color:var(--green-bd);background:var(--green-bg);color:var(--green)}.dp.a{border-color:var(--amber-bd);background:var(--amber-bg);color:var(--amber-2)}.dp.r{border-color:var(--red-bd);background:var(--red-bg);color:var(--red-2)}.dp.n{border-color:var(--border-2);color:var(--text-3)}
+.spec{background:var(--bg-1);border:1px solid var(--blue-bd);border-radius:10px;padding:18px 20px;margin-top:14px}
+.spec .row{display:grid;grid-template-columns:150px 1fr;gap:12px;padding:8px 0;border-bottom:1px solid var(--border);font-size:13px}
+.spec .row:last-child{border-bottom:0}
+.spec .row .k{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text-3);padding-top:2px}
+.spec .row .v{color:var(--text)}
+.spec .row .v small{font-family:'JetBrains Mono',monospace;color:var(--text-3);font-size:10px;margin-left:8px}
+.map{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.node{background:var(--blue-bg);border:1px solid var(--blue-bd);border-radius:10px;padding:12px 14px}
+.node.home{grid-column:1/-1;background:var(--bg-1);border-color:var(--blue)}
+.node .pn{font-size:12px;font-weight:700;color:var(--text)}
+.node .kw{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--blue-2);margin-top:4px}
+.node .m{font-size:10px;color:var(--text-3);margin-top:4px;font-family:'JetBrains Mono',monospace}
+.tl{display:grid;grid-template-columns:130px 1fr;gap:14px;padding:12px 0;border-bottom:1px solid var(--border)}
+.tl:last-child{border-bottom:0}
+.tl .w{font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--blue-2);padding-top:3px}
+.tl .d{color:var(--text-2)}
+.cmp{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:14px}
+.cmp .card h4{font-size:12px;text-transform:uppercase;letter-spacing:0.08em;font-weight:700;margin-bottom:10px}
+.cmp .card.cur h4{color:var(--red-2)}.cmp .card.new h4{color:var(--green)}
+.cmp li{font-size:12.5px}
+.faq{background:var(--bg-1);border:1px solid var(--border);border-radius:10px;padding:14px 18px;margin-bottom:8px}
+.faq .q{font-weight:600;color:var(--text);font-size:13px}
+.faq .an{color:var(--text-2);font-size:12.5px;margin-top:4px}
+footer{border-top:1px solid var(--border);padding:24px 48px;display:flex;justify-content:space-between;align-items:center;font-size:11px;color:var(--text-3)}
+.src{font-size:11px;color:var(--text-3);margin-top:10px}
+@media(max-width:820px){nav,.hero,footer{padding-left:20px;padding-right:20px}main{padding:0 20px}.alert{margin:24px 20px 0}.kpis,.gaps,.grid3,.map{grid-template-columns:1fr 1fr}.grid2,.cmp{grid-template-columns:1fr}h1{font-size:30px}.ev,.spec .row,.tl{grid-template-columns:1fr}}
+</style></head><body>
+<nav><div class="brand"><div class="mark">L</div>Local Service Pro</div><div class="navr"><span class="badge">SEO Research &amp; Strategy</span><span class="mono">Sep 2026</span></div></nav>
+
+<div class="hero">
+<div class="eyebrow"><span class="dot"></span>New client onboarding · Step 1 research</div>
+<h1>Enviro Garden Care &amp; Odd Jobs<br><span style="color:var(--text-3)">SEO Website Strategy</span></h1>
+<p class="sub">Pimpama-based lawn mowing, acreage mowing and garden maintenance across the Northern Gold Coast. What the current site is doing, who's beating it, what people actually search for, and the page-by-page plan to close the gap.</p>
+<div class="kpis">
+<div class="kpi"><div class="l">Target keyword</div><div class="v bl" style="font-size:16px">Lawn Mowing Gold Coast</div><div class="s mono">320 searches/mo · difficulty 10</div></div>
+<div class="kpi"><div class="l">Keywords ranking</div><div class="v mono a">10</div><div class="s mono">0 in top 10 · ~1 visit/mo</div></div>
+<div class="kpi"><div class="l">Pages indexed</div><div class="v mono r">3</div><div class="s mono">0 service pages · 0 suburb pages</div></div>
+<div class="kpi"><div class="l">Backlinks</div><div class="v mono r">18</div><div class="s mono">4 referring domains · DA 3</div></div>
+</div>
+</div>
+
+<div class="alert"><b>The honest picture:</b> the site is a single GoDaddy builder page, invisible for every suburb except Pimpama, with no schema and 4 referring domains. But the market is soft — the head term "lawn mowing gold coast" has a difficulty score of only 10, page one for the suburb terms is full of directories and one-page competitors, and the client is already sitting at position 12 for "lawn mowing pimpama" with almost nothing on the page. This is a closeable gap.</div>
+
+<main>
+
+<section id="overview">
+<div class="sn">01 · Business overview</div>
+<h2>Enviro Garden Care &amp; Odd Jobs</h2>
+<div class="grid3" style="margin-top:16px">
+<div class="card"><div class="l">Base</div><div style="font-weight:500">14 Cullen Street, Pimpama QLD 4209</div><div class="src">Northern Gold Coast · GoDaddy Website Builder</div></div>
+<div class="card"><div class="l">Contact</div><div style="font-weight:500">Shanon Hopton</div><div class="src mono">0407 276 574 · hello@envirogardencare.com.au</div></div>
+<div class="card"><div class="l">Differentiator</div><div style="font-weight:500">Battery-powered, low-noise equipment at no extra cost</div><div class="src">Unique in this market — nobody on page one owns it</div></div>
+</div>
+<h3>Core services</h3>
+<p>Lawn mowing · Ride-on mowing · Acreage mowing · Hedge trimming · Garden maintenance · Weed control · Green waste removal · Residential, commercial and industrial property maintenance</p>
+<h3>Service areas (19)</h3>
+<p>Coomera, Pimpama, Ormeau, Ormeau Hills, Parkwood, Arundel, Helensvale, Hope Island, Sanctuary Cove, Pacific Pines, Willowvale, Oxenford, Upper Coomera, Coomera Waters, Jacobs Well, Yatala, Stapylton, Windaroo, Mount Warren</p>
+</section>
+
+<section id="objective">
+<div class="sn">02 · Project objective</div>
+<h2>What this engagement achieves</h2>
+<ul class="b">
+<li><b>Own "Lawn Mowing Gold Coast" from the north.</b> The head term is 320 searches a month at difficulty 10 — winnable — and the homepage already half-targets it. Re-cut the page so the keyword sits in the H1, title and first paragraph with the northern suburbs named alongside it.</li>
+<li><b>Give Google 9+ pages instead of 3.</b> Every competitor on page one has a page per service and a page per suburb. The client has one page trying to rank for ten services across nineteen suburbs.</li>
+<li><b>Write the 18 missing suburbs into the site.</b> Coomera, Ormeau, Helensvale, Hope Island, Upper Coomera — zero mentions each today. Nobody in those suburbs can find this business by searching.</li>
+<li><b>Add the machine-readable layer.</b> LocalBusiness, Service and FAQ schema, sitemap, and a mobile page that becomes usable in under 3 seconds instead of 6.</li>
+</ul>
+</section>
+
+<section id="audit">
+<div class="sn">03 · Current site audit</div>
+<h2>envirogardencare.com.au — what's there today</h2>
+<p>Live crawl, Ubersuggest site audit and Google PageSpeed, run 4 September 2026. Gap scores are out of 10.</p>
+<div class="gaps">
+<div class="gap"><div class="n">Technical</div><div class="s a">5<small>/10</small></div><div class="bar"><i class="bg-a" style="width:50%"></i></div><div class="d">Fast on desktop, 6.0s to interactive on mobile. No schema. Sitemap not detected.</div></div>
+<div class="gap"><div class="n">Structural</div><div class="s r">2<small>/10</small></div><div class="bar"><i class="bg-r" style="width:20%"></i></div><div class="d">3 pages total. No service pages, no suburb pages, no internal linking.</div></div>
+<div class="gap"><div class="n">Content</div><div class="s r">3<small>/10</small></div><div class="bar"><i class="bg-r" style="width:30%"></i></div><div class="d">707 words for the whole business. "Gold Coast" repeated 20 times. One suburb mentioned.</div></div>
+<div class="gap"><div class="n">Local</div><div class="s a">4<small>/10</small></div><div class="bar"><i class="bg-a" style="width:40%"></i></div><div class="d">GBP exists. Street address not on site. No LocalBusiness schema. Reviews referenced, not shown.</div></div>
+<div class="gap"><div class="n">Conversion</div><div class="s a">4<small>/10</small></div><div class="bar"><i class="bg-a" style="width:40%"></i></div><div class="d">Click-to-call in header. No CTA above the fold, no quote form on homepage, expired promo still live.</div></div>
+</div>
+
+<h3>Critical findings</h3>
+<div class="find"><div class="num">01</div><div><div class="t">The homepage competes for the whole Gold Coast, and mentions one of 19 suburbs<span class="pill r">Critical</span></div><div class="x">Someone in Coomera searching "lawn mowing Coomera" will never see this site: the word Coomera does not appear on it. Same for Ormeau, Helensvale, Hope Island, Upper Coomera and thirteen others.</div>
+<div class="ev"><span class="k">Suburbs on page</span><span class="r">1 of 19 (Pimpama, 7 mentions)</span><span class="k">"Gold Coast" mentions</span><span class="a">20 — reads as stuffing</span><span class="k">"Northern Gold Coast"</span><span class="a">1 mention, buried in body copy</span></div></div></div>
+<div class="find"><div class="num">02</div><div><div class="t">No service pages — every service is a bullet in one list<span class="pill r">Critical</span></div><div class="x">Acreage mowing (70 searches/mo) and garden maintenance (140/mo) each deserve a page. Today they share a single URL with fourteen other services and the About section, so Google can't rank the site for any of them specifically.</div>
+<div class="ev"><span class="k">Pages crawled</span><span class="r">3 (home, services, contact)</span><span class="k">Dedicated service pages</span><span class="r">0</span><span class="k">Competitor average</span><span class="g">Page per service + page per suburb</span></div></div></div>
+<div class="find"><div class="num">03</div><div><div class="t">No schema markup of any kind<span class="pill r">Critical</span></div><div class="x">Your name, address, phone, hours and services aren't in the format Google and AI search engines read. You're missing from results that show them, and ChatGPT-style searches have nothing structured to cite.</div>
+<div class="ev"><span class="k">LocalBusiness schema</span><span class="r">Not found</span><span class="k">Service / FAQ schema</span><span class="r">Not found</span><span class="k">Street address on site</span><span class="r">No — footer says "Pimpama" only</span></div></div></div>
+<div class="find"><div class="num">04</div><div><div class="t">Thin content flagged by the crawler<span class="pill r">Critical</span></div><div class="x">707 words is the entire written footprint of the business. Fox Mowing's Pimpama page alone is a dedicated URL with its own copy; the client's whole site is shorter than that.</div>
+<div class="ev"><span class="k">Word count (homepage)</span><span class="r">707</span><span class="k">Ubersuggest flag</span><span class="r">content_count_words — high impact</span><span class="k">Site health score</span><span class="a">65 / 100</span></div></div></div>
+<div class="find"><div class="num">05</div><div><div class="t">Almost no authority: 4 websites link here<span class="pill r">Critical</span></div><div class="x">Fox Mowing has 234 referring domains, Pulse Mowing 133, even the one-page pimpama-lawn-mowing.com has 63. Four is why a DA-15 one-pager outranks this site on its own home suburb.</div>
+<div class="ev"><span class="k">Referring domains</span><span class="r">4 (competitor range: 63–234)</span><span class="k">Domain authority</span><span class="r">3</span><span class="k">Organic keywords</span><span class="a">10 — none in top 10</span><span class="k">Est. organic visits</span><span class="r">~1 / month</span></div></div></div>
+<div class="find am"><div class="num">06</div><div><div class="t">Mobile takes 6 seconds to become usable<span class="pill a">Medium</span></div><div class="x">Desktop is fast. On a phone — where most lawn-care searches happen — the page isn't interactive until 6.0s, and 630ms of that is redirect hops before the page even starts. The GoDaddy builder ships 150KB of JavaScript that isn't used.</div>
+<div class="ev"><span class="k">Mobile Time to Interactive</span><span class="r">6.0 s</span><span class="k">Mobile Speed Index</span><span class="a">4.2 s</span><span class="k">Mobile layout shift (CLS)</span><span class="a">0.115</span><span class="k">Desktop LCP / CLS</span><span class="g">1.9 s / 0.001</span><span class="k">Redirect cost (mobile)</span><span class="a">630 ms</span></div></div></div>
+<div class="find am"><div class="num">07</div><div><div class="t">Sitemap not detected, SSL flagged on the www hostname<span class="pill a">Medium</span></div><div class="x">The crawler couldn't find an XML sitemap and only discovered 3 pages. www.envirogardencare.com.au redirects correctly but tripped a certificate-validity check — worth verifying the cert covers both hostnames.</div></div></div>
+<div class="find am"><div class="num">08</div><div><div class="t">Heading hierarchy skips from H2 straight to H4<span class="pill a">Medium</span></div><div class="x">One H1, one H2 ("About Us"), then seven H4s. Google reads no logical outline of what the page covers.</div>
+<div class="ev"><span class="k">H1</span><span>Mowing Gold Coast - Expert Lawn Care and Gardening Services</span><span class="k">H2</span><span>About Us</span><span class="k">H4 ×7</span><span>Premium service · Current promotion · Exciting news · FAQs · Passion and dedication · Detail Oriented Service · Cookies</span></div></div></div>
+<div class="find am"><div class="num">09</div><div><div class="t">Expired promotion is still live<span class="pill a">Medium</span></div><div class="x">"50% off your 4th visit before September 1st, 2026" is on the page three days after the deadline. Visitors read it as neglect; Google reads it as stale.</div></div></div>
+<div class="find ok"><div class="num">10</div><div><div class="t">What's working<span class="pill g">Keep</span></div><div class="x">Title tag and meta description exist. Canonical is set. All 6 images have alt text. Click-to-call phone is in the header. Google site verification tag is present. The battery-equipment story, the FAQ content and the before/after photography are all reusable.</div></div></div>
+
+<h3>Keyword performance signals</h3>
+<table><tr><th>Signal</th><th>Current</th><th>Verdict</th></tr>
+<tr><td class="k">Title tag</td><td class="mono">Mowing Gold Coast - Expert Lawn Care Services</td><td><span class="dp a">"lawn mowing" split — keyword not intact</span></td></tr>
+<tr><td class="k">H1</td><td class="mono">Mowing Gold Coast - Expert Lawn Care and Gardening Services</td><td><span class="dp a">Same issue — H1 and title duplicate</span></td></tr>
+<tr><td class="k">Meta description</td><td class="mono">Expert lawn mowing and gardening services on the Gold Coast for all property types…</td><td><span class="dp g">Keyword present</span></td></tr>
+<tr><td class="k">"lawn mowing pimpama"</td><td class="mono">Position 12 · 40/mo</td><td><span class="dp a">One page off page one with zero targeting</span></td></tr>
+<tr><td class="k">"lawn care gold coast"</td><td class="mono">Position 20 · 90/mo</td><td><span class="dp a">Ranking accidentally</span></td></tr>
+<tr><td class="k">"upper coomera landscape"</td><td class="mono">Position 57 · 480/mo</td><td><span class="dp n">Wrong intent — ignore</span></td></tr></table>
+<h3>What this means</h3>
+<p class="lead">Google already half-trusts this site for Pimpama — position 12 with nothing on the page targeting it. That's the tell. Every competitor above it has either a dedicated Pimpama page or a dedicated Pimpama domain. Give this site the same structure and the authority it's missing, and the suburb terms are within reach inside a quarter.</p>
+</section>
+
+<section id="phase1">
+<div class="sn">04 · Phase 1 — Homepage optimisation</div>
+<h2>The homepage spec</h2>
+<p>This is the copy that goes live. Primary keyword first in the title, in the H1, and in the first 100 words — with the northern suburbs named in the same breath so the page owns the geography without losing the volume.</p>
+<div class="spec">
+<div class="row"><div class="k">H1</div><div class="v">Lawn Mowing Gold Coast — Northern Suburbs from Pimpama to Coomera<small>65 chars</small></div></div>
+<div class="row"><div class="k">Meta title</div><div class="v">Lawn Mowing Gold Coast | Enviro Garden Care &amp; Odd Jobs<small>54 chars</small></div></div>
+<div class="row"><div class="k">Meta description</div><div class="v">Reliable lawn mowing Gold Coast north: Pimpama, Coomera, Ormeau &amp; Helensvale. Acreage mowing, hedges, garden care. Quiet battery gear. Get a free quote today.<small>158 chars</small></div></div>
+<div class="row"><div class="k">Target keyword</div><div class="v mono bl">Lawn Mowing Gold Coast <small>320/mo · SD 10 · CPC A$3.26</small></div></div>
+<div class="row"><div class="k">Canonical</div><div class="v mono">https://envirogardencare.com.au/</div></div>
+</div>
+<h3>Structural changes</h3>
+<ul class="b">
+<li>Replace the H1 with the keyword-led version above; stop duplicating it as the title</li>
+<li>Put "lawn mowing Gold Coast" in the opening sentence, then name Pimpama, Coomera, Ormeau, Helensvale and Hope Island in the second</li>
+<li>Add an H2 per core service, each linking to its own service page — lawn mowing, acreage &amp; ride-on, hedges &amp; garden maintenance, green waste &amp; clean-ups, commercial maintenance</li>
+<li>Add a "Where we mow" H2 listing all 19 suburbs as text, grouped Coomera corridor / Helensvale–Hope Island / Ormeau–Yatala acreage belt</li>
+<li>Rebuild heading order H1 → H2 → H3; the current H2 → H4 jump goes</li>
+<li>Promote the battery-equipment section to a "Why us" block with its own H2: quiet, no fumes, no extra charge, Sunday-friendly</li>
+<li>Move the three FAQs into an accordion, expand to six, mark up as FAQPage</li>
+<li>Show the Google and Facebook reviews the page currently only mentions</li>
+<li>Remove the September 2026 promotion; replace with an evergreen new-client offer</li>
+<li>Cut "Gold Coast" from 20 mentions to natural density — target 1.3–1.5% on the primary term</li>
+<li>Add the full street address to the footer and contact section: 14 Cullen Street, Pimpama QLD 4209</li>
+</ul>
+<h3>Technical foundations</h3>
+<ul class="b">
+<li>Google Search Console — the existing verification tag can be reused; submit the sitemap on day one</li>
+<li>XML sitemap + robots.txt (not detected today)</li>
+<li>Single-hop redirect www → non-www, and confirm the SSL certificate covers www</li>
+<li>LocalBusiness JSON-LD with geo coordinates, opening hours, phone, sameAs (Facebook, Instagram, GBP) and areaServed for all 19 suburbs</li>
+<li>Strip the 150KB of unused builder JavaScript; target mobile interactive under 3s and CLS under 0.1</li>
+<li>Lazy-load and compress images; explicit width/height to kill the layout shift</li>
+<li><b>Platform note:</b> on GoDaddy Website Builder, title/description/H1 edits live under each section's SEO settings; schema cannot be added without a code block, which is a hard limit of that platform and one reason to rebuild</li>
+</ul>
+<h3>Fix table — quick wins on the current site, ordered by impact</h3>
+<table><tr><th>Fix</th><th>Effort</th><th>Impact</th><th>Action (copy-paste)</th></tr>
+<tr><td class="k">Meta title</td><td><span class="dp g">Low</span></td><td><span class="dp g">High</span></td><td class="mono">Lawn Mowing Gold Coast | Enviro Garden Care &amp; Odd Jobs</td></tr>
+<tr><td class="k">H1</td><td><span class="dp g">Low</span></td><td><span class="dp g">High</span></td><td class="mono">Lawn Mowing Gold Coast — Northern Suburbs from Pimpama to Coomera</td></tr>
+<tr><td class="k">Meta description</td><td><span class="dp g">Low</span></td><td><span class="dp g">High</span></td><td class="mono">Reliable lawn mowing Gold Coast north: Pimpama, Coomera, Ormeau &amp; Helensvale. Acreage mowing, hedges, garden care. Quiet battery gear. Get a free quote today.</td></tr>
+<tr><td class="k">Add suburb section</td><td><span class="dp g">Low</span></td><td><span class="dp g">High</span></td><td>New H2 "Where we mow" listing all 19 suburbs in plain text</td></tr>
+<tr><td class="k">LocalBusiness schema</td><td><span class="dp a">Medium</span></td><td><span class="dp g">High</span></td><td>JSON-LD with NAP, geo, hours, areaServed — requires rebuild off GoDaddy Builder</td></tr>
+<tr><td class="k">Remove expired promo</td><td><span class="dp g">Low</span></td><td><span class="dp a">Medium</span></td><td>Delete the "before September 1st, 2026" block</td></tr>
+<tr><td class="k">Hero image alt</td><td><span class="dp g">Low</span></td><td><span class="dp a">Medium</span></td><td class="mono">Freshly mowed lawn with crisp edges — lawn mowing Gold Coast by Enviro Garden Care, Pimpama</td></tr>
+<tr><td class="k">Street address</td><td><span class="dp g">Low</span></td><td><span class="dp a">Medium</span></td><td class="mono">14 Cullen Street, Pimpama QLD 4209 · 0407 276 574</td></tr></table>
+</section>
+
+<section id="keywords">
+<div class="sn">05 · Phase 2 — Keyword strategy</div>
+<h2>What people actually search for</h2>
+<p>All figures are Australian monthly volume from Ubersuggest, September 2026. Difficulty under 20 is green — realistic for a new site with a few good links. Suburb terms show low measured volume; that's normal for suburbs of 10–20k people and the intent is pure purchase.</p>
+<table><tr><th>Keyword</th><th>Volume /mo</th><th>Difficulty</th><th>CPC</th><th>Tier</th></tr>
+<tr><td class="k">lawn mowing gold coast</td><td class="mono">320</td><td><span class="dp g">10</span></td><td class="mono">A$3.26</td><td><span class="pill bl">Primary</span></td></tr>
+<tr><td class="k">garden maintenance gold coast</td><td class="mono">140</td><td><span class="dp g">13</span></td><td class="mono">A$5.76</td><td><span class="pill bl">Service</span></td></tr>
+<tr><td class="k">lawn care gold coast</td><td class="mono">90</td><td><span class="dp g">10</span></td><td class="mono">A$6.29</td><td><span class="pill bl">Service</span></td></tr>
+<tr><td class="k">acreage mowing gold coast</td><td class="mono">70</td><td><span class="dp g">12</span></td><td class="mono">A$7.13</td><td><span class="pill bl">Service</span></td></tr>
+<tr><td class="k">green waste removal gold coast</td><td class="mono">50</td><td><span class="dp a">23</span></td><td class="mono">A$6.76</td><td><span class="pill bl">Service</span></td></tr>
+<tr><td class="k">ndis lawn mowing gold coast</td><td class="mono">50</td><td><span class="dp g">5</span></td><td class="mono">—</td><td><span class="pill bl">Service (if NDIS-registered)</span></td></tr>
+<tr><td class="k">lawn mowing coomera</td><td class="mono">50</td><td><span class="dp g">13</span></td><td class="mono">A$3.36</td><td><span class="pill bl">Local</span></td></tr>
+<tr><td class="k">lawn mowing pimpama</td><td class="mono">40</td><td><span class="dp a">27</span></td><td class="mono">A$2.90</td><td><span class="pill bl">Local</span></td></tr>
+<tr><td class="k">lawn mowing helensvale</td><td class="mono">30</td><td><span class="dp a">29</span></td><td class="mono">A$2.78</td><td><span class="pill bl">Local</span></td></tr>
+<tr><td class="k">lawn mowing upper coomera</td><td class="mono">30</td><td><span class="dp a">26</span></td><td class="mono">A$4.12</td><td><span class="pill bl">Local</span></td></tr>
+<tr><td class="k">lawn mowing ormeau</td><td class="mono">20</td><td><span class="dp a">38</span></td><td class="mono">A$3.78</td><td><span class="pill bl">Local</span></td></tr>
+<tr><td class="k">hedge trimming gold coast</td><td class="mono">20</td><td><span class="dp g">15</span></td><td class="mono">A$5.76</td><td><span class="pill bl">Local</span></td></tr>
+<tr><td class="k">lawn mowing hope island</td><td class="mono">10</td><td><span class="dp a">27</span></td><td class="mono">A$3.34</td><td><span class="pill bl">Local</span></td></tr>
+<tr><td class="k">lawn mowing northern gold coast</td><td class="mono">no measured vol.</td><td><span class="dp n">—</span></td><td class="mono">—</td><td><span class="pill bl">Long-tail (in autocomplete)</span></td></tr>
+<tr><td class="k">commercial property maintenance gold coast</td><td class="mono">no measured vol.</td><td><span class="dp n">—</span></td><td class="mono">—</td><td><span class="pill bl">Long-tail / high intent</span></td></tr>
+<tr><td class="k">lawn mowing gold coast prices · lawn mowing cost gold coast</td><td class="mono">autocomplete</td><td><span class="dp n">—</span></td><td class="mono">—</td><td><span class="pill bl">Long-tail / AEO</span></td></tr>
+<tr><td class="k">lawn mowing times gold coast · lawn mowing sunday gold coast · lawn mower noise gold coast</td><td class="mono">autocomplete</td><td><span class="dp n">—</span></td><td class="mono">—</td><td><span class="pill bl">Long-tail / AEO — battery angle</span></td></tr>
+<tr><td class="k">acreage mowing cost · acreage mowing near me</td><td class="mono">autocomplete</td><td><span class="dp n">—</span></td><td class="mono">—</td><td><span class="pill bl">Long-tail / blog</span></td></tr></table>
+
+<h3>A note on the primary keyword</h3>
+<p>The earlier strategy doc proposed "Lawn Mowing Northern Gold Coast" as the homepage target. The data doesn't support it as the primary: Ubersuggest returns no measured volume for it, though it does appear in Google autocomplete. The right call is to target <b style="color:var(--text)">Lawn Mowing Gold Coast</b> (320/mo, SD 10) and carry "Northern Gold Coast" in the H1 and copy as the qualifier, so the page captures both. The ClickUp strategy doc should be updated to match this once approved.</p>
+<p><b style="color:var(--text)">One flag:</b> "ndis lawn mowing gold coast" is 50 searches a month at difficulty 5 — the easiest term in the whole set. It only makes sense if Shanon is, or wants to become, an NDIS-registered provider. Worth a conversation.</p>
+
+<h3>Keyword map — one target per page, no overlap</h3>
+<div class="map">
+<div class="node home"><div class="pn">Homepage</div><div class="kw">Lawn Mowing Gold Coast</div><div class="m">320/mo · SD 10 · qualifier: Northern Gold Coast, Pimpama–Coomera</div></div>
+<div class="node"><div class="pn">Service: Lawn Mowing</div><div class="kw">Lawn Mowing Coomera</div><div class="m">50/mo · SD 13 · + Upper Coomera, Coomera Waters</div></div>
+<div class="node"><div class="pn">Service: Acreage &amp; Ride-On</div><div class="kw">Acreage Mowing Gold Coast</div><div class="m">70/mo · SD 12 · Jacobs Well, Yatala, Ormeau Hills</div></div>
+<div class="node"><div class="pn">Service: Garden Maintenance &amp; Hedges</div><div class="kw">Garden Maintenance Gold Coast</div><div class="m">140/mo · SD 13 · Helensvale, Hope Island, Sanctuary Cove</div></div>
+<div class="node"><div class="pn">Service: Green Waste &amp; Clean-Ups</div><div class="kw">Green Waste Removal Gold Coast</div><div class="m">50/mo · SD 23 · Pimpama, Ormeau, Oxenford</div></div>
+<div class="node"><div class="pn">Service: Commercial &amp; Industrial</div><div class="kw">Commercial Property Maintenance Gold Coast</div><div class="m">high intent · Yatala, Stapylton, Arundel estates</div></div>
+<div class="node"><div class="pn">About</div><div class="kw">Battery Powered Lawn Mowing Gold Coast</div><div class="m">differentiator page · quiet / no fumes / Sunday-safe</div></div>
+<div class="node"><div class="pn">Blog 1</div><div class="kw">lawn mowing cost gold coast</div><div class="m">autocomplete · price intent</div></div>
+<div class="node"><div class="pn">Blog 2</div><div class="kw">acreage mowing cost</div><div class="m">autocomplete · price intent</div></div>
+<div class="node"><div class="pn">Blog 3</div><div class="kw">how often to mow lawn gold coast</div><div class="m">seasonal / informational</div></div>
+</div>
+<p style="margin-top:14px"><b style="color:var(--green)">No two pages share a primary target.</b> The homepage takes the head term; lawn mowing as a service takes Coomera rather than re-fighting Gold Coast; every other service takes its own Gold Coast term with a different northern suburb cluster underneath it. Each page has one job.</p>
+</section>
+
+<section id="phase3">
+<div class="sn">06 · Phase 3 — Indexing &amp; technical SEO</div>
+<h2>Getting the site found and read</h2>
+<div class="grid2">
+<div class="card"><div class="l">Setup</div><ul class="b"><li>Google Search Console (reuse existing verification tag)</li><li>Google Analytics 4 with call and form conversions</li><li>Bing Webmaster Tools</li><li>XML sitemap submitted; robots.txt configured</li><li>Self-referencing canonical on every page</li><li>Request indexing for all new URLs at launch</li></ul></div>
+<div class="card"><div class="l">Fixes from audit</div><ul class="b"><li>Deploy LocalBusiness + Service + FAQPage schema</li><li>Single-hop www → non-www redirect (saves 630ms on mobile)</li><li>Verify SSL on www hostname</li><li>Remove 150KB unused JS; mobile interactive under 3s</li><li>Fix CLS 0.115 → under 0.1 with sized images</li><li>Descriptive alt text carrying service + suburb on every new image</li></ul></div>
+</div>
+<p style="margin-top:16px">Desktop is already strong (LCP 1.9s, CLS 0.001). The technical work is about mobile speed and giving Google more than three URLs — once that's done, the on-page changes get picked up fast rather than being held back by crawl limits.</p>
+</section>
+
+<section id="phase4">
+<div class="sn">07 · Phase 4 — Service pages</div>
+<h2>Five pages, five distinct ranking targets</h2>
+<p>Every service page will target a distinct local commercial keyword, name the suburbs in its cluster, carry Service schema, run 600–900 words with a FAQ block, feature a click-to-call and quote CTA, and link back to the homepage and its sibling services. Geography is spread deliberately so the pages don't compete with each other.</p>
+<table><tr><th>Page</th><th>H1</th><th>Meta title</th><th>Target keyword</th><th>Audience</th></tr>
+<tr><td class="k">Lawn Mowing</td><td>Lawn Mowing Coomera &amp; Upper Coomera — Regular Residential Mowing</td><td class="mono">Lawn Mowing Coomera | Enviro Garden Care (40)</td><td class="mono">lawn mowing coomera</td><td>Homeowners, renters, strata in the Coomera growth corridor</td></tr>
+<tr><td class="k">Acreage &amp; Ride-On Mowing</td><td>Acreage Mowing Gold Coast — Ride-On Mowing for Large Blocks</td><td class="mono">Acreage Mowing Gold Coast | Enviro Garden Care (46)</td><td class="mono">acreage mowing gold coast</td><td>Acreage and lifestyle-lot owners: Jacobs Well, Yatala, Stapylton, Ormeau Hills, Willowvale, Mount Warren</td></tr>
+<tr><td class="k">Garden Maintenance &amp; Hedge Trimming</td><td>Garden Maintenance Gold Coast — Hedges, Pruning &amp; Weed Control</td><td class="mono">Garden Maintenance Gold Coast | Enviro Garden Care (50)</td><td class="mono">garden maintenance gold coast</td><td>Established-garden suburbs: Helensvale, Hope Island, Sanctuary Cove, Parkwood, Arundel, Pacific Pines</td></tr>
+<tr><td class="k">Green Waste &amp; Site Clean-Ups</td><td>Green Waste Removal Gold Coast — Yard &amp; Site Clean-Ups</td><td class="mono">Green Waste Removal Gold Coast | Enviro Garden Care (51)</td><td class="mono">green waste removal gold coast</td><td>End-of-lease, overgrown blocks, post-storm clean-ups: Pimpama, Ormeau, Oxenford</td></tr>
+<tr><td class="k">Commercial &amp; Industrial Maintenance</td><td>Commercial Property Maintenance Gold Coast — Grounds &amp; Lawn Care</td><td class="mono">Commercial Property Maintenance Gold Coast | Enviro (51)</td><td class="mono">commercial property maintenance gold coast</td><td>Property managers, body corporates, industrial estates in Yatala, Stapylton, Arundel</td></tr></table>
+</section>
+
+<section id="phase5">
+<div class="sn">08 · Phase 5 — Blog content</div>
+<h2>Content that answers the price and timing questions</h2>
+<ul class="b">
+<li><b>"How Much Does Lawn Mowing Cost on the Gold Coast in 2026?"</b> — "lawn mowing gold coast prices" and "lawn mowing cost gold coast" are both in autocomplete. A transparent pricing guide captures the highest-intent informational search there is and pre-qualifies the lead.</li>
+<li><b>"Acreage Mowing Cost: What a Large Block Really Costs to Maintain"</b> — "acreage mowing cost", "acreage mowing rates" and "how long does it take to mow 5 acres" all surface in autocomplete. Feeds the acreage page directly.</li>
+<li><b>"How Often Should You Mow Your Lawn on the Gold Coast? A Season-by-Season Guide"</b> — "how often mow lawn australia" is a live question; the subtropical answer (weekly in summer, fortnightly in winter) positions the annual lawn-care program the client already sells.</li>
+<li><b>"Can You Mow on a Sunday on the Gold Coast? Noise Rules and the Quiet Alternative"</b> — "lawn mowing times gold coast", "lawn mowing sunday gold coast" and "lawn mower noise gold coast" are all real autocomplete queries, and the battery-equipment story is the only honest answer to them. Nobody else can write this post.</li>
+</ul>
+</section>
+
+<section id="suburbs">
+<div class="sn">09 · Optional add-on — Suburb landing pages</div>
+<h2>Phase two: one page per suburb</h2>
+<p>Not included in the core build. Each page targets "lawn mowing [suburb]", runs 400–500 words with local detail, its own meta title and description, and links back to the homepage and the relevant service page. Recommended order, by opportunity:</p>
+<table><tr><th>Suburb page</th><th>Target</th><th>Vol /mo</th><th>SD</th><th>Why</th></tr>
+<tr><td class="k">Pimpama</td><td class="mono">lawn mowing pimpama</td><td class="mono">40</td><td><span class="dp a">27</span></td><td>Home suburb, already position 12, strongest GBP proximity</td></tr>
+<tr><td class="k">Helensvale (+ Pacific Pines, Oxenford)</td><td class="mono">lawn mowing helensvale</td><td class="mono">30</td><td><span class="dp a">29</span></td><td>Established gardens, hedge and maintenance demand</td></tr>
+<tr><td class="k">Upper Coomera (+ Coomera Waters)</td><td class="mono">lawn mowing upper coomera</td><td class="mono">30</td><td><span class="dp a">26</span></td><td>Biggest new-build growth in the service area</td></tr>
+<tr><td class="k">Ormeau (+ Ormeau Hills)</td><td class="mono">lawn mowing ormeau</td><td class="mono">20</td><td><span class="dp r">38</span></td><td>Acreage crossover; harder, so later</td></tr>
+<tr><td class="k">Hope Island (+ Sanctuary Cove)</td><td class="mono">lawn mowing hope island</td><td class="mono">10</td><td><span class="dp a">27</span></td><td>Premium canal estates, strata and body corporate</td></tr></table>
+</section>
+
+<section id="geo">
+<div class="sn">10 · GEO &amp; AEO</div>
+<h2>Showing up in AI search and voice answers</h2>
+<div class="grid2">
+<div class="card"><div class="l">Generative engine optimisation</div><ul class="b"><li>Schema today: <span class="r">none</span>. Deploy LocalBusiness JSON-LD site-wide with NAP, geo, hours, sameAs and areaServed listing all 19 suburbs</li><li>Service schema on each of the five service pages</li><li>Consistent entity name — "Enviro Garden Care &amp; Odd Jobs" — across site, GBP, Facebook, Instagram</li><li>One citable sentence AI engines can lift: <i>"Enviro Garden Care &amp; Odd Jobs is a Pimpama-based lawn mowing and garden maintenance business servicing the Northern Gold Coast from Coomera to Yatala with both fuel and battery-powered equipment."</i></li></ul></div>
+<div class="card"><div class="l">Answer engine optimisation</div><ul class="b"><li>FAQPage schema on the homepage and every service page</li><li>Questions written the way people say them to a phone</li><li>40–60 word direct answers under each question for snippet eligibility</li><li>Speakable markup on the answer blocks</li></ul></div>
+</div>
+<h3>AEO FAQ set — final copy</h3>
+<div class="faq"><div class="q">How much does lawn mowing cost on the Gold Coast?</div><div class="an">Most standard residential lawns in Pimpama, Coomera and Helensvale fall into a set per-visit rate; larger or overgrown blocks are quoted on size and access. Regular fortnightly clients pay less per visit than one-offs. Call 0407 276 574 for a same-day quote.</div></div>
+<div class="faq"><div class="q">Do you do lawn mowing in Coomera and Upper Coomera?</div><div class="an">Yes. We service Coomera, Upper Coomera and Coomera Waters from our base in Pimpama, with fortnightly and monthly schedules for residential and strata properties.</div></div>
+<div class="faq"><div class="q">Do you mow acreage properties near Jacobs Well and Yatala?</div><div class="an">Yes. Ride-on and acreage mowing for lifestyle lots and rural blocks across Jacobs Well, Yatala, Stapylton, Ormeau Hills and Willowvale, including slashing, brush cutting and clean-up.</div></div>
+<div class="faq"><div class="q">Is battery-powered lawn mowing as good as petrol?</div><div class="an">For most residential and commercial sites, yes — and there's no extra charge. Battery equipment is quieter and produces no fumes, which suits early starts, Sundays, shift workers and customer-facing businesses. Large acreage jobs still use petrol ride-on gear.</div></div>
+<div class="faq"><div class="q">Can you handle body corporate or commercial grounds maintenance on the Northern Gold Coast?</div><div class="an">Yes. Scheduled grounds maintenance for body corporates, retail sites and industrial estates across Yatala, Stapylton, Arundel and Hope Island, with low-noise equipment available for customer-facing premises.</div></div>
+<div class="faq"><div class="q">Do you take the green waste away after mowing or hedge trimming?</div><div class="an">Yes. Green waste removal is included or available as an add-on on every job across the Northern Gold Coast, taken away in our enclosed trailer.</div></div>
+</section>
+
+<section id="competitors">
+<div class="sn">11 · Competitors</div>
+<h2>Who's winning locally, and how</h2>
+<p>Page one for "lawn mowing pimpama" and "lawn mowing coomera" is a mix of three groups: national franchises with a page for every suburb (Jim's, Fox, James Home Services, Pulse), directories (Airtasker, Localsearch, Hipages, Facebook groups), and tiny one-page locals in the map pack. The client is beaten by all three today — but only the franchises have real authority, and even they rank on structure more than strength.</p>
+<table><tr><th>Domain</th><th>DA</th><th>Keywords</th><th>Est. visits/mo</th><th>Ref. domains</th><th>Structure</th></tr>
+<tr class="me"><td class="k">envirogardencare.com.au <span class="pill r" style="margin-left:6px">Client</span></td><td class="mono r">3</td><td class="mono r">10</td><td class="mono r">1</td><td class="mono r">4</td><td>One page. Position 12 for lawn mowing pimpama, 20 for lawn care gold coast</td></tr>
+<tr><td class="k">foxmowingqld.com.au</td><td class="mono">23</td><td class="mono">729</td><td class="mono">354</td><td class="mono">234</td><td>Page per suburb statewide (/lawn-mowing-and-gardening-pimpama, -coomera, -windaroo). Ranks 3 map pack + 8 organic for Pimpama</td></tr>
+<tr><td class="k">pulsemowing.com.au</td><td class="mono">18</td><td class="mono">149</td><td class="mono">64</td><td class="mono">133</td><td>Page per suburb nationally + lawn-care blog (bindis, clover, grass types). Position 7 for Coomera</td></tr>
+<tr><td class="k">pimpama-lawn-mowing.com</td><td class="mono">15</td><td class="mono">1</td><td class="mono">1</td><td class="mono">63</td><td>One page, exact-match domain. Position 7 for lawn mowing pimpama on 63 links alone — <span class="g">beatable</span></td></tr>
+<tr><td class="k">jimsmowing.com.au</td><td class="mono">37</td><td class="mono">—</td><td class="mono">—</td><td class="mono">—</td><td>Franchise; /locations/qld/gold-coast/pimpama/ at position 4. Not pulled — national brand, not the real competitor for the sale</td></tr>
+<tr><td class="k">Map pack (Pimpama)</td><td colspan="4" class="mono">pimpamalawnmowing.com.au (DA 1) · Stevensons Yard Maintenance · Fox Mowing</td><td>Two of three map-pack spots held by DA-1 one-pagers — GBP strength, not website strength</td></tr></table>
+<h3>What they rank for that the client doesn't</h3>
+<ul class="b g">
+<li><b>Suburb pages.</b> Fox alone ranks for Windaroo landscaping, Nerang, Gold Coast mowing services — each from a dedicated URL. The client has zero suburb URLs. This is the structural gap and it's the whole story.</li>
+<li><b>Lawn-care questions.</b> Pulse pulls traffic from "how to get rid of bindis" (70/mo), "best grass for Australian lawns" (90/mo) and clover removal (480/mo). The client has three plain-text FAQs.</li>
+<li><b>Nobody owns the quiet/battery angle.</b> "lawn mower noise gold coast" and "lawn mowing sunday gold coast" are live queries with no dedicated answer on page one.</li>
+<li><b>Directories dominate mid-page.</b> Airtasker, Localsearch, Hipages and Facebook groups hold positions 5–13. A proper service page with schema and reviews outranks a directory listing for a suburb term — that's the open door.</li>
+<li><b>Authority gap is real but small in absolute terms.</b> 63 referring domains gets a one-pager to position 7. The client needs local citations, a GBP link, and a handful of Gold Coast business links — not hundreds.</li>
+</ul>
+</section>
+
+<section id="compare">
+<div class="sn">12 · Before / after</div>
+<h2>Current site vs the optimised structure</h2>
+<div class="cmp">
+<div class="card cur"><h4>Current — live audit, Sep 2026</h4><ul class="b"><li>3 pages, 0 service pages, 0 suburb pages</li><li>Primary keyword split across H1 and title ("Mowing Gold Coast")</li><li>707 words for the whole business</li><li>1 of 19 suburbs mentioned</li><li>No schema of any kind</li><li>10 keywords ranking, none in top 10, ~1 visit/mo</li><li>4 referring domains, DA 3</li><li>Mobile interactive at 6.0s, CLS 0.115</li><li>Sitemap not detected</li><li>Expired promo, "Gold Coast" ×20</li></ul></div>
+<div class="card new"><h4>New — SEO-optimised structure</h4><ul class="b g"><li>9+ indexable pages: home, about, 5 services, areas, contact</li><li>"Lawn Mowing Gold Coast" intact in title, H1, first sentence</li><li>4,000+ words across pages at natural density</li><li>All 19 suburbs in copy and in schema areaServed</li><li>LocalBusiness + Service + FAQPage schema</li><li>One distinct target per page, no overlap</li><li>Citation and local-link plan to close the authority gap</li><li>Mobile interactive under 3s, CLS under 0.1</li><li>Sitemap + Search Console + GA4 from day one</li><li>Evergreen offer, reviews shown, battery USP front and centre</li></ul></div>
+</div>
+</section>
+
+<section id="timeline">
+<div class="sn">13 · Timeline</div>
+<h2>How results compound</h2>
+<div class="tl"><div class="w">Week 1–2</div><div class="d">New site live. Homepage re-targeted, schema deployed, sitemap submitted, redirect and SSL cleaned up, expired promo gone. Search Console indexing requested for every URL. GBP linked with matching NAP.</div></div>
+<div class="tl"><div class="w">Month 1</div><div class="d">All pages indexed. Google associates the business with Coomera, Ormeau, Helensvale and Hope Island for the first time. First impressions for suburb + service terms. Citation build starts.</div></div>
+<div class="tl"><div class="w">Month 2–3</div><div class="d">"Lawn mowing pimpama" moves from 12 onto page one — it's already close. Acreage and garden maintenance pages start ranking for their Gold Coast terms (SD 12–13). FAQ answers begin appearing in People Also Ask.</div></div>
+<div class="tl"><div class="w">Month 3–6</div><div class="d">Homepage climbs for "lawn mowing gold coast" as links accumulate. Suburb pages (if added) extend reach. Commercial page pulls Yatala/Stapylton enquiries. Measurable lift in calls and form fills.</div></div>
+<div class="tl"><div class="w">Month 6+</div><div class="d">Multiple page-one positions across service × suburb combinations. Reduced dependence on referrals and Facebook groups. Compounding authority across the northern corridor.</div></div>
+</section>
+
+<section id="why">
+<div class="sn">14 · Why this strategy works</div>
+<h2>The case in six lines</h2>
+<ul class="b g">
+<li>Fixes the five critical audit issues first — suburbs, service pages, schema, thin content, authority — the things actually blocking rankings</li>
+<li>Targets a head term with real volume (320/mo) at a difficulty of 10, not a vanity term or a zero-volume one</li>
+<li>Builds on a site Google already half-trusts: position 12 for Pimpama with nothing on the page targeting it</li>
+<li>Matches the structure every page-one competitor already uses — page per service, page per suburb — and adds the schema most of them skip</li>
+<li>Owns a differentiator nobody else on page one can claim: quiet, fume-free, battery-powered mowing at no extra cost</li>
+<li>Scales across all 19 suburbs of the Northern Gold Coast without the pages competing with each other</li>
+</ul>
+<p class="src" style="margin-top:20px">Sources: live crawl of envirogardencare.com.au (4 Sep 2026) · Ubersuggest site audit, PageSpeed, domain overview, SERP analysis and keyword data (Australia, 4 Sep 2026) · Google autocomplete. The Hey Jay SEO connector was unavailable in this session; no figures were estimated or filled in — where a source returned nothing, it says so above.</p>
+</section>
+
+</main>
+<footer><div class="brand"><div class="mark">L</div>Local Service Pro</div><div class="mono">enviro-garden-care · seo-research · 2026-09-04</div></footer>
+</body></html>
