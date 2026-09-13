@@ -8,10 +8,10 @@ Built to the spec in **`build/seo-research-source.html`** (Local Service Pro SEO
 Research & Strategy for A1 Lawn Care, 10 September 2026) — every meta title, H1,
 keyword target and FAQ question comes from that document.
 
-> **Repository note:** this branch lives in the `enviro-garden-care` repository because
-> that is the repo the session was given. The content is entirely A1 Lawn Care and shares
-> nothing with the Enviro site on `main` except the build tooling. Before launch, move
-> this branch into its own `a1-lawn-care` repository.
+> **History note:** this site was first built on a branch of the `enviro-garden-care`
+> repository — that was the repo the session had access to — and moved here on
+> 14 September 2026. The commit history starts fresh at the move; nothing of the Enviro
+> Garden Care site came with it apart from the build tooling both sites share.
 
 ---
 
