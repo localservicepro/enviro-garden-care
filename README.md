@@ -66,24 +66,18 @@ no framework and no npm dependency in the shipped site.
 
 ---
 
-## ⚠️ Confirm before launch
+## ⚠️ Before launch
 
-Three items need the client's sign-off or a real value. Everything else is live-ready.
+Two items need the client's sign-off. Lead capture (section 1) is already wired —
+it is documented here because the wiring is easy to break.
 
-### 1. Wire the forms to GoHighLevel — **required, or leads are lost**
+### 1. Lead capture — how it works (no webhook needed)
 
-Open `assets/js/main.js` and set:
+Quote submissions are captured by the **GoHighLevel external-tracking script**, which
+listens for submit events on the page and reads the field values. Nothing else to
+configure.
 
-```js
-var LEAD_ENDPOINT = 'https://services.leadconnectorhq.com/hooks/...';
-```
-
-Get it from **GHL → Automation → Workflows → new workflow → Inbound Webhook → copy URL**.
-
-While it is an empty string the form validates and still sends the visitor to
-`thank-you.html`, but **nothing is transmitted**.
-
-The form posts JSON whose keys are exactly the GHL contact fields:
+Input `name` attributes are the GHL contact fields exactly:
 
 | Form label | `name` attribute | GHL merge field |
 |---|---|---|
@@ -95,11 +89,30 @@ The form posts JSON whose keys are exactly the GHL contact fields:
 | Service Needed | `service_needed` | `{{contact.service_needed}}` |
 | Job Notes | `job_notes` | `{{contact.job_notes}}` |
 
-Plus `page_url`, `page_title` and `submitted_at` for attribution. Each field also
-carries a `data-ghl="{{contact.…}}"` attribute so the mapping is visible in the markup.
+Each field also carries `data-ghl="{{contact.…}}"` so the mapping is readable in the markup.
 
 `property_size` and `service_needed` are custom fields — create them in GHL
-(**Settings → Custom Fields**) before the first submission if they don't exist.
+(**Settings → Custom Fields**) before the first submission, or those two values
+will have nowhere to land.
+
+**Two things in `assets/js/main.js` exist to keep capture working. Don't "tidy" them away:**
+
+- The submit handler **never calls `stopPropagation()`**, so the tracking script's own
+  listener still receives the event.
+- The redirect to `thank-you.html` is **held for `CAPTURE_GRACE_MS` (900ms)**. Redirecting
+  synchronously can cancel the tracking request mid-flight and silently lose the lead.
+  Raise the value if you ever see submissions arriving on the site but not in GHL.
+
+Load order matters and is already correct: the tracking script is a plain (non-deferred)
+tag at the end of `<body>`, and `main.js` is deferred, so the tracker registers its
+listeners first.
+
+Honeypot submissions call `stopImmediatePropagation()` — bots get the thank-you page,
+GHL gets no junk contact.
+
+Forms are `method="get"` purely as a no-JS fallback (a native POST to a static `.html`
+is a 405 on most static hosts). With JS running the submit is intercepted, so no field
+values ever reach the URL.
 
 ### 2. Trading hours — **assumed, not confirmed**
 
@@ -108,7 +121,7 @@ document and is published in the footer, on the contact page and in `LocalBusine
 schema. Confirm with Shanon and correct `BIZ["hours"]` in `build/data.py`, then rebuild.
 It must match the Google Business Profile exactly.
 
-### 3. Images are hot-linked from Google Drive — **replace before launch**
+### 3. Images — **replace the Drive hot-links before launch**
 
 The client photography is served from the Drive folder supplied
 (`1fNAUinCZXQD56NgmTM1Dd5FK92IUXXuf`) via Drive's public image CDN:
@@ -143,7 +156,7 @@ it now sits on** once the files are local, and reorder `GALLERY` if any are mism
 
 **Technical**
 - `sitemap.xml` (excludes `thank-you` / `404`) and `robots.txt`
-- Zero render-blocking JS; all scripts `defer`/async, single 25 KB stylesheet
+- Zero render-blocking JS; site script is `defer`, single stylesheet
 - Every image lazy-loaded with explicit `width`/`height` to hold CLS near zero
 - `preconnect` to fonts and the image CDN
 - Responsive from 320px up; no horizontal scroll at any width

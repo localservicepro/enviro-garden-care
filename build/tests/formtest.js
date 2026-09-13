@@ -82,6 +82,57 @@ const { chromium } = require('playwright');
   T('honeypot is off-screen and untabbable', hp.off && hp.tab === -1, JSON.stringify(hp));
   await p.close();
 
+  // ---- 7. Tracking script still sees the submit, and redirect waits for it ----
+  p = await b.newPage();
+  // Stand in for link.msgsndr.com (blocked here / third-party): register a
+  // document-level submit listener exactly like the GHL tracker does.
+  await p.addInitScript(() => {
+    window.__captured = null; window.__capturedAt = null; window.__navAt = null;
+    document.addEventListener('submit', (ev) => {
+      const f = ev.target; const d = {};
+      [...f.querySelectorAll('[name]')].forEach(c => { d[c.name] = c.value; });
+      window.__captured = d; window.__capturedAt = Date.now();
+    });
+    window.addEventListener('beforeunload', () => { window.__navAt = Date.now(); });
+  });
+  await p.goto('http://127.0.0.1:8123/contact.html',{waitUntil:'networkidle'});
+  await p.fill('#contact-quote-full_name','Sam Tester');
+  await p.fill('#contact-quote-email','sam@example.com');
+  await p.fill('#contact-quote-phone','0407 276 574');
+  await p.fill('#contact-quote-property_address','9 Cullen St, Pimpama');
+  await p.selectOption('#contact-quote-service_needed',{index:1});
+  await p.click('#contact-quote button[type=submit]');
+  const cap = await p.evaluate(() => ({ d: window.__captured, at: window.__capturedAt }));
+  T('tracking-style listener received the submit', !!cap.d, cap.d ? Object.keys(cap.d).filter(k=>k!=='company_website').join(',') : 'nothing captured');
+  T('captured values are the real field values', cap.d && cap.d.full_name === 'Sam Tester' && cap.d.email === 'sam@example.com');
+  const stillHere = !/thank-you/.test(p.url());
+  T('redirect is deferred, not immediate', stillHere, stillHere ? 'still on contact.html right after submit' : 'navigated instantly — capture at risk');
+  await p.waitForURL('**/thank-you.html',{timeout:8000}).catch(()=>{});
+  T('redirect still happens', /thank-you\.html$/.test(p.url()), p.url());
+  await p.close();
+
+  // ---- 8. No PII in the URL on the JS path ------------------------------
+  T('no field values leaked into the thank-you URL', !/full_name|email=/.test(p.url()), p.url());
+
+  // ---- 9. Honeypot submissions are not captured -------------------------
+  p = await b.newPage();
+  await p.addInitScript(() => {
+    window.__captured = null;
+    document.addEventListener('submit', (ev) => { window.__captured = 'yes'; });
+  });
+  await p.goto('http://127.0.0.1:8123/contact.html',{waitUntil:'networkidle'});
+  await p.evaluate(() => {
+    const f = document.getElementById('contact-quote');
+    f.full_name.value='Bot'; f.email.value='bot@spam.com'; f.phone.value='0400000000';
+    f.property_address.value='x'; f.service_needed.selectedIndex=1;
+    f.querySelector('[name=company_website]').value='http://spam.example';
+  });
+  await p.click('#contact-quote button[type=submit]');
+  await p.waitForTimeout(300);
+  const botCap = await p.evaluate(() => window.__captured);
+  T('honeypot submission is NOT passed to the tracker', botCap === null, String(botCap));
+  await p.close();
+
   await b.close();
   console.log('\n' + results.join('\n'));
   console.log(`\n${results.filter(r=>r.startsWith('FAIL')).length} failure(s)`);

@@ -384,7 +384,11 @@ def quote_form(depth=0, form_id="quote-form", compact=False, preselect=None, hea
 
     return """<div class="quote{cls}">
   {head}
-  <form class="quote__form" id="{fid}" method="post" action="{up}thank-you.html" novalidate>
+  <!-- method="get" is the no-JS fallback only: a native POST to a static .html
+       is a 405 on most static hosts. With JS the submit is intercepted, so no
+       field values ever reach the URL. Capture is handled by the GHL tracking
+       script — see assets/js/main.js. -->
+  <form class="quote__form" id="{fid}" method="get" action="{up}thank-you.html" novalidate>
     <div class="quote__grid">
       {rows}
     </div>

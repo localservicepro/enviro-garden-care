@@ -103,7 +103,11 @@
       <div class="sticky">
         <div id="quote"><div class="quote quote--compact">
   <div class="quote__head"><h2>Free quote for commercial & industrial maintenance</h2><p>Tell us about the property and we will come back with a price — usually the same day.</p></div>
-  <form class="quote__form" id="svc-quote" method="post" action="../thank-you.html" novalidate>
+  <!-- method="get" is the no-JS fallback only: a native POST to a static .html
+       is a 405 on most static hosts. With JS the submit is intercepted, so no
+       field values ever reach the URL. Capture is handled by the GHL tracking
+       script — see assets/js/main.js. -->
+  <form class="quote__form" id="svc-quote" method="get" action="../thank-you.html" novalidate>
     <div class="quote__grid">
       <div class="field"><label for="svc-quote-full_name">Name <span class="req" aria-hidden="true">*</span></label><input type="text" id="svc-quote-full_name" name="full_name" data-ghl="{{contact.full_name}}" autocomplete="name" placeholder="Your name" required></div>
       <div class="field"><label for="svc-quote-email">Email <span class="req" aria-hidden="true">*</span></label><input type="email" id="svc-quote-email" name="email" data-ghl="{{contact.email}}" autocomplete="email" placeholder="you@example.com" required></div>

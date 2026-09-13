@@ -5,20 +5,28 @@
   'use strict';
 
   /* -----------------------------------------------------------------------
-     CONFIG — set this before launch.
+     LEAD CAPTURE
 
-     LEAD_ENDPOINT is where quote form submissions are POSTed. Use the
-     GoHighLevel inbound webhook URL for the "Website Quote Request" workflow
-     (GHL → Automation → Workflows → Inbound Webhook → copy URL).
+     Quote submissions are captured by the GoHighLevel external-tracking
+     script, which listens for submit events on the page and reads the field
+     values. Input names are the GHL contact fields exactly:
 
-     Field names posted match the GHL contact fields exactly:
        full_name, email, phone, property_address,
        property_size, service_needed, job_notes
 
-     While this is an empty string the form still validates and still sends
-     the visitor to thank-you.html, but nothing is transmitted — so set it.
+     Two things below exist to keep that capture working — do not "tidy" them
+     away:
+
+     1. We never call stopPropagation() on the submit event, so the tracking
+        script's own listener still receives it.
+     2. We hold the redirect for CAPTURE_GRACE_MS so the tracking request has
+        left the browser before the page unloads. Redirecting synchronously
+        can cancel it in-flight and silently lose the lead.
+
+     The tracking script is a plain (non-deferred) tag at the end of <body>
+     and this file is deferred, so its listeners are always registered first.
      ----------------------------------------------------------------------- */
-  var LEAD_ENDPOINT = '';
+  var CAPTURE_GRACE_MS = 900;
   var THANK_YOU = 'thank-you.html';
 
   var root = document.documentElement;
@@ -176,20 +184,9 @@
     return firstBad;
   }
 
-  function payloadOf(form) {
-    var data = {};
-    $$('[name]', form).forEach(function (control) {
-      data[control.name] = (control.value || '').trim();
-    });
-    data.page_url = window.location.href;
-    data.page_title = document.title;
-    data.submitted_at = new Date().toISOString();
-    return data;
-  }
-
-  function goToThankYou(form) {
+  function goToThankYou(form, delay) {
     var target = form.getAttribute('action') || THANK_YOU;
-    window.location.assign(target);
+    window.setTimeout(function () { window.location.assign(target); }, delay || 0);
   }
 
   $$('.quote__form').forEach(function (form) {
@@ -215,37 +212,22 @@
         return;
       }
 
-      // Silently drop bot submissions.
+      // Bots that fill the honeypot get the thank-you page and nothing else:
+      // bail out before the tracking script can log a junk contact.
       var honey = form.querySelector('[name="company_website"]');
-      if (honey && honey.value) { goToThankYou(form); return; }
+      if (honey && honey.value) {
+        e.stopImmediatePropagation();
+        goToThankYou(form);
+        return;
+      }
 
       var button = form.querySelector('button[type="submit"]');
       if (button) button.classList.add('is-sending');
       form.classList.add('is-sending');
 
-      var data = payloadOf(form);
-      delete data.company_website;
-
-      if (!LEAD_ENDPOINT) {
-        // Not wired up yet — still complete the visitor journey.
-        goToThankYou(form);
-        return;
-      }
-
-      var done = false;
-      var finish = function () {
-        if (done) return;
-        done = true;
-        goToThankYou(form);
-      };
-      // Never strand the visitor if the endpoint is slow or unreachable.
-      window.setTimeout(finish, 6000);
-
-      fetch(LEAD_ENDPOINT, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(data)
-      }).then(finish).catch(finish);
+      // The GHL tracking script reads the submit event after this handler.
+      // Hold the redirect so its request is not cancelled by the unload.
+      goToThankYou(form, CAPTURE_GRACE_MS);
     });
 
     // Clear a field's error as soon as the visitor starts fixing it.
