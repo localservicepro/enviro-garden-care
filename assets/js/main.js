@@ -1,5 +1,6 @@
 /* =========================================================================
-   Enviro Garden Care & Odd Jobs — site behaviour
+   A1 Lawn Care Pty Ltd — site behaviour
+   No dependencies. Everything degrades to a working page without JS.
    ========================================================================= */
 (function () {
   'use strict';
@@ -17,36 +18,53 @@
      Two things below exist to keep that capture working — do not "tidy" them
      away:
 
-     1. We never call stopPropagation() on the submit event, so the tracking
-        script's own listener still receives it.
+     1. We never call stopPropagation() on a real submit, so the tracking
+        script's own listener still receives the event.
      2. We hold the redirect for CAPTURE_GRACE_MS so the tracking request has
         left the browser before the page unloads. Redirecting synchronously
-        can cancel it in-flight and silently lose the lead.
+        can cancel it in flight and silently lose the lead.
 
      The tracking script is a plain (non-deferred) tag at the end of <body>
      and this file is deferred, so its listeners are always registered first.
      ----------------------------------------------------------------------- */
   var CAPTURE_GRACE_MS = 900;
-  var THANK_YOU = 'thank-you.html';
+  var THANK_YOU = '/thank-you/';
 
   var root = document.documentElement;
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  var desktop = function () { return window.matchMedia('(min-width: 981px)').matches; };
 
   function $(sel, ctx) { return (ctx || document).querySelector(sel); }
-  function $$(sel, ctx) { return Array.prototype.slice.call((ctx || document).querySelectorAll(sel)); }
+  function $$(sel, ctx) {
+    return Array.prototype.slice.call((ctx || document).querySelectorAll(sel));
+  }
 
   /* ---------- Footer year ------------------------------------------------ */
   var year = $('#year');
   if (year) year.textContent = String(new Date().getFullYear());
 
-  /* ---------- Sticky header shadow --------------------------------------- */
+  /* ---------- Sticky header, scroll progress, back to top ---------------- */
   var header = $('#site-header');
-  if (header) {
-    var onScroll = function () {
-      header.classList.toggle('is-stuck', window.scrollY > 12);
-    };
-    onScroll();
-    window.addEventListener('scroll', onScroll, { passive: true });
+  var bar = $('#scrollbar');
+  var toTop = $('#totop');
+
+  var onScroll = function () {
+    var y = window.scrollY;
+    if (header) header.classList.toggle('is-stuck', y > 12);
+    if (toTop) toTop.classList.toggle('is-on', y > 700);
+    if (bar) {
+      var max = document.documentElement.scrollHeight - window.innerHeight;
+      bar.style.width = (max > 0 ? (y / max) * 100 : 0) + '%';
+    }
+  };
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive: true });
+  window.addEventListener('resize', onScroll, { passive: true });
+
+  if (toTop) {
+    toTop.addEventListener('click', function () {
+      window.scrollTo({ top: 0, behavior: reduceMotion ? 'auto' : 'smooth' });
+    });
   }
 
   /* ---------- Mobile navigation ------------------------------------------ */
@@ -75,9 +93,12 @@
   }
 
   /* ---------- Services megamenu (desktop) -------------------------------- */
+  // Bound via the data-nav hook, not a URL — changing the nav href must not be
+  // able to silently unbind the dropdown.
   var mega = $('#megamenu');
-  var servicesLink = $('.nav__list a[href$="services.html"]');
-  if (mega && servicesLink && header) {
+  var servicesItem = $('[data-nav="services"]');
+  var servicesLink = servicesItem && servicesItem.querySelector('a');
+  if (mega && servicesItem && servicesLink && header) {
     var megaTimer = null;
     var showMega = function (show) {
       window.clearTimeout(megaTimer);
@@ -87,8 +108,7 @@
         megaTimer = window.setTimeout(function () { mega.hidden = true; }, 180);
       }
     };
-    var desktop = function () { return window.matchMedia('(min-width: 981px)').matches; };
-    servicesLink.parentElement.addEventListener('mouseenter', function () {
+    servicesItem.addEventListener('mouseenter', function () {
       if (desktop()) showMega(true);
     });
     header.addEventListener('mouseleave', function () { showMega(false); });
@@ -96,7 +116,7 @@
     mega.addEventListener('mouseleave', function () { showMega(false); });
     servicesLink.addEventListener('focus', function () { if (desktop()) showMega(true); });
     document.addEventListener('keydown', function (e) {
-      if (e.key === 'Escape') { mega.hidden = true; }
+      if (e.key === 'Escape') mega.hidden = true;
     });
   }
 
@@ -115,9 +135,44 @@
     revealables.forEach(function (el) { io.observe(el); });
   }
 
+  /* ---------- Counting stats --------------------------------------------- */
+  var counters = $$('.count');
+  if (counters.length) {
+    var run = function (el) {
+      // The final number is already in the HTML, so a visitor without JS (and
+      // any crawler) sees the real figure. JS only animates up to it.
+      var target = parseInt(el.getAttribute('data-count'), 10);
+      if (isNaN(target)) return;
+      if (reduceMotion) { el.textContent = String(target); return; }
+      el.textContent = '0';
+      var start = null;
+      var DURATION = 1200;
+      var tick = function (now) {
+        if (start === null) start = now;
+        var p = Math.min((now - start) / DURATION, 1);
+        // ease-out so the number settles rather than stopping dead
+        el.textContent = String(Math.round(target * (1 - Math.pow(1 - p, 3))));
+        if (p < 1) window.requestAnimationFrame(tick);
+      };
+      window.requestAnimationFrame(tick);
+    };
+    if (!('IntersectionObserver' in window)) {
+      counters.forEach(run);
+    } else {
+      var cio = new IntersectionObserver(function (entries) {
+        entries.forEach(function (entry) {
+          if (!entry.isIntersecting) return;
+          run(entry.target);
+          cio.unobserve(entry.target);
+        });
+      }, { threshold: 0.6 });
+      counters.forEach(function (el) { cio.observe(el); });
+    }
+  }
+
   /* ---------- Hero parallax ---------------------------------------------- */
   var heroBg = $('.hero__bg');
-  if (heroBg && !reduceMotion && window.matchMedia('(min-width: 981px)').matches) {
+  if (heroBg && !reduceMotion && desktop()) {
     var ticking = false;
     window.addEventListener('scroll', function () {
       if (ticking) return;
@@ -131,9 +186,11 @@
   }
 
   /* ---------- Broken image guard ----------------------------------------- */
+  // Photography is served from the client's Google Drive folder. If a file is
+  // moved or unshared, show the brand gradient rather than a broken icon.
   $$('img').forEach(function (img) {
     img.addEventListener('error', function () {
-      img.style.background = 'linear-gradient(135deg,#1f6343,#2a8154)';
+      img.style.background = 'linear-gradient(135deg,#14472a,#63b32a)';
       img.style.minHeight = '160px';
       img.removeAttribute('src');
     }, { once: true });
@@ -194,7 +251,8 @@
     var pot = document.createElement('div');
     pot.setAttribute('aria-hidden', 'true');
     pot.style.cssText = 'position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden';
-    pot.innerHTML = '<label>Do not fill this in<input type="text" name="company_website" tabindex="-1" autocomplete="off"></label>';
+    pot.innerHTML = '<label>Do not fill this in' +
+      '<input type="text" name="company_website" tabindex="-1" autocomplete="off"></label>';
     form.appendChild(pot);
 
     var errorBox = $('.quote__error', form);

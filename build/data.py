@@ -1,480 +1,582 @@
 # -*- coding: utf-8 -*-
-"""Content model for the Enviro Garden Care & Odd Jobs website.
+"""Content model for the A1 Lawn Care Pty Ltd website.
 
-Every keyword target, meta title, meta description, H1 and FAQ answer in this
+Every keyword target, meta title, meta description, H1 and FAQ question in this
 file comes from the Local Service Pro SEO research document
-(build/seo-research-source.html, 4 Sep 2026). Change content here, not in the
-generated HTML.
+(build/seo-research-source.html, 10 September 2026). Change content here, not in
+the generated HTML — the HTML is overwritten on every build.
 """
 
-SITE = "https://envirogardencare.com.au"
+SITE = "https://www.a1lawncare.net.au"
 
 BIZ = {
-    "name": "Enviro Garden Care & Odd Jobs",
-    "short": "Enviro Garden Care",
-    "owner": "Shanon Hopton",
-    "street": "14 Cullen Street",
-    "suburb": "Pimpama",
+    "name": "A1 Lawn Care Pty Ltd",
+    "short": "A1 Lawn Care",
+    "owner": "Steve Cope",
+    "street": "1593 Logan Rd",
+    "suburb": "Mount Gravatt",
     "region": "QLD",
     "region_full": "Queensland",
-    "postcode": "4209",
+    "postcode": "4122",
     "country": "AU",
-    "phone_display": "0407 276 574",
-    "phone_e164": "+61407276574",
-    "email": "hello@envirogardencare.com.au",
-    "lat": "-27.8326247",
-    "lng": "153.32468",
-    "facebook": "https://www.facebook.com/p/Enviro-Garden-Care-Odd-Jobs-100088271821117/",
-    "gbp": "https://maps.app.goo.gl/Q28zDvYDuuXLZRQh9",
+    "phone_display": "0456 198 080",
+    "phone_e164": "+61456198080",
+    "email": "info@a1lawncare.net.au",
+    # NOTE: coordinates are the Logan Rd / Mount Gravatt shopping strip, accurate
+    # to the block but not surveyed off the title. Confirm before launch —
+    # see README.md -> "Confirm before launch".
+    "lat": "-27.5413",
+    "lng": "153.0789",
+    "facebook": "https://www.facebook.com/NDISmowing",
+    # The Google Business Profile still points at a dead business.site URL
+    # (research, critical issue 03). Until that is fixed and the real profile
+    # link is known, we link to a Maps search for the business rather than
+    # inventing a short link.
+    "gbp": ("https://www.google.com/maps/search/?api=1&amp;query="
+            "A1+Lawn+Care+1593+Logan+Rd+Mount+Gravatt+QLD+4122"),
     # NOTE: trading hours are an assumption pending client confirmation.
-    # See README.md -> "Confirm before launch".
+    # They are published in LocalBusiness schema, so check them first.
     "hours": [
-        (["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], "07:00", "17:00", "Mon – Fri"),
-        (["Saturday"], "07:00", "15:00", "Saturday"),
+        (["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], "06:30", "17:00", "Mon – Fri"),
+        (["Saturday"], "07:00", "14:00", "Saturday"),
     ],
-    "hours_note": "Sunday by arrangement — battery equipment means we can work quietly.",
+    "hours_note": "Sunday and after-hours by arrangement — quotes answered seven days.",
+    "abn_note": "NDIS registered provider · Fully insured · ABN available on request",
 }
 
-MAP_EMBED = (
-    "https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3528.257254598568"
-    "!2d153.32468!3d-27.8326247!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2"
-    "!1s0x8080b68e32a41843%3A0xa20149d71fb924d9!2sEnviro%20Garden%20Care%20%26%20Odd%20Jobs"
-    "!5e0!3m2!1sfil!2sph!4v1789265580524!5m2!1sfil!2sph"
-)
+# A keyless Maps embed: no API key, no expiring "pb=" blob, and it resolves to
+# the same pin as the address in LocalBusiness schema.
+MAP_EMBED = ("https://www.google.com/maps?q=1593+Logan+Rd,+Mount+Gravatt+QLD+4122"
+             "&amp;hl=en-AU&amp;z=15&amp;output=embed")
 
-TRACKING_ID = "tk_5bee5316dafc4ac09c8e0e20ec24e0e4"
+TRACKING_ID = "tk_6582cb70c3d84289821c555a3d8691f9"
 
-# The single sentence written for AI/generative engines to lift verbatim.
+# The sentence written for AI assistants and answer engines to lift verbatim.
+# Research section 10: "An AI cannot infer what a website does not say."
 CITABLE = (
-    "Enviro Garden Care &amp; Odd Jobs is a Pimpama-based lawn mowing and garden "
-    "maintenance business servicing the Northern Gold Coast from Coomera to Yatala "
-    "with both fuel and battery-powered equipment."
+    "A1 Lawn Care Pty Ltd is an NDIS registered lawn mowing and garden maintenance "
+    "business at 1593 Logan Rd, Mount Gravatt QLD 4122, servicing more than 150 "
+    "suburbs across Brisbane&#39;s south side, Bayside, Logan and the Redlands."
 )
 
 # --------------------------------------------------------------------------
-# Images — client photography, Google Drive folder 1fNAUinCZXQD56NgmTM1Dd5FK92IUXXuf
-# Served through Drive's public image CDN. See README.md -> "Images".
+# Images
+#
+# A1's own photography, copied into the client's public Google Drive folder
+# (1fNAUinCZXQD56NgmTM1Dd5FK92IUXXuf) and served through Drive's image CDN.
+# See README.md -> "Images" for why, and for the move to host-served WebP that
+# the speed work in the research depends on.
 # --------------------------------------------------------------------------
 def drive(file_id, width=1600):
     return "https://lh3.googleusercontent.com/d/%s=w%d" % (file_id, width)
 
 
 IMG = {
-    "logo": drive("1z4Ip6GLPeDBuyDfUf-Vy28bBA0MB_R4c", 320),
-    "hero": drive("1v50z_PLo_6Ft-U027nD1Q-VtFtzRv_Xc", 1800),
-    "about": drive("143PG3RJgZnpXDnlPHb_a46vdUOxSkmAt", 1200),
-    "battery": drive("1rW_quVFoi_MST6FW435CSSBQWHyHEnfN", 1200),
-    "areas": drive("1hRPbL8HOlTA5vqsIXN_DsauLAq0B4JwQ", 1200),
-    "cta": drive("1W0FUz2hRBXCJFPdlxeDhYnGM4HMW8ukx", 1800),
-    "svc_mowing": drive("1q-NSWe2ZeTKZ-SYcBX3Z0yr7AvNPPEQh", 1200),
-    "svc_acreage": drive("1---Fr4ddP5c3s3TQXofTzuk1WaHesQUw", 1200),
-    "svc_garden": drive("1H0FhMI3oExVvBKcKR0TpdXdUKe94NzJ3", 1200),
-    "svc_green": drive("1DPTCRjv7eyJcpsk1p_rqeUkWd7HVkRWs", 1200),
-    "svc_commercial": drive("1mF8psxPv9zzz2ILyZo6rycpaLdQr3SDU", 1200),
-    "svc_odd": drive("1a-nqGc_KouyxhtTicg7UZjQhNGeXxph2", 1200),
+    "logo": drive("1U2I-VOzL-3t1cL8IC5AHD7wQLIVPmn8m", 320),
+    "ndis": drive("195PxNdASaGEg3ybUK_4Gqlw0npgq32A3", 420),
+    "ndis_white": drive("1mz4OKQJRkENypVqIYE__fkN_sotfs-Oh", 420),
+    "hero": drive("170uaoPJkAeuJx3wKXO4H5_13k6NxT_KU", 1400),
+    "about": drive("1Wkzjny6oQMAgS-HoSPJnIcfanEJCw7-l", 1200),
+    "svc_mowing": drive("17LLWEtvi9r4KdrjcqiGAOt_PiONjtiQ0", 1100),
+    "svc_ndis": drive("19SyrnQZQpxBKBpipU_KgQMwRtLEAuPce", 1100),
+    "svc_garden": drive("1RXVN3O2REW9lZ0jWIMfZhNf41-IoVnPD", 1100),
+    "svc_palm": drive("1QNMD5WrtvtFSxCQpWRZAf2MCoRSqMBpd", 1100),
+    "svc_green": drive("1QFPH82fEOQVvwXgYmja6EgPX5h3e0Rxi", 1100),
+    "svc_hedging": drive("1m4r-v_9F_t-q5BlJHFkRe9TnJe6w2Tjn", 1100),
+    "cta": drive("1uDMkA_7zfHl2Ny0j_u0avcdzErlo3jYt", 1600),
+    "work_extra": drive("1Iq1K5Gqmy-TxXCuS3Jkfs4AoX8PiaRMe", 1100),
 }
 
+# Gallery — A1's own job photos. Alt text names the service and the area the
+# way the research asks for; it is deliberately not claiming a specific suburb
+# for a specific photo. See README.md -> "Confirm before launch".
 GALLERY = [
-    (drive("1zjOeo0z5zYz4Ba0HN1e9OHgLxmgj2Bew", 900),
-     "Freshly mowed lawn with crisp edges — lawn mowing Gold Coast by Enviro Garden Care, Pimpama"),
-    (drive("1_aHGRK3aF7Kg9uNxKCz9PqEBSbbOptt4", 900),
-     "Acreage block mown with a ride-on mower — acreage mowing Gold Coast, Ormeau Hills"),
-    (drive("1lyKrO6tPH4RE_HlatcfzRa4lSNnvEQ3S", 900),
-     "Trimmed hedge and tidy garden bed — garden maintenance Gold Coast, Helensvale"),
-    (drive("1mLEYN2LQBdPPtNPH0NNJwGuU0BzK9sRu", 900),
-     "Yard cleared and green waste loaded for removal — green waste removal Gold Coast, Pimpama"),
-    (drive("1_VURECkgTaVDnDm2B1sp2zPrc8Cd8ptj", 900),
-     "Residential lawn striped after a regular mow — lawn mowing Coomera by Enviro Garden Care"),
-    (drive("1obEOqbWZwZPv-53mxuynPhS3WWcv77AY", 900),
-     "Grounds kept neat on a commercial site — commercial property maintenance Gold Coast, Yatala"),
-    (drive("1a8xV5xmVlqIahKg-RtXf3w6oNGzxw2aW", 900),
-     "Edges and paths trimmed after mowing — lawn care Gold Coast northern suburbs"),
-    (drive("1oAo_C-cAicH_lNhtk8UvXwiWdq_tnSRk", 900),
-     "Battery-powered mower on a residential lawn — quiet lawn mowing Gold Coast, Upper Coomera"),
-    (drive("18ZBWMoFM85uHZxZcbEnA7CiffkFJh3XK", 900),
-     "Garden bed mulched and weeded after a maintenance visit — garden maintenance Gold Coast, Hope Island"),
+    (IMG["svc_mowing"],
+     "Lawn mown and edged by A1 Lawn Care — lawn mowing Mount Gravatt, Brisbane"),
+    (IMG["svc_ndis"],
+     "Yard kept tidy on a regular NDIS maintenance visit — A1 Lawn Care Brisbane"),
+    (IMG["svc_garden"],
+     "Garden beds weeded and edged — garden maintenance Brisbane by A1 Lawn Care"),
+    (IMG["svc_palm"],
+     "Palm and tree work on a Brisbane property — palm tree removal by A1 Lawn Care"),
+    (IMG["svc_green"],
+     "Yard cleared and green waste loaded out — green waste removal Brisbane"),
+    (IMG["svc_hedging"],
+     "Hedge trimmed square and level — hedge trimming Brisbane southside, A1 Lawn Care"),
+    (IMG["cta"],
+     "Lawn cut and cleaned up after a service — lawn care Brisbane south side"),
+    (IMG["work_extra"],
+     "Finished lawn and garden on a Brisbane southside property — A1 Lawn Care"),
 ]
 
 # --------------------------------------------------------------------------
-# Service areas — 19 suburbs, grouped the way the research recommends
+# Service areas
+#
+# Research, critical issue 01: not one suburb appears anywhere on the current
+# site. These are the four regions the business works, grouped the way the
+# research specifies (Brisbane South, Bayside, Logan, Redlands).
 # --------------------------------------------------------------------------
 AREA_GROUPS = [
-    ("Coomera corridor",
-     "The growth belt we mow most — new builds, compact blocks and strata.",
-     ["Coomera", "Upper Coomera", "Coomera Waters", "Pimpama", "Oxenford"]),
-    ("Helensvale &amp; Hope Island",
-     "Established gardens, hedges and premium canal estates.",
-     ["Helensvale", "Hope Island", "Sanctuary Cove", "Pacific Pines", "Parkwood", "Arundel"]),
-    ("Ormeau &amp; Yatala acreage belt",
-     "Lifestyle lots, rural blocks and industrial estates north of the M1.",
-     ["Ormeau", "Ormeau Hills", "Yatala", "Stapylton", "Jacobs Well", "Willowvale",
-      "Windaroo", "Mount Warren"]),
+    ("Brisbane South",
+     "Our home ground — ten minutes from the Logan Rd depot at Mount Gravatt.",
+     ["Mount Gravatt", "Mount Gravatt East", "Upper Mount Gravatt", "Wishart",
+      "Mansfield", "Holland Park", "Holland Park West", "Tarragindi", "Greenslopes",
+      "Coorparoo", "Camp Hill", "Carina", "Carina Heights", "Moorooka", "Salisbury",
+      "Coopers Plains", "Annerley", "Fairfield", "Yeronga", "Yeerongpilly", "Nathan",
+      "Rocklea", "Archerfield", "Acacia Ridge", "Sunnybank", "Sunnybank Hills",
+      "Robertson", "MacGregor", "Eight Mile Plains", "Runcorn", "Kuraby", "Calamvale",
+      "Stretton", "Algester", "Parkinson", "Drewvale", "Karawatha", "Larapinta",
+      "Willawong", "Pallara", "Heathwood", "Doolandella", "Durack", "Inala",
+      "Richlands", "Ellen Grove", "Forest Lake", "Rochedale", "Mackenzie", "Burbank"]),
+    ("Bayside",
+     "Carindale across to the water — established gardens, hedges and canal blocks.",
+     ["Carindale", "Cannon Hill", "Tingalpa", "Murarrie", "Hemmant", "Wynnum",
+      "Wynnum West", "Manly", "Manly West", "Lota", "Wakerley", "Gumdale", "Chandler",
+      "Belmont", "Ransome", "Bulimba", "Balmoral", "Hawthorne", "Morningside",
+      "Norman Park", "Seven Hills", "Lytton"]),
+    ("Logan",
+     "Down the highway from Springwood to Beenleigh, including the newer estates.",
+     ["Springwood", "Slacks Creek", "Underwood", "Daisy Hill", "Shailer Park",
+      "Loganholme", "Tanah Merah", "Rochedale South", "Priestdale", "Logan Central",
+      "Woodridge", "Kingston", "Marsden", "Crestmead", "Berrinba", "Browns Plains",
+      "Regents Park", "Heritage Park", "Hillcrest", "Boronia Heights", "Park Ridge",
+      "Munruben", "Greenbank", "Logan Reserve", "Waterford", "Waterford West",
+      "Bethania", "Edens Landing", "Holmview", "Beenleigh", "Eagleby",
+      "Mount Warren Park", "Windaroo", "Bannockburn", "Yarrabilba", "Cornubia",
+      "Carbrook", "Loganlea", "Meadowbrook"]),
+    ("Redlands",
+     "Capalaba through to the bay — acreage, coastal blocks and holiday properties.",
+     ["Capalaba", "Alexandra Hills", "Cleveland", "Ormiston", "Wellington Point",
+      "Birkdale", "Thorneside", "Thornlands", "Victoria Point", "Redland Bay",
+      "Sheldon", "Mount Cotton"]),
 ]
 
 ALL_SUBURBS = [s for _, _, group in AREA_GROUPS for s in group]
 
+# Suburbs the research names as keyword targets — these must appear in body copy,
+# not only in a footer list.
+KEY_SUBURBS = ["Mount Gravatt", "Mount Gravatt East", "Sunnybank", "Carindale",
+               "Coorparoo", "Greenslopes", "Tarragindi", "Wynnum", "Cannon Hill",
+               "Tingalpa", "Wakerley", "Bulimba", "Moorooka", "Coopers Plains",
+               "Acacia Ridge", "Inala", "Springwood", "Slacks Creek",
+               "Browns Plains", "Capalaba"]
+
 # --------------------------------------------------------------------------
-# Services — one distinct primary keyword per page, no overlap
+# Services — six pages, one distinct primary keyword each, no overlap.
+# Page spec: research section 07, Phase 4.
 # --------------------------------------------------------------------------
 SERVICES = [
     {
         "slug": "lawn-mowing",
         "nav": "Lawn Mowing",
         "name": "Lawn Mowing",
-        "keyword": "lawn mowing Coomera",
-        "volume": "50 searches/mo",
-        "h1": "Lawn Mowing Coomera &amp; Upper Coomera — Regular Residential Mowing",
-        "title": "Lawn Mowing Coomera | Enviro Garden Care &amp; Odd Jobs",
-        "desc": ("Regular lawn mowing Coomera, Upper Coomera and Coomera Waters. Mow, edge, "
-                 "blow down, green waste taken away. Quiet battery gear. Free quote — 0407 276 574."),
-        "tagline": "Fortnightly, monthly or one-off mowing across the Coomera corridor.",
-        "audience": "Homeowners, renters and strata in the Coomera growth corridor",
+        "keyword": "lawn mowing mount gravatt",
+        "volume": "difficulty 4 — the address suburb",
+        "h1": "Lawn Mowing Mount Gravatt — Domestic, Acreage &amp; Commercial",
+        "title": "Lawn Mowing Mount Gravatt | A1 Lawn Care Brisbane",
+        "desc": ("Lawn mowing Mount Gravatt and Brisbane southside — domestic, acreage and "
+                 "commercial mowing, edging and clean-up. NDIS registered. Free quote: "
+                 "0456 198 080."),
+        "tagline": "Domestic, acreage and commercial mowing on a schedule that suits the grass.",
+        "audience": "Homeowners and body corporates in Mount Gravatt, Holland Park and Wishart",
         "img": "svc_mowing",
         "icon": "mower",
-        "suburbs": ["Coomera", "Upper Coomera", "Coomera Waters", "Pimpama", "Oxenford", "Helensvale"],
+        "suburbs": ["Mount Gravatt", "Mount Gravatt East", "Upper Mount Gravatt", "Wishart",
+                    "Holland Park", "Tarragindi", "Coorparoo", "Greenslopes", "Mansfield"],
         "intro": (
-            "Regular <strong>lawn mowing in Coomera</strong> keeps a new-estate lawn looking "
-            "like the display home rather than the vacant block next door. Enviro Garden Care "
-            "&amp; Odd Jobs mows across Coomera, Upper Coomera and Coomera Waters on a "
-            "fortnightly, monthly or one-off schedule — and because we are based ten minutes "
-            "up the road in Pimpama, we are not charging you for a drive down from Brisbane."),
+            "<strong>Lawn mowing in Mount Gravatt</strong> starts at our own front door — the "
+            "depot is at 1593 Logan Rd, so half our regular run is inside a ten-minute drive. "
+            "A1 Lawn Care mows domestic blocks, acreage and commercial grounds across Mount "
+            "Gravatt, Mount Gravatt East, Upper Mount Gravatt, Wishart, Holland Park, "
+            "Tarragindi, Coorparoo and Greenslopes, weekly, fortnightly, monthly or as a "
+            "one-off tidy-up."),
         "body": [
-            ("What a standard mow includes", [
-                "Cut to the right height for your grass type — we do not scalp couch or buffalo in summer",
-                "All edges trimmed: fence lines, paths, driveway, garden beds and around the letterbox",
-                "Hard surfaces blown down so the clippings end up in the trailer, not on your porch",
-                "Clippings and green waste taken away in our enclosed trailer at no extra charge",
-                "Gates closed, pets kept in mind, and a message when we are done if you are not home",
+            ("What every mow includes", [
+                "Cut at the right height for your grass — we do not scalp buffalo or couch through a Brisbane summer",
+                "Edges trimmed along fences, paths, driveway, beds and around the letterbox",
+                "Paths, drive and patio blown down so the clippings leave with us",
+                "Clippings and green waste taken away — nothing left filling your wheelie bin",
+                "Gates shut, pets kept in mind, and a message when we are done if you are out",
             ]),
-            ("Schedules that suit south-east Queensland grass", [
-                "<strong>Weekly or fortnightly, October to March</strong> — couch and kikuyu run hard through the wet season",
-                "<strong>Fortnightly to monthly, April to September</strong> — growth slows, and so does your bill",
-                "<strong>One-off tidy-ups</strong> for inspections, end of lease, or a block that has got away from you",
-                "<strong>Holiday cover</strong> so you are not coming home to knee-high grass",
+            ("Domestic, acreage and commercial", [
+                "<strong>Domestic blocks</strong> — standard suburban yards across the southside, on a schedule that changes with the season",
+                "<strong>Acreage mowing Brisbane</strong> — lifestyle lots and larger holdings cut with ride-on gear and slashed where it has got away",
+                "<strong>Commercial mowing Brisbane</strong> — body corporate grounds, strata, childcare, rentals and small industrial sites on a maintenance contract",
+                "<strong>One-off and end-of-lease cuts</strong> — inspections, sales, or a block nobody has touched since the last wet season",
+            ]),
+            ("Schedules that match Brisbane grass", [
+                "<strong>Weekly or fortnightly, October to March</strong> — couch, kikuyu and buffalo run hard through the storm season",
+                "<strong>Fortnightly to monthly, April to September</strong> — growth slows and so does the cost",
+                "<strong>Holiday cover</strong> so you are not coming home to a paddock",
             ]),
         ],
         "faqs": [
-            ("Do you do lawn mowing in Coomera and Upper Coomera?",
-             "Yes. We service Coomera, Upper Coomera and Coomera Waters from our base in "
-             "Pimpama, with fortnightly and monthly schedules for residential and strata properties."),
-            ("How much does lawn mowing cost on the Gold Coast?",
-             "Most standard residential lawns in Pimpama, Coomera and Helensvale fall into a set "
-             "per-visit rate; larger or overgrown blocks are quoted on size and access. Regular "
-             "fortnightly clients pay less per visit than one-offs. Call 0407 276 574 for a "
-             "same-day quote."),
+            ("Do you mow lawns in Mount Gravatt and Mount Gravatt East?",
+             "Yes. A1 Lawn Care is based at 1593 Logan Rd, Mount Gravatt QLD 4122, and Mount "
+             "Gravatt, Mount Gravatt East and Upper Mount Gravatt are on our weekly run, along "
+             "with Wishart, Holland Park, Tarragindi, Coorparoo and Greenslopes."),
+            ("How much does lawn mowing cost in Brisbane?",
+             "Lawn mowing in Brisbane is quoted per visit on the size of the lawn, the access, "
+             "and how long it has been since the last cut. Regular fortnightly clients pay less "
+             "per visit than one-off jobs, and an overgrown first cut costs more than the visits "
+             "that follow. Call 0456 198 080 for a price on your block."),
             ("Do I need to be home when you mow?",
-             "No. As long as we can get to the lawn and any gates are unlocked, we will mow, "
-             "tidy up and let you know it is done. Most of our regular clients are at work when we visit."),
-            ("Do you take the clippings with you?",
-             "Yes. Clippings and green waste go into our enclosed trailer and leave with us — "
-             "there is no extra charge and nothing left in your bin."),
+             "No. As long as we can reach the lawn and any side gates are unlocked, we mow, tidy "
+             "up and let you know it is finished. Most of our regular clients are at work when "
+             "we visit."),
+            ("Do you do commercial and acreage mowing?",
+             "Yes. We mow body corporate and strata grounds, rental portfolios and small "
+             "industrial sites on a maintenance schedule, and we have the gear for acreage and "
+             "lifestyle blocks across Brisbane&#39;s south side, Logan and the Redlands."),
         ],
     },
     {
-        "slug": "acreage-mowing",
-        "nav": "Acreage &amp; Ride-On",
-        "name": "Acreage &amp; Ride-On Mowing",
-        "keyword": "acreage mowing Gold Coast",
-        "volume": "70 searches/mo",
-        "h1": "Acreage Mowing Gold Coast — Ride-On Mowing for Large Blocks",
-        "title": "Acreage Mowing Gold Coast | Enviro Garden Care &amp; Odd Jobs",
-        "desc": ("Acreage mowing Gold Coast — ride-on mowing, slashing and brush cutting for "
-                 "lifestyle lots at Jacobs Well, Yatala and Ormeau Hills. Free quote: 0407 276 574."),
-        "tagline": "Ride-on mowing and slashing for lifestyle lots and rural blocks.",
-        "audience": "Acreage and lifestyle-lot owners north of the M1",
-        "img": "svc_acreage",
-        "icon": "tractor",
-        "suburbs": ["Jacobs Well", "Yatala", "Stapylton", "Ormeau Hills", "Willowvale",
-                    "Mount Warren", "Windaroo", "Ormeau"],
+        "slug": "ndis-yard-garden-maintenance",
+        "nav": "NDIS Yard &amp; Garden",
+        "name": "NDIS Yard &amp; Garden Maintenance",
+        "keyword": "ndis mowing",
+        "volume": "70 searches/mo · difficulty 20",
+        "h1": "NDIS Registered Lawn Mowing &amp; Yard Maintenance in Brisbane",
+        "title": "NDIS Lawn Mowing Brisbane | A1 Lawn Care",
+        "desc": ("NDIS mowing and yard maintenance in Brisbane from a registered provider. "
+                 "Plan managed, self managed or NDIA managed. Mount Gravatt based — "
+                 "0456 198 080."),
+        "tagline": "Registered provider — plan managed, self managed or NDIA managed.",
+        "audience": "NDIS participants, plan managers and support coordinators",
+        "img": "svc_ndis",
+        "icon": "shield",
+        "suburbs": ["Mount Gravatt", "Sunnybank", "Springwood", "Capalaba", "Wynnum",
+                    "Browns Plains", "Coorparoo", "Slacks Creek", "Carindale"],
         "intro": (
-            "<strong>Acreage mowing on the Gold Coast</strong> is a different job to a suburban "
-            "lawn, and a push mower will not finish it before dark. We bring ride-on gear to "
-            "lifestyle lots and rural blocks across Jacobs Well, Yatala, Stapylton, Ormeau Hills "
-            "and Willowvale — from a tidy half-acre house paddock to a block that has not been "
-            "touched since the last wet season."),
+            "A1 Lawn Care is an <strong>NDIS registered provider</strong>, and "
+            "<strong>NDIS mowing</strong> and yard maintenance is a core part of what we do "
+            "every week — not a sideline. We work with participants, plan managers and support "
+            "coordinators across Brisbane&#39;s south side, Bayside, Logan and the Redlands, on "
+            "the same regular schedule and the same standard as every other job on the run."),
         "body": [
-            ("What we handle on a large block", [
-                "Ride-on mowing for open paddock and house-yard areas",
-                "Slashing for long grass, vacant land and blocks that have got away",
-                "Brush cutting and whipper snipping around sheds, tanks, fence lines and dam banks",
-                "Track, driveway and firebreak maintenance",
-                "Clean-up and green waste removal once the cutting is finished",
+            ("What NDIS mowing and yard maintenance covers", [
+                "Regular lawn mowing, edging and blow-down on a set schedule you can plan around",
+                "Garden tidy-ups — weeding, pruning, bed edging and mulching",
+                "Hedge and shrub trimming so paths, windows and clotheslines stay clear",
+                "Green waste and clippings taken away every visit",
+                "Yard clean-ups and clearing where a property has got away or access has become unsafe",
             ]),
-            ("Before we quote an acreage job", [
-                "<strong>Block size and how much of it is actually mown</strong> — five acres with two mown is a very different price to five acres wall to wall",
-                "<strong>Access</strong> — gate widths, slopes, boggy ground and anything the ride-on cannot safely cross",
-                "<strong>Obstacles</strong> — stumps, star pickets, irrigation, rock and hidden debris are worth pointing out before we start",
-                "<strong>How long since the last cut</strong> — a first cut on overgrown ground takes longer and is priced accordingly, then regular visits cost less",
+            ("How booking works with your plan", [
+                "<strong>Plan managed</strong> — we invoice your plan manager directly, with the service dates and NDIS details they need",
+                "<strong>Self managed</strong> — we invoice you and you claim it back through the portal",
+                "<strong>NDIA managed</strong> — talk to us and we will walk through what your plan allows before anything is booked",
+                "<strong>Support coordinators</strong> — one contact, consistent crew, and reporting on visits if a participant needs it",
+            ]),
+            ("Why participants stay with us", [
+                "The same person turns up, so nobody is explaining the property again every visit",
+                "Set schedule, so the yard never gets to the point where it is a hazard",
+                "Quiet, tidy, and out of the way — we work around the household, not through it",
+                "Straight answers on what is claimable and what is not, before we start",
             ]),
         ],
         "faqs": [
-            ("Do you mow acreage properties near Jacobs Well and Yatala?",
-             "Yes. Ride-on and acreage mowing for lifestyle lots and rural blocks across Jacobs "
-             "Well, Yatala, Stapylton, Ormeau Hills and Willowvale, including slashing, brush "
-             "cutting and clean-up."),
-            ("How much does acreage mowing cost?",
-             "Acreage is quoted on the area actually being cut, the access, and how long the "
-             "grass has been left. A regular maintenance visit costs noticeably less per acre "
-             "than a first cut on an overgrown block. Call 0407 276 574 and we will price it on size."),
-            ("Can you mow a block that has not been cut in months?",
-             "Yes. Overgrown blocks are slashed first to bring the height down, then cut back to "
-             "a normal finish. Let us know what is under the grass — star pickets, stumps and "
-             "irrigation are easier to avoid when we know they are there."),
-            ("Do you mow vacant land for council notices or before a sale?",
-             "Yes. Vacant block slashing, pre-sale tidy-ups and compliance cuts across the "
-             "Ormeau, Yatala and Jacobs Well acreage belt, usually within a few days of the call."),
+            ("Is A1 Lawn Care an NDIS registered provider, and how do I book with my plan?",
+             "Yes — A1 Lawn Care is an NDIS registered provider. If your plan is plan managed we "
+             "invoice your plan manager directly; if it is self managed we invoice you to claim "
+             "through the portal; and if it is NDIA managed, call us on 0456 198 080 and we will "
+             "go through what your plan covers before booking anything in."),
+            ("What does NDIS lawn mowing cost?",
+             "NDIS lawn mowing is quoted the same way as any other job — on lawn size, access and "
+             "how often we visit — and the quote is written so a plan manager can see exactly what "
+             "is being charged. Regular scheduled visits cost less per visit than one-off clean-ups."),
+            ("Do you do NDIS yard maintenance near me in Brisbane?",
+             "We cover more than 150 suburbs across Brisbane&#39;s south side, Bayside, Logan and "
+             "the Redlands from our base at Mount Gravatt, including Sunnybank, Carindale, "
+             "Springwood, Capalaba, Wynnum and Browns Plains."),
+            ("Can support coordinators set up a recurring service?",
+             "Yes. Support coordinators and plan managers can set up a recurring fortnightly or "
+             "monthly service with one point of contact, a consistent crew and invoices that "
+             "match the service dates."),
         ],
     },
     {
         "slug": "garden-maintenance",
-        "nav": "Garden &amp; Hedges",
-        "name": "Garden Maintenance &amp; Hedge Trimming",
-        "keyword": "garden maintenance Gold Coast",
-        "volume": "140 searches/mo",
-        "h1": "Garden Maintenance Gold Coast — Hedges, Pruning &amp; Weed Control",
-        "title": "Garden Maintenance Gold Coast | Enviro Garden Care &amp; Odd Jobs",
-        "desc": ("Garden maintenance Gold Coast — hedge trimming, pruning, weeding and mulching "
-                 "in Helensvale, Hope Island and Sanctuary Cove. Free quote: 0407 276 574."),
-        "tagline": "Hedges, pruning, weeding and mulching for established gardens.",
-        "audience": "Established-garden suburbs from Helensvale to Sanctuary Cove",
+        "nav": "Garden Maintenance",
+        "name": "Garden Maintenance",
+        "keyword": "garden maintenance brisbane",
+        "volume": "170 searches/mo · difficulty 30",
+        "h1": "Garden Maintenance Brisbane — Pruning, Weeding &amp; Edging",
+        "title": "Garden Maintenance Brisbane | A1 Lawn Care",
+        "desc": ("Garden maintenance Brisbane — pruning, weeding, edging and mulching across "
+                 "Mount Gravatt, Carindale, Sunnybank and Bayside. Free quote: 0456 198 080."),
+        "tagline": "Pruning, weeding, edging and mulching on a schedule.",
+        "audience": "Homeowners, strata managers and rental property managers",
         "img": "svc_garden",
         "icon": "shears",
-        "suburbs": ["Helensvale", "Hope Island", "Sanctuary Cove", "Parkwood", "Arundel",
-                    "Pacific Pines", "Oxenford"],
+        "suburbs": ["Carindale", "Bulimba", "Coorparoo", "Sunnybank", "Wishart",
+                    "Holland Park", "Cleveland", "Wellington Point", "Mansfield"],
         "intro": (
-            "<strong>Garden maintenance on the Gold Coast</strong> is really a subtropical "
-            "problem: everything grows twice as fast as the plan allowed for. We keep hedges "
-            "square, beds clear and shrubs in shape across Helensvale, Hope Island, Sanctuary "
-            "Cove, Pacific Pines, Parkwood and Arundel — as a scheduled visit or a one-off reset "
-            "before the garden gets ahead of you again."),
+            "<strong>Garden maintenance in Brisbane</strong> is really a subtropical problem: "
+            "everything grows twice as fast as the landscape plan allowed for, and two wet weeks "
+            "in February will undo a season of tidy. A1 Lawn Care keeps beds clear, shrubs in "
+            "shape and edges sharp across Carindale, Bulimba, Coorparoo, Sunnybank, Wishart and "
+            "the Redlands — as a standing visit or a one-off reset."),
         "body": [
-            ("What garden maintenance covers", [
-                "Hedge trimming — straight lines, level tops and the drop sheet down so we take the cuttings, not you",
+            ("What garden maintenance services in Brisbane cover", [
                 "Pruning and shaping of shrubs, natives and small ornamental trees",
-                "Weeding and weed control through beds, paths, driveways and gravel",
+                "Weeding through beds, paths, driveways and gravel — by hand where spraying is not appropriate",
+                "Bed edging so the garden reads as maintained from the street",
                 "Mulching to hold moisture through summer and slow the weeds down",
-                "Bed edging and tidy-ups so the garden reads as maintained from the street",
-                "All prunings and green waste taken away when we leave",
+                "Seasonal cut-backs before the wet, and again before spring growth",
+                "All prunings and green waste taken away the same visit",
             ]),
-            ("When to book what", [
-                "<strong>Hedges</strong> — two to three trims a year on the Gold Coast; more for lilly pilly and murraya through the wet",
-                "<strong>Mulch</strong> — top up before summer to cut watering and suppress weeds",
-                "<strong>Pruning</strong> — late winter for most shrubs, straight after flowering for the rest",
-                "<strong>Pre-sale and pre-inspection resets</strong> — book a week out so the garden has time to settle and look established, not freshly attacked",
+            ("Rentals, strata and managed properties", [
+                "<strong>Property managers</strong> — routine inspections passed without a last-minute scramble",
+                "<strong>Body corporate and strata</strong> — common areas, entry gardens and verges on a fixed schedule",
+                "<strong>Pre-sale presentation</strong> — the garden tidied and edged before photography",
+                "<strong>Between tenancies</strong> — reset overgrown beds and hand the property back presentable",
+            ]),
+            ("When to book what in south-east Queensland", [
+                "<strong>September to November</strong> — cut back, mulch and edge before the growing season takes off",
+                "<strong>December to March</strong> — regular visits; this is when a garden gets away fastest",
+                "<strong>April to August</strong> — shaping, weed control and structural pruning while growth is slow",
             ]),
         ],
         "faqs": [
-            ("What does garden maintenance include?",
-             "Hedge trimming, pruning, weeding, weed control, mulching and bed edging, with all "
-             "prunings and green waste taken away. We work across Helensvale, Hope Island, "
-             "Sanctuary Cove, Pacific Pines, Parkwood and Arundel."),
-            ("How often should hedges be trimmed on the Gold Coast?",
-             "Most Gold Coast hedges need trimming two to three times a year. Fast growers like "
-             "lilly pilly and murraya often want a fourth trim through the summer wet season to "
-             "keep the shape."),
-            ("Do you take the prunings away?",
-             "Yes. Hedge cuttings, prunings and weeds go into our enclosed trailer and leave with "
-             "us — your green bin stays empty for your own use."),
-            ("Can you maintain a garden while we are away or between tenants?",
-             "Yes. Scheduled garden maintenance for absentee owners, holiday homes, rentals and "
-             "body corporates across the northern Gold Coast, with photos after the visit if you want them."),
+            ("What does garden maintenance in Brisbane include?",
+             "Our garden maintenance covers pruning and shaping, weeding, bed edging, mulching and "
+             "seasonal cut-backs, with all prunings and green waste taken away at the end of the "
+             "visit. It can run as a standing fortnightly or monthly service, or as a one-off reset."),
+            ("Do you maintain gardens for rentals and body corporates?",
+             "Yes. We work with property managers, landlords and body corporates across Brisbane&#39;s "
+             "south side and Bayside on fixed schedules, which keeps routine inspections and common "
+             "areas from becoming a problem."),
+            ("Can you take on a garden that has been neglected?",
+             "Yes. Overgrown gardens are quoted as a first-visit reset — cut back, weeded, edged and "
+             "cleared — and regular visits after that cost noticeably less."),
+            ("Do you do garden maintenance in Carindale and Sunnybank?",
+             "Yes. Carindale, Sunnybank, Bulimba, Coorparoo, Wishart and Mansfield are all on our "
+             "regular run, along with the Redlands from Capalaba out to Cleveland."),
+        ],
+    },
+    {
+        "slug": "tree-palm-removal",
+        "nav": "Tree &amp; Palm Removal",
+        "name": "Tree &amp; Palm Removal",
+        "keyword": "palm tree removal brisbane",
+        "volume": "110 searches/mo · difficulty 27",
+        "h1": "Palm Tree Removal Brisbane — Fast, Insured, Fully Cleaned Up",
+        "title": "Palm Tree Removal Brisbane | A1 Lawn Care",
+        "desc": ("Palm tree removal Brisbane — palms, small trees and stumps removed and the "
+                 "mess taken away. Fully insured, Mount Gravatt based. Free quote: 0456 198 080."),
+        "tagline": "Palms, small trees and the whole mess gone the same day.",
+        "audience": "Homeowners, acreage owners and commercial site managers",
+        "img": "svc_palm",
+        "icon": "palm",
+        "suburbs": ["Mount Gravatt", "Sunnybank", "Carindale", "Wynnum", "Springwood",
+                    "Capalaba", "Coorparoo", "Runcorn", "Redland Bay"],
+        "intro": (
+            "<strong>Palm tree removal in Brisbane</strong> is the job people put off, usually "
+            "until fronds are dropping on the roof or the trunk is lifting a path. A1 Lawn Care "
+            "removes palms and small trees across Brisbane&#39;s south side, Bayside, Logan and "
+            "the Redlands — fully insured, cleaned up properly, and with the green waste loaded "
+            "out rather than stacked on the verge."),
+        "body": [
+            ("What we remove", [
+                "Cocos, Alexandra, Bangalow, Golden Cane and Foxtail palms — single specimens or a whole row",
+                "Small and medium trees within safe working reach of the ground and our gear",
+                "Storm-damaged and leaning palms that have become a risk to a roof, fence or pool",
+                "Stumps ground or dug out where access allows, so you can turf or replant over the top",
+                "Dead fronds, seed pods and self-seeded palm suckers cleared at the same time",
+            ]),
+            ("What the price depends on", [
+                "<strong>Height and species</strong> — a three-metre Golden Cane and a fifteen-metre Cocos are different jobs entirely",
+                "<strong>Access</strong> — whether we can get a machine to it, or it has to be roped down over a pool and carried out by hand",
+                "<strong>What is underneath</strong> — roofs, fences, pools, sheds and power lines all change the method",
+                "<strong>Stump and waste</strong> — whether the stump is ground out and how much material has to leave the site",
+            ]),
+            ("Work we will not quote over the phone", [
+                "Anything near powerlines, which is Energex-adjacent work and gets assessed on site",
+                "Large-canopy trees needing a climbing arborist and a traffic plan — we will tell you straight and point you to one",
+                "Protected vegetation, where Brisbane City Council or Redland City Council approval is needed before anything is cut",
+            ]),
+        ],
+        "faqs": [
+            ("How much does palm tree removal cost in Brisbane?",
+             "Palm tree removal in Brisbane is priced on the height and species of the palm, how "
+             "much access there is for machinery, what is underneath it, and whether the stump is "
+             "removed. A single small Golden Cane in an open yard is a very different price to a "
+             "tall Cocos roped down over a pool. Send a photo to 0456 198 080 and we will give you "
+             "a figure."),
+            ("Do you take the palm away or leave it on the verge?",
+             "We take it with us. Fronds, trunk sections and debris are loaded out and the area is "
+             "raked and blown down before we leave — removal and clean-up are quoted as one job."),
+            ("Can you remove the stump as well?",
+             "Usually, yes — stumps are ground or dug out where access allows, so the area can be "
+             "turfed or replanted. If access is too tight for a grinder we will say so up front."),
+            ("Do you remove palms in Sunnybank, Carindale and the Redlands?",
+             "Yes. Palm and small tree removal runs across the same area as the rest of our work: "
+             "Brisbane south, Bayside, Logan and the Redlands, from Mount Gravatt out to Redland Bay."),
         ],
     },
     {
         "slug": "green-waste-removal",
         "nav": "Green Waste &amp; Clean-Ups",
-        "name": "Green Waste &amp; Site Clean-Ups",
-        "keyword": "green waste removal Gold Coast",
-        "volume": "50 searches/mo",
-        "h1": "Green Waste Removal Gold Coast — Yard &amp; Site Clean-Ups",
-        "title": "Green Waste Removal Gold Coast | Enviro Garden Care &amp; Odd Jobs",
-        "desc": ("Green waste removal Gold Coast: overgrown yards, end-of-lease and post-storm "
-                 "clean-ups in Pimpama, Ormeau and Oxenford. Loaded and taken away. "
-                 "Call 0407 276 574."),
-        "tagline": "Overgrown yards, end-of-lease resets and storm clean-ups, taken away.",
-        "audience": "End-of-lease, overgrown blocks and post-storm clean-ups",
+        "name": "Green Waste Removal &amp; Site Clean-Ups",
+        "keyword": "green waste removal brisbane",
+        "volume": "210 searches/mo · difficulty 31",
+        "h1": "Green Waste Removal Brisbane — Yard &amp; Site Clean-Ups",
+        "title": "Green Waste Removal Brisbane | A1 Lawn Care",
+        "desc": ("Green waste removal Brisbane — yard clean-ups, storm debris, end of lease and "
+                 "pre-sale clearing, loaded and taken away. Free quote: 0456 198 080."),
+        "tagline": "Yard clean-ups, storm debris and end-of-lease clearing, loaded and gone.",
+        "audience": "Vendors preparing to sell, landlords, builders and end-of-lease tenants",
         "img": "svc_green",
         "icon": "truck",
-        "suburbs": ["Pimpama", "Ormeau", "Oxenford", "Coomera", "Upper Coomera", "Yatala"],
+        "suburbs": ["Mount Gravatt", "Moorooka", "Acacia Ridge", "Inala", "Slacks Creek",
+                    "Beenleigh", "Wynnum", "Capalaba", "Browns Plains"],
         "intro": (
-            "<strong>Green waste removal on the Gold Coast</strong> is usually the difference "
-            "between a job finished and a pile in the driveway waiting three weeks for a council "
-            "collection. We clear overgrown yards, end-of-lease properties and storm damage "
-            "across Pimpama, Ormeau, Oxenford and the Coomera corridor — cut, loaded into our "
-            "enclosed trailer, and gone the same visit."),
+            "<strong>Green waste removal in Brisbane</strong> is usually the difference between a "
+            "yard that has been worked on and a yard that looks finished. A1 Lawn Care clears and "
+            "carts away prunings, clippings, storm debris, old garden beds and general yard rubbish "
+            "across the south side, Logan, Bayside and the Redlands — either as part of a job we "
+            "are already doing, or as a clean-up on its own."),
         "body": [
-            ("Clean-ups we take on", [
-                "Overgrown yards and neglected blocks brought back to a mown finish",
-                "End-of-lease and pre-sale clean-ups so the property passes its inspection",
-                "Storm and wind damage — fallen branches, palm fronds and debris cleared",
-                "Garden bed strip-outs, dead plant removal and old mulch clear-outs",
-                "Existing piles of prunings, clippings and garden waste loaded and removed",
+            ("What we clear and cart away", [
+                "Prunings, clippings, palm fronds and hedge cuttings",
+                "Storm debris and fallen branches after a Brisbane summer blow-through",
+                "Overgrown beds, dead plants and self-seeded growth pulled out and removed",
+                "General yard rubbish that has accumulated behind the shed",
+                "Whole-site clean-ups where a property has been vacant or neglected",
             ]),
-            ("Why the enclosed trailer matters", [
-                "Nothing blows out on the M1 between your place and the tip",
-                "We can take mixed green waste in one load instead of several trips",
-                "Loads are tarped and tidy, which matters on body corporate and commercial sites",
-                "Green waste is disposed of properly rather than dumped on a vacant block",
+            ("When people call us for a clean-up", [
+                "<strong>Before a sale</strong> — vendors getting a yard photograph-ready in one visit",
+                "<strong>End of lease</strong> — tenants and property managers clearing a yard back to inspection standard",
+                "<strong>Builders and trades</strong> — site tidy-ups and vegetation clearing before or after work",
+                "<strong>After a storm</strong> — debris and damaged growth cleared so the yard is safe to use again",
+                "<strong>Deceased estates and vacant homes</strong> — handled quietly and without fuss",
+            ]),
+            ("How a clean-up is quoted", [
+                "<strong>Volume</strong> — how many trailer loads are actually leaving the site",
+                "<strong>Access</strong> — whether we can back a trailer in or everything is carried out by hand",
+                "<strong>What is in it</strong> — green waste is straightforward; mixed rubbish needs a different tip run",
+                "<strong>Cutting versus carting</strong> — whether we are clearing growth first or only removing what is already on the ground",
             ]),
         ],
         "faqs": [
-            ("Do you take the green waste away after mowing or hedge trimming?",
-             "Yes. Green waste removal is included or available as an add-on on every job across "
-             "the Northern Gold Coast, taken away in our enclosed trailer."),
-            ("Can you clear a yard that is completely overgrown?",
-             "Yes. Overgrown yards are slashed down first, then cut back to a normal mown finish "
-             "and cleared. We handle end-of-lease, pre-sale and vacant blocks across Pimpama, "
-             "Ormeau, Oxenford and Coomera."),
-            ("Will you remove a pile of branches I have already cut?",
-             "Yes. If you have already done the cutting, we can simply load the pile and take it "
-             "away — priced on the volume and how far it has to be carried."),
-            ("How quickly can you do a storm clean-up?",
-             "We prioritise storm and access-blocking work. Call 0407 276 574 and we will tell "
-             "you honestly when we can get there rather than booking you in and not turning up."),
+            ("Do you take away the green waste and clippings after a job?",
+             "Yes. Clippings, prunings and green waste leave with us on every visit at no extra "
+             "charge — nothing is bagged up and left in your wheelie bin or stacked on the verge."),
+            ("How much does green waste removal cost in Brisbane?",
+             "Green waste removal is quoted on volume and access — how many loads are going out, and "
+             "whether we can reach it with a trailer. A one-off yard clean-up is quoted as a job "
+             "rather than an hourly rate, so you know the number before we start."),
+            ("Can you clear a yard before a sale or an end-of-lease inspection?",
+             "Yes, and it is one of the most common jobs we do. Pre-sale and end-of-lease clean-ups "
+             "are usually booked within a few days, and we will tell you honestly what can be done "
+             "in one visit."),
+            ("Do you clear storm damage and fallen branches?",
+             "Yes. After a summer storm we clear fallen branches, damaged growth and debris so the "
+             "yard is usable again, across Brisbane south, Logan, Bayside and the Redlands."),
         ],
     },
     {
-        "slug": "commercial-property-maintenance",
-        "nav": "Commercial",
-        "name": "Commercial &amp; Industrial Maintenance",
-        "keyword": "commercial property maintenance Gold Coast",
-        "volume": "high intent",
-        "h1": "Commercial Property Maintenance Gold Coast — Grounds &amp; Lawn Care",
-        "title": "Commercial Property Maintenance Gold Coast | Enviro Garden Care",
-        "desc": ("Commercial property maintenance Gold Coast — scheduled grounds and lawn care for "
-                 "body corporates and industrial estates in Yatala and Stapylton. Call 0407 276 574."),
-        "tagline": "Scheduled grounds care for body corporates, retail and industrial sites.",
-        "audience": "Property managers, body corporates and industrial estates",
-        "img": "svc_commercial",
-        "icon": "building",
-        "suburbs": ["Yatala", "Stapylton", "Arundel", "Hope Island", "Coomera", "Ormeau"],
+        "slug": "hedging-lawn-treatments",
+        "nav": "Hedging &amp; Lawn Treatments",
+        "name": "Hedging &amp; Lawn Treatments",
+        "keyword": "hedge trimming services brisbane",
+        "volume": "30 searches/mo · difficulty 18",
+        "h1": "Hedge Trimming &amp; Lawn Treatments — Brisbane Southside",
+        "title": "Hedge Trimming Services Brisbane | A1 Lawn Care",
+        "desc": ("Hedge trimming services Brisbane southside, plus lawn coring, top dressing and "
+                 "weed control across Mount Gravatt and Bayside. Free quote: 0456 198 080."),
+        "tagline": "Hedges kept square, plus coring, top dressing and weed control.",
+        "audience": "Homeowners wanting hedging, coring, top dressing and weed control",
+        "img": "svc_hedging",
+        "icon": "leaf",
+        "suburbs": ["Mount Gravatt", "Holland Park", "Carina", "Camp Hill", "Coorparoo",
+                    "Wishart", "Carindale", "Tarragindi", "Sunnybank"],
         "intro": (
-            "<strong>Commercial property maintenance on the Gold Coast</strong> is judged on two "
-            "things: whether the site looks cared for when someone pulls into the car park, and "
-            "whether you have to chase the contractor. We run scheduled grounds and lawn care for "
-            "body corporates, retail sites and industrial estates across Yatala, Stapylton, "
-            "Arundel and Hope Island — on a set roster, with low-noise battery equipment available "
-            "for customer-facing premises."),
+            "<strong>Hedge trimming services in Brisbane</strong> — and the lawn treatments that "
+            "go with them, coring, top dressing and weed control — are the jobs that lift a yard "
+            "from mown to maintained. A1 Lawn Care keeps hedges square and lawns healthy right "
+            "across the Brisbane southside: Mount Gravatt, Holland Park, Carina, Camp Hill, "
+            "Coorparoo, Wishart and Carindale."),
         "body": [
-            ("What a scheduled site visit covers", [
-                "Lawn and common-area mowing on an agreed roster",
-                "Edging, line trimming and blow-down of car parks, paths and entries",
-                "Hedge, shrub and garden bed maintenance to keep the frontage presentable",
-                "Weed control through car parks, fence lines and hard stand",
-                "Green waste removed on the same visit — no bins left on site",
-                "Storm and after-hours clean-ups by arrangement",
+            ("Hedge trimming services, Brisbane southside", [
+                "Lilly pilly, murraya, viburnum, photinia and box — kept level, square and off the paths",
+                "Screening hedges cut back to line without opening holes in the middle",
+                "Height reductions on hedges that have grown past the fence line or the windows",
+                "Drop sheets down and every cutting taken away — you are not left with the pile",
+                "Two to three trims a year is normal in Brisbane; more for lilly pilly through the wet",
             ]),
-            ("Why managers keep us on the roster", [
-                "<strong>One contact.</strong> You deal with Shanon, not a call centre and a rotating crew",
-                "<strong>Low-noise option.</strong> Battery equipment for tenanted, retail and customer-facing sites — early starts without complaints",
-                "<strong>Reporting.</strong> Photos after each visit if your body corporate or owner wants a record",
-                "<strong>Fixed schedule, fixed price.</strong> Quoted per visit or per month so it goes straight into the budget",
+            ("Lawn coring and top dressing", [
+                "<strong>Coring</strong> pulls plugs out of compacted soil so water, air and fertiliser reach the root zone instead of running off",
+                "<strong>Top dressing</strong> levels the hollows and bumps a mower scalps, and feeds new growth into the surface",
+                "<strong>Best done in warm growing weather</strong> — September through March in Brisbane, when the lawn can knit back together quickly",
+                "<strong>Usually paired</strong> — coring then top dressing in the same visit gets far more out of both",
+            ]),
+            ("Weed control that actually holds", [
+                "Broadleaf weed control through the lawn, matched to your grass type",
+                "Bindii treated before it seeds — late autumn and winter, not when it is already hurting bare feet",
+                "Nut grass and creeping weeds treated repeatedly rather than once and hoped for",
+                "Paths, driveways and gravel kept clear between visits",
             ]),
         ],
         "faqs": [
-            ("Can you handle body corporate or commercial grounds maintenance on the Northern Gold Coast?",
-             "Yes. Scheduled grounds maintenance for body corporates, retail sites and industrial "
-             "estates across Yatala, Stapylton, Arundel and Hope Island, with low-noise equipment "
-             "available for customer-facing premises."),
-            ("Do you work outside business hours?",
-             "Yes. Battery-powered equipment lets us start early or work close to tenanted "
-             "premises without the noise complaints that come with petrol gear. After-hours and "
-             "weekend visits by arrangement."),
-            ("Do you provide photos or reports after each visit?",
-             "Yes, on request. Many of our body corporate and property manager clients get photos "
-             "after every scheduled visit as a record for owners."),
-            ("Are you insured for commercial sites?",
-             "Yes — we carry public liability insurance and can provide a current certificate of "
-             "currency before work starts on your site."),
-        ],
-    },
-    {
-        "slug": "odd-jobs-handyman",
-        "nav": "Odd Jobs",
-        "name": "Odd Jobs &amp; Handyman Repairs",
-        "keyword": "odd jobs handyman Gold Coast",
-        "volume": "long-tail / high intent",
-        "h1": "Odd Jobs &amp; Handyman Repairs — Northern Gold Coast",
-        "title": "Odd Jobs &amp; Handyman Gold Coast | Enviro Garden Care",
-        "desc": ("Odd jobs and minor handyman repairs on the Northern Gold Coast: flat pack and "
-                 "trampoline assembly, fence painting, flyscreens and local transport. "
-                 "Call 0407 276 574."),
-        "tagline": "The small jobs that never quite make it to the top of the list.",
-        "audience": "Homeowners and renters with a list of small jobs",
-        "img": "svc_odd",
-        "icon": "tools",
-        "suburbs": ["Pimpama", "Coomera", "Upper Coomera", "Ormeau", "Helensvale", "Oxenford"],
-        "intro": (
-            "The <em>&amp; Odd Jobs</em> half of the name is not decoration. While we are already "
-            "on site mowing, we take on the minor repairs and assembly work that sit on the list "
-            "for months — across Pimpama, Coomera, Upper Coomera, Ormeau and Helensvale. "
-            "If it is a small job and it is not licensed trade work, ask."),
-        "body": [
-            ("Odd jobs we take on", [
-                "Flat pack furniture assembly — beds, wardrobes, desks, shelving",
-                "Trampoline, swing set and outdoor play equipment assembly",
-                "Fence painting, staining and touch-ups",
-                "Flyscreen repairs and replacement screens",
-                "Picture hanging, shelf mounting and small fixings",
-                "Local transport of goods in our semi-enclosed trailer — pickups, deliveries and tip runs",
-            ]),
-            ("What we do not do", [
-                "Licensed electrical work",
-                "Licensed plumbing or gas work",
-                "Structural building work or anything requiring certification",
-                "Roof work and anything needing height safety equipment",
-            ]),
-        ],
-        "faqs": [
-            ("What kind of odd jobs do you do?",
-             "Flat pack and trampoline assembly, fence painting, flyscreen repairs, small fixings "
-             "and local transport of goods in our trailer. We take on minor, unlicensed work — "
-             "usually while we are already on site for a mow."),
-            ("Can you do odd jobs at the same visit as my mow?",
-             "Yes, and it is the cheapest way to do it. Tell us what is on the list when you book "
-             "and we will allow the extra time rather than making a second trip."),
-            ("Do you do electrical or plumbing work?",
-             "No. Licensed electrical, plumbing, gas, roof and structural work is outside what we "
-             "take on. We will tell you straight away if a job needs a licensed trade."),
-            ("Can you pick something up and deliver it locally?",
-             "Yes. We run a semi-enclosed trailer and can collect and deliver goods locally across "
-             "the Northern Gold Coast — marketplace pickups, deliveries and tip runs."),
+            ("How often should a hedge be trimmed in Brisbane?",
+             "Most hedges on the Brisbane southside need two to three trims a year, and fast growers "
+             "like lilly pilly and murraya need more through the wet season. Trimming little and "
+             "often keeps the hedge dense; letting it run and then cutting hard opens holes that take "
+             "a season to fill."),
+            ("When is the best time to top dress a lawn in Brisbane?",
+             "The best time to top dress a lawn in Brisbane is in warm growing weather, roughly "
+             "September through March, when the grass is actively growing and can knit through the "
+             "new soil quickly. Coring first and top dressing straight after gets far more out of "
+             "both jobs than doing either alone."),
+            ("What does lawn coring do?",
+             "Coring pulls plugs out of compacted soil so water, air and fertiliser reach the roots "
+             "instead of running off the surface. On heavy Brisbane clay soils it is the single "
+             "biggest improvement you can make to a tired lawn."),
+            ("Do you do weed control as well as mowing?",
+             "Yes. Weed control is matched to your grass type and the weed — broadleaf through the "
+             "lawn, bindii treated before it seeds, and paths and driveways kept clear between "
+             "visits."),
         ],
     },
 ]
 
-SERVICE_BY_SLUG = {s["slug"]: s for s in SERVICES}
-
 # --------------------------------------------------------------------------
-# Homepage FAQ — final AEO copy from the research, 40–60 word direct answers
+# Homepage FAQ — research section 10, "FAQ set to deploy", written as final copy.
 # --------------------------------------------------------------------------
 HOME_FAQS = [
-    ("How much does lawn mowing cost on the Gold Coast?",
-     "Most standard residential lawns in Pimpama, Coomera and Helensvale fall into a set "
-     "per-visit rate; larger or overgrown blocks are quoted on size and access. Regular "
-     "fortnightly clients pay less per visit than one-offs. Call 0407 276 574 for a same-day quote."),
-    ("Do you do lawn mowing in Coomera and Upper Coomera?",
-     "Yes. We service Coomera, Upper Coomera and Coomera Waters from our base in Pimpama, with "
-     "fortnightly and monthly schedules for residential and strata properties."),
-    ("Do you mow acreage properties near Jacobs Well and Yatala?",
-     "Yes. Ride-on and acreage mowing for lifestyle lots and rural blocks across Jacobs Well, "
-     "Yatala, Stapylton, Ormeau Hills and Willowvale, including slashing, brush cutting and clean-up."),
-    ("Is battery-powered lawn mowing as good as petrol?",
-     "For most residential and commercial sites, yes — and there's no extra charge. Battery "
-     "equipment is quieter and produces no fumes, which suits early starts, Sundays, shift workers "
-     "and customer-facing businesses. Large acreage jobs still use petrol ride-on gear."),
-    ("Can you handle body corporate or commercial grounds maintenance on the Northern Gold Coast?",
-     "Yes. Scheduled grounds maintenance for body corporates, retail sites and industrial estates "
-     "across Yatala, Stapylton, Arundel and Hope Island, with low-noise equipment available for "
-     "customer-facing premises."),
-    ("Do you take the green waste away after mowing or hedge trimming?",
-     "Yes. Green waste removal is included or available as an add-on on every job across the "
-     "Northern Gold Coast, taken away in our enclosed trailer."),
+    ("How much does lawn mowing cost in Brisbane?",
+     "Lawn mowing in Brisbane is quoted per visit on the size of the lawn, how easy it is to get "
+     "to, and how long it has been since the last cut. A standard suburban block on a regular "
+     "fortnightly schedule costs less per visit than a one-off cut on a yard that has got away. "
+     "Call A1 Lawn Care on 0456 198 080 and you will get a price, not a range."),
+    ("Is A1 Lawn Care an NDIS registered provider, and how do I book with my plan?",
+     "Yes — A1 Lawn Care is an NDIS registered provider. Plan managed participants have invoices "
+     "sent straight to their plan manager, self managed participants are invoiced directly to "
+     "claim through the portal, and NDIA managed participants can call us on 0456 198 080 to go "
+     "through what the plan covers before anything is booked."),
+    ("Do you mow lawns in Sunnybank, Carindale and Springwood?",
+     "Yes. Sunnybank, Carindale and Springwood are all on our regular run, along with more than "
+     "150 other suburbs across Brisbane&#39;s south side, Bayside, Logan and the Redlands — all "
+     "serviced from our base at 1593 Logan Rd, Mount Gravatt."),
+    ("How much does palm tree removal cost in Brisbane?",
+     "Palm tree removal in Brisbane is priced on the height and species of the palm, the access "
+     "for machinery, what sits underneath it, and whether the stump is ground out. A small Golden "
+     "Cane in an open yard is a very different job to a tall Cocos roped down over a pool. Send a "
+     "photo to 0456 198 080 for a firm price."),
+    ("When is the best time to top dress a lawn in Brisbane?",
+     "Top dress a Brisbane lawn in the warm growing months, roughly September through March, so "
+     "the grass grows through the new soil rather than sitting under it. Coring first and top "
+     "dressing immediately after gets far more out of both jobs."),
+    ("Do you take away the green waste and clippings after a job?",
+     "Yes. Clippings, prunings and green waste leave with us on every visit at no extra charge. "
+     "Nothing is bagged and left in your wheelie bin, and nothing is stacked on the verge."),
 ]
 
 # --------------------------------------------------------------------------
-# Quote form — GoHighLevel contact field mapping
-# name attribute  ->  GHL merge field
+# Quote form — field names are the GoHighLevel contact fields exactly, so the
+# external-tracking script maps them without any extra configuration.
+# (name, label, merge field, input type, required, placeholder, options)
 # --------------------------------------------------------------------------
 FORM_FIELDS = [
     ("full_name", "Name", "{{contact.full_name}}", "text", True,
@@ -484,24 +586,35 @@ FORM_FIELDS = [
     ("phone", "Phone", "{{contact.phone}}", "tel", True,
      "0400 000 000", None),
     ("property_address", "Property Address", "{{contact.property_address}}", "text", True,
-     "Street, suburb", None),
+     "Street and suburb", None),
     ("property_size", "Property Size", "{{contact.property_size}}", "select", False, None,
-     ["Small yard (courtyard / townhouse)",
-      "Standard residential block (up to 600m²)",
-      "Large residential block (600 – 1,000m²)",
+     ["Courtyard or townhouse",
+      "Standard block (up to 600m²)",
+      "Large block (600 – 1,000m²)",
       "Half to 1 acre",
       "1 – 5 acres",
       "5+ acres",
-      "Commercial / industrial site",
+      "Commercial or strata site",
       "Not sure"]),
     ("service_needed", "Service Needed", "{{contact.service_needed}}", "select", True, None,
      ["Lawn mowing",
-      "Acreage / ride-on mowing",
-      "Garden maintenance &amp; hedge trimming",
+      "NDIS yard &amp; garden maintenance",
+      "Garden maintenance",
+      "Tree &amp; palm removal",
       "Green waste removal / clean-up",
-      "Commercial &amp; industrial maintenance",
-      "Odd jobs &amp; handyman repairs",
+      "Hedging &amp; lawn treatments",
       "Something else"]),
     ("job_notes", "Job Notes", "{{contact.job_notes}}", "textarea", False,
      "Anything we should know — access, gates, dogs, how long since the last cut…", None),
+]
+
+# --------------------------------------------------------------------------
+# Trust / differentiator strip. Figures are facts from the research document
+# or counts derived from this file — nothing invented.
+# --------------------------------------------------------------------------
+STATS = [
+    ("150", "+", "suburbs serviced", "Brisbane south, Bayside, Logan &amp; Redlands"),
+    ("6", "", "specialist services", "Mowing through to palm removal"),
+    ("7", "", "days for quotes", "Calls and forms answered seven days"),
+    ("1", "", "local crew", "Steve and the team, not a call centre"),
 ]
