@@ -153,6 +153,13 @@ Everything below is an assumption or an approximation. It is all in `build/data.
    website field to `https://www.a1lawncare.net.au/` at the same time.
 6. **Reviews** — no review content or `AggregateRating` is published, because none has
    been supplied. Add it once reviews are being collected on-site (research, Phase 3).
+7. **Credentials the research does not evidence** — "fully insured", a founding year, staff
+   numbers and similar claims are deliberately absent from the copy. The research confirms the
+   NDIS registration and nothing else of that kind, and an unverified credential on a live site
+   is a liability. Add them to `data.BIZ` and the relevant copy once the client confirms.
+   One exception: the palm page H1, *"Palm Tree Removal Brisbane — Fast, Insured, Fully Cleaned
+   Up"*, is prescribed word-for-word by the research (section 07) and is deployed as written.
+   Confirm the insurance before that page goes live, or change the H1 in `data.SERVICES`.
 
 ## After launch
 

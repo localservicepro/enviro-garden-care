@@ -127,7 +127,7 @@ def home():
       <ul class="ticks">
         <li>{ck}Mowing, gardens, hedges, palms and clean-ups from one crew</li>
         <li>{ck}Green waste and clippings leave with us every visit</li>
-        <li>{ck}Fully insured, with straight prices quoted before we start</li>
+        <li>{ck}A straight price quoted before we start, and no surprises on the invoice</li>
         <li>{ck}Quotes answered seven days on {phone}</li>
       </ul>
       <a class="btn btn--ghost" href="/about/">More about A1 Lawn Care</a>
@@ -184,7 +184,7 @@ def home():
         owner=BIZ["owner"].split()[0], street=BIZ["street"], suburb=BIZ["suburb"],
         hero=IMG["hero"], ndis=IMG["ndis_white"], about=IMG["about"],
         chips=_hero_chips(["NDIS registered provider", "150+ suburbs covered",
-                           "Green waste taken away", "Fully insured"]),
+                           "Green waste taken away", "Quotes answered 7 days"]),
         marquee=marquee(KEY_SUBURBS + ["Mount Gravatt"]),
         ndis_band=ndis_band(),
         stats=stats_strip(),
@@ -377,7 +377,7 @@ def service_page(svc):
       <ul class="pagehead__chips rise" style="--d:320ms">
         <li>{ck}NDIS registered</li>
         <li>{ck}Green waste removed</li>
-        <li>{ck}Fully insured</li>
+        <li>{ck}Mount Gravatt based</li>
       </ul>
     </div>
     <figure class="pagehead__media rise" style="--d:220ms">
@@ -494,7 +494,7 @@ def about():
     <div class="split__copy reveal">
       <span class="eyebrow">Who you are dealing with</span>
       <h2>One local crew, run by {owner}</h2>
-      <p>A1 Lawn Care Pty Ltd is a family-run lawn and garden business working out of
+      <p>A1 Lawn Care Pty Ltd is a local lawn and garden business working out of
          {street}, {suburb} QLD {pc}. When you ring {first}, you get {first} — not a call centre
          booking a franchisee who has never seen your street.</p>
       <p>The work is straightforward and we keep it that way: mowing on a schedule, gardens kept
@@ -582,7 +582,7 @@ def about():
                "None of this is remarkable. It is just rarer than it should be."),
            points=_points([
                ("shield", "NDIS registered provider",
-                "Registered, insured and used to working with plan managers, support "
+                "Registered, and used to working with plan managers, support "
                 "coordinators and participants directly."),
                ("truck", "Green waste always removed",
                 "Every clipping, frond and pruning leaves with us. It is quoted in, never added "

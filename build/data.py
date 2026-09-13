@@ -41,7 +41,7 @@ BIZ = {
         (["Saturday"], "07:00", "14:00", "Saturday"),
     ],
     "hours_note": "Sunday and after-hours by arrangement — quotes answered seven days.",
-    "abn_note": "NDIS registered provider · Fully insured · ABN available on request",
+    "abn_note": "NDIS registered provider · ABN available on request",
 }
 
 # A keyless Maps embed: no API key, no expiring "pb=" blob, and it resolves to
@@ -363,7 +363,8 @@ SERVICES = [
         "h1": "Palm Tree Removal Brisbane — Fast, Insured, Fully Cleaned Up",
         "title": "Palm Tree Removal Brisbane | A1 Lawn Care",
         "desc": ("Palm tree removal Brisbane — palms, small trees and stumps removed and the "
-                 "mess taken away. Fully insured, Mount Gravatt based. Free quote: 0456 198 080."),
+                 "whole mess taken away. Mount Gravatt based, NDIS registered. Free quote: "
+                 "0456 198 080."),
         "tagline": "Palms, small trees and the whole mess gone the same day.",
         "audience": "Homeowners, acreage owners and commercial site managers",
         "img": "svc_palm",
@@ -374,8 +375,8 @@ SERVICES = [
             "<strong>Palm tree removal in Brisbane</strong> is the job people put off, usually "
             "until fronds are dropping on the roof or the trunk is lifting a path. A1 Lawn Care "
             "removes palms and small trees across Brisbane&#39;s south side, Bayside, Logan and "
-            "the Redlands — fully insured, cleaned up properly, and with the green waste loaded "
-            "out rather than stacked on the verge."),
+            "the Redlands — cleaned up properly, with the green waste loaded out rather than "
+            "stacked on the verge."),
         "body": [
             ("What we remove", [
                 "Cocos, Alexandra, Bangalow, Golden Cane and Foxtail palms — single specimens or a whole row",
