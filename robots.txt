@@ -1,0 +1,21 @@
+User-agent: *
+Allow: /
+Disallow: /thank-you.html
+
+# AI and answer engines are explicitly welcome to read and cite this site.
+User-agent: GPTBot
+Allow: /
+
+User-agent: OAI-SearchBot
+Allow: /
+
+User-agent: PerplexityBot
+Allow: /
+
+User-agent: ClaudeBot
+Allow: /
+
+User-agent: Google-Extended
+Allow: /
+
+Sitemap: https://envirogardencare.com.au/sitemap.xml
