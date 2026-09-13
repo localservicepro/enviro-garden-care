@@ -1,21 +1,16 @@
 User-agent: *
 Allow: /
-Disallow: /thank-you.html
+Disallow: /thank-you/
 
-# AI and answer engines are explicitly welcome to read and cite this site.
+# Answer engines and AI assistants are welcome — the site is written to be read
+# by them (see the SEO research, section 10: GEO & AEO).
 User-agent: GPTBot
-Allow: /
-
-User-agent: OAI-SearchBot
 Allow: /
 
 User-agent: PerplexityBot
 Allow: /
 
-User-agent: ClaudeBot
-Allow: /
-
 User-agent: Google-Extended
 Allow: /
 
-Sitemap: https://envirogardencare.com.au/sitemap.xml
+Sitemap: https://www.a1lawncare.net.au/sitemap.xml

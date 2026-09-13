@@ -1,85 +1,85 @@
-# Enviro Garden Care & Odd Jobs — website
+# A1 Lawn Care Pty Ltd — website
 
-Static, dependency-free website for **Enviro Garden Care & Odd Jobs**, a Pimpama-based
-lawn mowing and garden maintenance business servicing the Northern Gold Coast.
+Static, dependency-free website for **A1 Lawn Care Pty Ltd**, an NDIS registered lawn
+mowing and garden maintenance business at 1593 Logan Rd, Mount Gravatt QLD 4122,
+servicing Brisbane south, Bayside, Logan and the Redlands.
 
 Built to the spec in **`build/seo-research-source.html`** (Local Service Pro SEO
-Research & Strategy, 4 Sep 2026) — every meta title, H1, keyword target and FAQ answer
-comes from that document.
+Research & Strategy for A1 Lawn Care, 10 September 2026) — every meta title, H1,
+keyword target and FAQ question comes from that document.
+
+> **History note:** this site was first built on a branch of the `enviro-garden-care`
+> repository — that was the repo the session had access to — and moved here on
+> 14 September 2026. The commit history starts fresh at the move; nothing of the Enviro
+> Garden Care site came with it apart from the build tooling both sites share.
 
 ---
 
 ## Pages
 
-| URL | Primary keyword | Vol/mo | Difficulty |
-|---|---|---|---|
-| `index.html` | lawn mowing gold coast | 320 | 10 |
-| `services/lawn-mowing.html` | lawn mowing coomera | 50 | 13 |
-| `services/acreage-mowing.html` | acreage mowing gold coast | 70 | 12 |
-| `services/garden-maintenance.html` | garden maintenance gold coast | 140 | 13 |
-| `services/green-waste-removal.html` | green waste removal gold coast | 50 | 23 |
-| `services/commercial-property-maintenance.html` | commercial property maintenance gold coast | high intent | — |
-| `services/odd-jobs-handyman.html` | odd jobs handyman gold coast | long-tail | — |
-| `services.html` | services hub (no competing target) | — | — |
-| `about.html` | battery powered lawn mowing gold coast | differentiator | — |
-| `contact.html` | quotes and contact | — | — |
-| `thank-you.html` | form redirect target (`noindex`) | — | — |
-| `404.html` | not found (`noindex`) | — | — |
+| URL | Served by | Primary keyword | Vol/mo | Difficulty |
+|---|---|---|---|---|
+| `/` | `index.html` | lawn mowing services brisbane | 590 | 22 |
+| `/services/` | `services/index.html` | services hub (no competing target) | — | — |
+| `/services/lawn-mowing/` | …`/index.html` | lawn mowing mount gravatt | below floor | 4 |
+| `/services/ndis-yard-garden-maintenance/` | …`/index.html` | ndis mowing | 70 | 20 |
+| `/services/garden-maintenance/` | …`/index.html` | garden maintenance brisbane | 170 | 30 |
+| `/services/tree-palm-removal/` | …`/index.html` | palm tree removal brisbane | 110 | 27 |
+| `/services/green-waste-removal/` | …`/index.html` | green waste removal brisbane | 210 | 31 |
+| `/services/hedging-lawn-treatments/` | …`/index.html` | hedge trimming services brisbane | 30 | 18 |
+| `/about/` | `about/index.html` | brand + NDIS entity page | — | — |
+| `/contact/` | `contact/index.html` | quotes and contact | — | — |
+| `/thank-you/` | `thank-you/index.html` | form redirect target (`noindex`) | — | — |
+| `/404.html` | `404.html` | not found (`noindex`) | — | — |
 
-No two pages share a primary target, per the research's keyword map.
-
-> **Note on `odd-jobs-handyman.html`:** this page is *in addition* to the five service
-> pages the research specifies. "& Odd Jobs" is half the business name and a real
-> revenue line (flat pack and trampoline assembly, fence painting, flyscreens, local
-> transport), so it earned a page. It targets a distinct long-tail term and cannibalises
-> nothing. Remove it from `SERVICES` in `build/data.py` if you'd rather stick to five.
+No two pages share a primary target, per the research's keyword-to-page map.
+`build/check.py` fails the build if that ever stops being true.
 
 ---
 
 ## Build
 
-The HTML is **generated** — edit the Python source, not the `.html` files, or your
-changes will be overwritten on the next build.
+The HTML is **generated**. Edit the Python source, not the `.html` files, or your
+changes are overwritten on the next build.
 
 ```bash
-python3 build/build.py    # writes all HTML + sitemap.xml + robots.txt
+python3 build/build.py     # writes all HTML + sitemap.xml + robots.txt
 python3 build/check.py     # validates the output (must exit 0)
 ```
 
 | File | What lives there |
 |---|---|
-| `build/data.py` | All business facts, services, suburbs, FAQs, form fields |
-| `build/templates.py` | Header, footer, schema, reusable components |
+| `build/data.py` | All business facts, services, suburbs, FAQs, form fields, image IDs |
+| `build/templates.py` | Head, header, footer, schema, reusable components |
 | `build/pages.py` | Page bodies and copy |
 | `build/build.py` | Orchestrator |
 | `build/check.py` | Post-build validation |
 | `build/tests/` | Browser checks (see its README) |
 
-`check.py` enforces: valid JSON-LD, one `<h1>` per page, no broken internal links,
-no duplicate titles/descriptions/canonicals, alt text on every image, the tracking
-script exactly once per page, map embeds on home/about/contact, every form action
-pointing at `thank-you.html`, sitemap coverage, and keyword placement in
-title / H1 / first 100 words.
-
-Deploying is just uploading the repository root. There is no build step at runtime,
-no framework and no npm dependency in the shipped site.
+`check.py` enforces: valid JSON-LD with `LocalBusiness` on every page, `Service` +
+`FAQPage` on every service page, one `<h1>` per page, `lang="en-AU"`, a viewport that
+allows pinch-zoom, no broken internal links, no `.html` in any URL, no duplicate
+titles/descriptions/canonicals, alt text on every image, NAP on every page, the tracking
+script exactly once per page, every form action pointing at `/thank-you/`, all seven GHL
+fields present, `noindex` on exactly the two pages that should have it, and the primary
+keyword in each page's title, H1 and first 100 words.
 
 ---
 
-## ⚠️ Before launch
+## Lead capture
 
-Two items need the client's sign-off. Lead capture (section 1) is already wired —
-it is documented here because the wiring is easy to break.
+Forms are captured by the GoHighLevel external-tracking script, installed **once
+globally** at the end of `<body>` on every page:
 
-### 1. Lead capture — how it works (no webhook needed)
+```html
+<script src="https://link.msgsndr.com/js/external-tracking.js"
+        data-tracking-id="tk_6582cb70c3d84289821c555a3d8691f9"></script>
+```
 
-Quote submissions are captured by the **GoHighLevel external-tracking script**, which
-listens for submit events on the page and reads the field values. Nothing else to
-configure.
+Field names are the GHL contact fields exactly, so no endpoint or mapping config is
+needed:
 
-Input `name` attributes are the GHL contact fields exactly:
-
-| Form label | `name` attribute | GHL merge field |
+| Form label | `name` | Merge field |
 |---|---|---|
 | Name | `full_name` | `{{contact.full_name}}` |
 | Email | `email` | `{{contact.email}}` |
@@ -89,124 +89,91 @@ Input `name` attributes are the GHL contact fields exactly:
 | Service Needed | `service_needed` | `{{contact.service_needed}}` |
 | Job Notes | `job_notes` | `{{contact.job_notes}}` |
 
-Each field also carries `data-ghl="{{contact.…}}"` so the mapping is readable in the markup.
+Every form redirects to `/thank-you/` on success. Two details in
+`assets/js/main.js` keep capture working and must not be "tidied" away: the submit
+event is never stopped from propagating (the tracker listens for it), and the redirect
+is held for 900ms so the tracking request leaves the browser before the page unloads.
 
-`property_size` and `service_needed` are custom fields — create them in GHL
-(**Settings → Custom Fields**) before the first submission, or those two values
-will have nowhere to land.
-
-**Two things in `assets/js/main.js` exist to keep capture working. Don't "tidy" them away:**
-
-- The submit handler **never calls `stopPropagation()`**, so the tracking script's own
-  listener still receives the event.
-- The redirect to `thank-you.html` is **held for `CAPTURE_GRACE_MS` (900ms)**. Redirecting
-  synchronously can cancel the tracking request mid-flight and silently lose the lead.
-  Raise the value if you ever see submissions arriving on the site but not in GHL.
-
-Load order matters and is already correct: the tracking script is a plain (non-deferred)
-tag at the end of `<body>`, and `main.js` is deferred, so the tracker registers its
-listeners first.
-
-Honeypot submissions call `stopImmediatePropagation()` — bots get the thank-you page,
-GHL gets no junk contact.
-
-Forms are `method="get"` purely as a no-JS fallback (a native POST to a static `.html`
-is a 405 on most static hosts). With JS running the submit is intercepted, so no field
-values ever reach the URL.
-
-### 2. Trading hours — **assumed, not confirmed**
-
-`Mon–Fri 7:00–17:00, Sat 7:00–15:00` is an assumption. It was not in the research
-document and is published in the footer, on the contact page and in `LocalBusiness`
-schema. Confirm with Shanon and correct `BIZ["hours"]` in `build/data.py`, then rebuild.
-It must match the Google Business Profile exactly.
-
-### 3. Images — **replace the Drive hot-links before launch**
-
-The client photography is served from the Drive folder supplied
-(`1fNAUinCZXQD56NgmTM1Dd5FK92IUXXuf`) via Drive's public image CDN:
-
-```
-https://lh3.googleusercontent.com/d/<FILE_ID>=w1600
-```
-
-This works, but Drive is not a production image host — it rate-limits and the
-folder must stay shared as "anyone with the link". **Before launch:** download the
-originals, compress them to WebP, drop them in `assets/img/`, and change the
-`drive()` helper at the top of `build/data.py` to return a local path. Every image
-on the site resolves through `IMG` and `GALLERY` in that one file, so it is a
-single-function change.
-
-Alt text is written per the research (service + suburb). Because the photographs
-could not be viewed while building, **re-check that each alt line matches the image
-it now sits on** once the files are local, and reorder `GALLERY` if any are mismatched.
+A hidden honeypot field (`company_website`) sends bots to the thank-you page without
+letting the tracker log a junk contact.
 
 ---
 
-## SEO / GEO / AEO implemented
+## What the research asked for, and where it landed
 
-**On-page**
-- Primary keyword in meta title, H1 and first 100 words of every money page (verified by `check.py`)
-- Unique title, meta description and self-referencing canonical per page
-- Clean `H1 → H2 → H3` hierarchy — no skipped levels
-- 1,000+ words per service page, ~1,650 on the homepage
-- All 19 suburbs in body copy, footer and schema `areaServed`
-- Descriptive alt text carrying service + suburb
-- Internal linking: homepage → services → siblings → home, plus breadcrumbs
-
-**Technical**
-- `sitemap.xml` (excludes `thank-you` / `404`) and `robots.txt`
-- Zero render-blocking JS; site script is `defer`, single stylesheet
-- Every image lazy-loaded with explicit `width`/`height` to hold CLS near zero
-- `preconnect` to fonts and the image CDN
-- Responsive from 320px up; no horizontal scroll at any width
-
-**GEO (AI / generative engines)**
-- `LocalBusiness` + `HomeAndConstructionBusiness` JSON-LD with NAP, geo, hours,
-  `sameAs`, `areaServed` (19 suburbs), `knowsAbout` and an `OfferCatalog`
-- `Service` schema on each service page; `WebSite`, `WebPage`, `BreadcrumbList` throughout
-- Consistent entity name — "Enviro Garden Care & Odd Jobs" — across site, GBP and Facebook
-- The citable sentence the research specifies, marked `.speakable`, in every hero
-- `robots.txt` explicitly allows GPTBot, OAI-SearchBot, PerplexityBot, ClaudeBot, Google-Extended
-
-**AEO (answer engines / voice)**
-- `FAQPage` schema on the homepage, about, contact and all six service pages
-- Questions phrased the way people say them aloud; answers 40–60 words
-- `SpeakableSpecification` targeting `.speakable` and `.faq__a`
-
-**Local**
-- Full street address in the footer, contact page and schema
-- Google Maps embed on home (service areas), about and contact
-- Suburbs grouped as the research recommends: Coomera corridor / Helensvale–Hope Island /
-  Ormeau–Yatala acreage belt
-
----
-
-## Tracking
-
-The GoHighLevel tracking script is installed once on every page, immediately before
-`</body>`:
-
-```html
-<script src="https://link.msgsndr.com/js/external-tracking.js"
-        data-tracking-id="tk_5bee5316dafc4ac09c8e0e20ec24e0e4"></script>
-```
-
-Still to add at launch: Google Search Console (the existing verification tag on the old
-site can be reused), GA4 with call and form conversions, and Bing Webmaster Tools.
-
----
-
-## Business details used
-
-| | |
+| Research item | Where it is |
 |---|---|
-| Name | Enviro Garden Care & Odd Jobs |
-| Owner | Shanon Hopton |
-| Address | 14 Cullen Street, Pimpama QLD 4209 |
-| Phone | 0407 276 574 (`+61407276574`) |
-| Email | hello@envirogardencare.com.au |
-| Coordinates | -27.8326247, 153.32468 |
-| Google Business Profile | https://maps.app.goo.gl/Q28zDvYDuuXLZRQh9 |
+| Homepage H1, title, description deployed verbatim | `build/build.py`, `build/pages.py` |
+| One H1 per page, clean H1→H2→H3 order | enforced by `check.py` |
+| Areas-served section, suburbs as readable text | `/#areas`, footer on every page |
+| Business address on the site | header topbar, footer, contact page, schema |
+| `LocalBusiness` JSON-LD with geo, hours, `areaServed` | `templates.local_business_schema()` |
+| `Service` + `FAQPage` schema on service pages | `templates.service_schema()`, `faq_schema()` |
+| Quote form on the homepage, not a link out | `/#quote` |
+| Six service pages replacing one 234-word page | `/services/*` |
+| Six-question FAQ set, written as final copy | `data.HOME_FAQS` |
+| NDIS trust strip above the fold | `templates.ndis_band()` |
+| `en-AU`, pinch-zoom enabled, self-referencing canonical | `templates.head()` |
+| Answer-engine `speakable` + citable entity sentence | `data.CITABLE`, `.speakable` blocks |
 
-Source: `build/seo-research-source.html`.
+---
+
+## Images
+
+A1's own photography, copied from the client's
+`A1 Lawn Care Pty Ltd / Photos` folder into the public Drive folder and served through
+Drive's image CDN (`lh3.googleusercontent.com/d/<id>=w<width>`). IDs are in
+`data.IMG` and `data.GALLERY`.
+
+**Before launch, move these onto the site's own host.** Drive is fine for a preview but
+it is a third-party CDN with no cache headers you control, and the research puts mobile
+LCP under 2.5s as a target. Download each file, compress to WebP at the widths used in
+`data.IMG`, drop them in `assets/img/`, and change `data.drive()` to return a local path.
+`assets/js/main.js` paints a brand gradient if an image ever fails to load, so a broken
+Drive link degrades quietly rather than showing a broken-image icon.
+
+---
+
+## Confirm before launch
+
+Everything below is an assumption or an approximation. It is all in `build/data.py`.
+
+1. **Trading hours** — Mon–Fri 6:30am–5:00pm, Sat 7:00am–2:00pm is a guess. These are
+   published in `LocalBusiness` schema, so wrong hours are worse than none.
+2. **Geo coordinates** — `-27.5413, 153.0789` is the Logan Rd block at Mount Gravatt,
+   not surveyed off the title. Check the pin against the Google Business Profile.
+3. **Image alt text** — written from the service context each photo is used in. Someone
+   who can see the photos should confirm each one actually shows what its alt text says.
+4. **Suburb list** — 123 real suburbs across the four regions the research names. The
+   business claims 150+; confirm the list matches the run and add or remove suburbs in
+   `data.AREA_GROUPS`.
+5. **Google Business Profile link** — the profile still points at a dead
+   `business.site` URL (research, critical issue 03). The footer and areas section link
+   to a Maps search for the address until the real profile URL is known. Fix the GBP
+   website field to `https://www.a1lawncare.net.au/` at the same time.
+6. **Reviews** — no review content or `AggregateRating` is published, because none has
+   been supplied. Add it once reviews are being collected on-site (research, Phase 3).
+7. **Credentials the research does not evidence** — "fully insured", a founding year, staff
+   numbers and similar claims are deliberately absent from the copy. The research confirms the
+   NDIS registration and nothing else of that kind, and an unverified credential on a live site
+   is a liability. Add them to `data.BIZ` and the relevant copy once the client confirms.
+   One exception: the palm page H1, *"Palm Tree Removal Brisbane — Fast, Insured, Fully Cleaned
+   Up"*, is prescribed word-for-word by the research (section 07) and is deployed as written.
+   Confirm the insurance before that page goes live, or change the H1 in `data.SERVICES`.
+
+## After launch
+
+From the research's Phase 3, none of which is code:
+
+- Verify the domain in Google Search Console and submit `/sitemap.xml`
+- Install GA4 and add conversion events on `tel:` clicks and form submits
+- Baseline the 16 suburb keywords before anything changes
+- Request indexing on each new service page
+
+---
+
+## Deploying
+
+It is a static site with extensionless URLs and no build step at serve time. Any static
+host works (Netlify, Cloudflare Pages, Vercel, S3, Nginx). Point the host at the
+repository root and set `404.html` as the not-found page.
