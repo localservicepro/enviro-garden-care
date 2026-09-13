@@ -4,8 +4,8 @@
 from data import (SITE, BIZ, IMG, SERVICES, GALLERY, HOME_FAQS, ALL_SUBURBS,
                   AREA_GROUPS, KEY_SUBURBS, CITABLE)
 from templates import (areas_section, cta_band, crumbs, faq_block, gallery_section,
-                       icon, map_embed, marquee, ndis_band, plain, quote_form,
-                       section_head, service_cards, stats_strip, svc_url)
+                       icon, lower_name, map_embed, marquee, ndis_band, plain,
+                       quote_form, section_head, service_cards, stats_strip, svc_url)
 
 PHONE = BIZ["phone_display"]
 TEL = BIZ["phone_e164"]
@@ -446,7 +446,7 @@ def service_page(svc):
 </main>
 """.format(crumbs=crumbs([("Home", "/"), ("Services", "/services/"), (svc["name"], svc_url(svc["slug"]))]),
            ic=icon(svc["icon"], "icon icon--sm"), name=svc["name"],
-           name_l=plain(svc["name"]).lower(), h1=svc["h1"], intro=svc["intro"],
+           name_l=lower_name(svc["name"]), h1=svc["h1"], intro=svc["intro"],
            img=IMG[svc["img"]],
            alt="%s — A1 Lawn Care, %s Brisbane" % (plain(svc["h1"]), plain(svc["suburbs"][0])),
            blocks="\n      ".join(blocks), chips=chips, related=related,

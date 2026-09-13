@@ -16,6 +16,16 @@ def plain(html):
     return re.sub(r"\s+", " ", txt).strip()
 
 
+def lower_name(name):
+    """Lowercase a service name for mid-sentence use, keeping acronyms intact.
+
+    "NDIS Yard & Garden Maintenance" -> "NDIS yard & garden maintenance", not
+    "ndis yard & garden maintenance".
+    """
+    return " ".join(w if w.isupper() and len(w) > 1 else w.lower()
+                    for w in plain(name).split())
+
+
 def page_url(path=""):
     """Root-relative URL for a page.
 
