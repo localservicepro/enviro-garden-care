@@ -15,6 +15,23 @@ def plain(html):
     return re.sub(r"\s+", " ", txt).strip()
 
 
+def page_url(path=""):
+    """Root-relative URL for a page.
+
+    Pages are written as directory indexes (about/index.html) so the site has
+    extensionless URLs on any static host with no rewrite rules:
+        page_url("")                      -> "/"
+        page_url("about")                 -> "/about/"
+        page_url("services/lawn-mowing")  -> "/services/lawn-mowing/"
+    """
+    path = path.strip("/")
+    return "/" + (path + "/" if path else "")
+
+
+def svc_url(slug):
+    return page_url("services/" + slug)
+
+
 # --------------------------------------------------------------------------
 # Icons (inline SVG, currentColor)
 # --------------------------------------------------------------------------
@@ -100,7 +117,7 @@ def local_business_schema():
                 "itemOffered": {
                     "@type": "Service",
                     "name": plain(s["name"]),
-                    "url": "%s/services/%s.html" % (SITE, s["slug"]),
+                    "url": SITE + svc_url(s["slug"]),
                 },
             } for s in SERVICES],
         },
@@ -142,18 +159,18 @@ def faq_schema(faqs):
 def service_schema(svc):
     return {
         "@type": "Service",
-        "@id": "%s/services/%s.html#service" % (SITE, svc["slug"]),
+        "@id": SITE + svc_url(svc["slug"]) + "#service",
         "serviceType": plain(svc["name"]),
         "name": plain(svc["h1"]),
         "description": plain(svc["desc"]),
-        "url": "%s/services/%s.html" % (SITE, svc["slug"]),
+        "url": SITE + svc_url(svc["slug"]),
         "provider": {"@id": SITE + "/#business"},
         "areaServed": [{"@type": "City", "name": s, "addressRegion": "QLD",
                         "addressCountry": "AU"} for s in svc["suburbs"]],
         "audience": {"@type": "Audience", "audienceType": plain(svc["audience"])},
         "offers": {"@type": "Offer", "priceCurrency": "AUD",
                    "availability": "https://schema.org/InStock",
-                   "url": "%s/services/%s.html" % (SITE, svc["slug"])},
+                   "url": SITE + svc_url(svc["slug"])},
     }
 
 
@@ -166,17 +183,16 @@ def speakable():
 # Layout
 # --------------------------------------------------------------------------
 NAV = [
-    ("Home", "index.html"),
-    ("Services", "services.html"),
-    ("Service Areas", "index.html#areas"),
-    ("About", "about.html"),
-    ("Contact", "contact.html"),
+    ("Home", "/"),
+    ("Services", "/services/"),
+    ("Service Areas", "/#areas"),
+    ("About", "/about/"),
+    ("Contact", "/contact/"),
 ]
 
 
-def head(page, depth=0):
+def head(page):
     """page: dict with title, desc, canonical, og_image, schema(list), body_class"""
-    up = "../" * depth
     schema = {"@context": "https://schema.org", "@graph": page["schema"]}
     return """<!DOCTYPE html>
 <html lang="en-AU">
@@ -207,9 +223,9 @@ def head(page, depth=0):
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link rel="preconnect" href="https://lh3.googleusercontent.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<link rel="icon" href="{up}assets/img/favicon.svg" type="image/svg+xml">
-<link rel="apple-touch-icon" href="{up}assets/img/favicon.svg">
-<link rel="stylesheet" href="{up}assets/css/style.css">
+<link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
+<link rel="apple-touch-icon" href="/assets/img/favicon.svg">
+<link rel="stylesheet" href="/assets/css/style.css">
 <script type="application/ld+json">{schema}</script>
 </head>
 <body class="{body_class}">
@@ -217,28 +233,27 @@ def head(page, depth=0):
 """.format(title=page["title"], desc=page["desc"], canonical=page["canonical"],
            og_image=page.get("og_image", IMG["hero"]),
            og_type=page.get("og_type", "website"),
-           biz=BIZ["name"], lat=BIZ["lat"], lng=BIZ["lng"], up=up,
+           biz=BIZ["name"], lat=BIZ["lat"], lng=BIZ["lng"],
            body_class=page.get("body_class", ""),
            schema=json.dumps(schema, ensure_ascii=False, separators=(",", ":")))
 
 
-def header(active, depth=0):
-    up = "../" * depth
+def header(active=""):
+    """active: the NAV href of the current page, e.g. "/about/"."""
     links = []
     for label, href in NAV:
-        target = up + href
         is_active = (href == active)
         links.append('<li><a href="%s"%s>%s</a></li>' % (
-            target, ' class="is-active" aria-current="page"' if is_active else "", label))
+            href, ' class="is-active" aria-current="page"' if is_active else "", label))
 
     svc_items = "".join(
-        '<li><a href="%sservices/%s.html">%s%s<span>%s</span></a></li>' % (
-            up, s["slug"], icon(s["icon"], "icon icon--sm"), s["nav"], s["tagline"])
+        '<li><a href="%s">%s%s<span>%s</span></a></li>' % (
+            svc_url(s["slug"]), icon(s["icon"], "icon icon--sm"), s["nav"], s["tagline"])
         for s in SERVICES)
 
     return """<header class="site-header" id="site-header">
   <div class="wrap site-header__inner">
-    <a class="brand" href="{up}index.html" aria-label="{biz} — home">
+    <a class="brand" href="/" aria-label="{biz} — home">
       <img src="{logo}" alt="{biz} logo" width="44" height="44" loading="eager" decoding="async">
       <span class="brand__txt"><strong>Enviro Garden Care</strong><em>&amp; Odd Jobs · Pimpama</em></span>
     </a>
@@ -248,7 +263,7 @@ def header(active, depth=0):
       </ul>
       <div class="nav__cta">
         <a class="btn btn--ghost" href="tel:{tel}">{ph_icon}{phone}</a>
-        <a class="btn btn--primary" href="{up}contact.html">Get a free quote</a>
+        <a class="btn btn--primary" href="/contact/">Get a free quote</a>
       </div>
     </nav>
     <a class="header-call" href="tel:{tel}" aria-label="Call {phone}">{ph_icon}</a>
@@ -261,20 +276,19 @@ def header(active, depth=0):
       <div class="megamenu__lead">
         <span class="eyebrow">Our services</span>
         <p>Lawn, garden and grounds care across 19 suburbs of the Northern Gold Coast — plus the odd jobs nobody else will quote.</p>
-        <a class="link-arrow" href="{up}services.html">See all services {ar}</a>
+        <a class="link-arrow" href="/services/">See all services {ar}</a>
       </div>
       <ul class="megamenu__grid">{svc}</ul>
     </div>
   </div>
 </header>
-""".format(up=up, biz=BIZ["name"], logo=IMG["logo"], links="\n        ".join(links),
+""".format(biz=BIZ["name"], logo=IMG["logo"], links="\n        ".join(links),
            tel=BIZ["phone_e164"], phone=BIZ["phone_display"], svc=svc_items,
            ph_icon=icon("phone", "icon icon--sm"), ar=icon("arrow", "icon icon--sm"))
 
 
-def footer(depth=0):
-    up = "../" * depth
-    svc_links = "".join('<li><a href="%sservices/%s.html">%s</a></li>' % (up, s["slug"], s["name"])
+def footer():
+    svc_links = "".join('<li><a href="%s">%s</a></li>' % (svc_url(s["slug"]), s["name"])
                         for s in SERVICES)
     areas = "".join('<li>%s</li>' % s for s in ALL_SUBURBS)
     hours = "".join('<div class="hours__row"><span>%s</span><span>%s – %s</span></div>'
@@ -284,7 +298,7 @@ def footer(depth=0):
   <div class="wrap">
     <div class="site-footer__top">
       <div class="site-footer__brand">
-        <a class="brand brand--footer" href="{up}index.html">
+        <a class="brand brand--footer" href="/">
           <img src="{logo}" alt="{biz} logo" width="48" height="48" loading="lazy" decoding="async">
           <span class="brand__txt"><strong>Enviro Garden Care</strong><em>&amp; Odd Jobs</em></span>
         </a>
@@ -301,11 +315,11 @@ def footer(depth=0):
       <div class="site-footer__col">
         <h2>Company</h2>
         <ul>
-          <li><a href="{up}index.html">Home</a></li>
-          <li><a href="{up}about.html">About us</a></li>
-          <li><a href="{up}services.html">All services</a></li>
-          <li><a href="{up}index.html#areas">Service areas</a></li>
-          <li><a href="{up}contact.html">Contact &amp; quotes</a></li>
+          <li><a href="/">Home</a></li>
+          <li><a href="/about/">About us</a></li>
+          <li><a href="/services/">All services</a></li>
+          <li><a href="/#areas">Service areas</a></li>
+          <li><a href="/contact/">Contact &amp; quotes</a></li>
         </ul>
       </div>
       <div class="site-footer__col site-footer__contact">
@@ -332,11 +346,11 @@ def footer(depth=0):
 <a class="callbar" href="tel:{tel}">
   {ph_icon}<span>Call {phone}</span><em>Free quote · 7 days</em>
 </a>
-<script src="{up}assets/js/main.js" defer></script>
+<script src="/assets/js/main.js" defer></script>
 <script src="https://link.msgsndr.com/js/external-tracking.js" data-tracking-id="{track}"></script>
 </body>
 </html>
-""".format(up=up, biz=BIZ["name"], logo=IMG["logo"], svc=svc_links, areas=areas,
+""".format(biz=BIZ["name"], logo=IMG["logo"], svc=svc_links, areas=areas,
            tel=BIZ["phone_e164"], phone=BIZ["phone_display"], email=BIZ["email"],
            street=BIZ["street"], sub=BIZ["suburb"], reg=BIZ["region"], pc=BIZ["postcode"],
            hours=hours, hnote=BIZ["hours_note"], fb=BIZ["facebook"], gbp=BIZ["gbp"],
@@ -349,8 +363,7 @@ def footer(depth=0):
 # --------------------------------------------------------------------------
 # Components
 # --------------------------------------------------------------------------
-def quote_form(depth=0, form_id="quote-form", compact=False, preselect=None, heading=None):
-    up = "../" * depth
+def quote_form(form_id="quote-form", compact=False, preselect=None, heading=None):
     rows = []
     for name, label, merge, kind, required, placeholder, options in FORM_FIELDS:
         req = ' required' if required else ''
@@ -384,11 +397,11 @@ def quote_form(depth=0, form_id="quote-form", compact=False, preselect=None, hea
 
     return """<div class="quote{cls}">
   {head}
-  <!-- method="get" is the no-JS fallback only: a native POST to a static .html
+  <!-- method="get" is the no-JS fallback only: a native POST to a static page
        is a 405 on most static hosts. With JS the submit is intercepted, so no
        field values ever reach the URL. Capture is handled by the GHL tracking
        script — see assets/js/main.js. -->
-  <form class="quote__form" id="{fid}" method="get" action="{up}thank-you.html" novalidate>
+  <form class="quote__form" id="{fid}" method="get" action="/thank-you/" novalidate>
     <div class="quote__grid">
       {rows}
     </div>
@@ -403,7 +416,7 @@ def quote_form(depth=0, form_id="quote-form", compact=False, preselect=None, hea
     <p class="quote__error" role="alert" hidden></p>
   </form>
 </div>""".format(cls=" quote--compact" if compact else "", head=head_html, fid=form_id,
-                 up=up, rows="\n      ".join(rows), tel=BIZ["phone_e164"],
+                 rows="\n      ".join(rows), tel=BIZ["phone_e164"],
                  phone=BIZ["phone_display"], owner=BIZ["owner"].split()[0])
 
 
@@ -440,8 +453,7 @@ def faq_block(faqs, title="Frequently asked questions",
 </section>""".format(title=title, intro=intro, eyebrow="Answers", items="\n      ".join(items))
 
 
-def areas_section(depth=0, heading="Where we mow on the Northern Gold Coast",
-                  intro=None):
+def areas_section(heading="Where we mow on the Northern Gold Coast", intro=None):
     intro = intro or ("Nineteen suburbs, one truck, no travel surcharge. We work the northern "
                       "corridor from Yatala down to Parkwood — if you are on this list, you are "
                       "on our run.")
@@ -479,8 +491,7 @@ def areas_section(depth=0, heading="Where we mow on the Northern Gold Coast",
                      gbp=BIZ["gbp"], pin=icon("pin", "icon icon--sm"))
 
 
-def cta_band(depth=0, title=None, text=None):
-    up = "../" * depth
+def cta_band(title=None, text=None):
     title = title or "Get your lawn back on a schedule"
     text = text or ("Free quote, no obligation, and an honest answer about when we can "
                     "actually get there.")
@@ -491,11 +502,11 @@ def cta_band(depth=0, title=None, text=None):
       <p>{text}</p>
     </div>
     <div class="cta__actions">
-      <a class="btn btn--primary btn--lg" href="{up}contact.html">Get a free quote</a>
+      <a class="btn btn--primary btn--lg" href="/contact/">Get a free quote</a>
       <a class="btn btn--outline btn--lg" href="tel:{tel}">{ph}{phone}</a>
     </div>
   </div>
-</section>""".format(img=IMG["cta"], title=title, text=text, up=up,
+</section>""".format(img=IMG["cta"], title=title, text=text,
                      tel=BIZ["phone_e164"], phone=BIZ["phone_display"],
                      ph=icon("phone", "icon icon--sm"))
 
@@ -529,14 +540,12 @@ def gallery_section(items, title="Our recent work",
 </section>""".format(title=title, intro=intro, cells="\n      ".join(cells))
 
 
-def crumbs(trail, depth=0):
-    up = "../" * depth
+def crumbs(trail):
     parts = []
     for i, (name, url) in enumerate(trail):
         if i == len(trail) - 1:
             parts.append('<li aria-current="page">%s</li>' % name)
         else:
-            parts.append('<li><a href="%s%s">%s</a></li>' % (
-                up, url.lstrip("/") or "index.html", name))
+            parts.append('<li><a href="%s">%s</a></li>' % (url, name))
     return ('<nav class="crumbs" aria-label="Breadcrumb"><div class="wrap"><ol>%s</ol></div></nav>'
             % "".join(parts))

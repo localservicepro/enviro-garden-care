@@ -5,7 +5,7 @@ from data import (SITE, BIZ, IMG, GALLERY, SERVICES, ALL_SUBURBS, HOME_FAQS, CIT
 from templates import (head, header, footer, icon, quote_form, map_embed, faq_block,
                        areas_section, cta_band, gallery_section, crumbs, plain,
                        local_business_schema, website_schema, breadcrumbs,
-                       faq_schema, service_schema, speakable)
+                       faq_schema, service_schema, speakable, page_url, svc_url)
 
 TEL = BIZ["phone_e164"]
 PHONE = BIZ["phone_display"]
@@ -25,14 +25,13 @@ def _trust_bar():
     return '<section class="trust"><div class="wrap"><ul class="trust__list">%s</ul></div></section>' % cells
 
 
-def _service_cards(depth=0, featured=None):
-    up = "../" * depth
+def _service_cards(featured=None):
     cards = []
     for i, s in enumerate(SERVICES):
         if featured and s["slug"] == featured:
             continue
         cards.append("""<article class="svc reveal" style="--d:{d}ms">
-        <a class="svc__link" href="{up}services/{slug}.html">
+        <a class="svc__link" href="{url}">
           <div class="svc__media">
             <img src="{img}" alt="{alt}" loading="lazy" decoding="async" width="1200" height="800">
           </div>
@@ -44,7 +43,7 @@ def _service_cards(depth=0, featured=None):
           </div>
         </a>
       </article>""".format(
-            d=i * 70, up=up, slug=s["slug"], img=IMG[s["img"]],
+            d=i * 70, url=svc_url(s["slug"]), img=IMG[s["img"]],
             alt="%s — %s by Enviro Garden Care &amp; Odd Jobs, Northern Gold Coast" % (
                 plain(s["name"]), plain(s["keyword"])),
             ic=icon(s["icon"]), name=s["name"], tag=s["tagline"],
@@ -107,7 +106,7 @@ def home():
         ck=icon("check", "icon icon--sm icon--tick"),
         ph=icon("phone", "icon icon--sm"), gbp=BIZ["gbp"],
         stars="".join(icon("star", "icon icon--star") for _ in range(5)),
-        form=quote_form(0, "hero-quote", compact=True,
+        form=quote_form("hero-quote", compact=True,
                         heading="Free quote in your inbox"),
         marq="".join('<span>%s</span>' % s for s in ALL_SUBURBS))
 
@@ -129,7 +128,7 @@ def home():
         <li>{ck} <strong>Green waste removed</strong> on the same visit, every visit</li>
         <li>{ck} <strong>Fully insured</strong> for residential, strata and commercial work</li>
       </ul>
-      <a class="link-arrow" href="about.html">More about how we work {ar}</a>
+      <a class="link-arrow" href="/about/">More about how we work {ar}</a>
     </div>
     <div class="intro__media reveal">
       <img src="{img}" alt="Enviro Garden Care &amp; Odd Jobs mowing a residential lawn — lawn mowing Gold Coast, Pimpama"
@@ -156,7 +155,7 @@ def home():
       {cards}
     </div>
   </div>
-</section>""".format(cards=_service_cards(0))
+</section>""".format(cards=_service_cards())
 
     why = """<section class="section section--why" id="why">
   <div class="wrap why">
@@ -233,9 +232,9 @@ def home():
 </section>""".format(stars=icon("star", "icon icon--sm"), gbp=BIZ["gbp"], fb=BIZ["facebook"],
                      s5="".join(icon("star", "icon icon--star") for _ in range(5)))
 
-    body = (header("index.html", 0) + '<main id="main">' + hero + _trust_bar() + intro
+    body = (header("/") + '<main id="main">' + hero + _trust_bar() + intro
             + services + why + process + gallery_section(GALLERY, feature=True)
-            + areas_section(0, "Where we mow on the Northern Gold Coast",
+            + areas_section("Where we mow on the Northern Gold Coast",
                             "Nineteen suburbs on one run. We cover lawn mowing Gold Coast north — "
                             "Coomera, Pimpama, Ormeau, Helensvale and the acreage belt out to Yatala "
                             "and Jacobs Well — with no travel surcharge anywhere inside that area.")
@@ -243,15 +242,15 @@ def home():
             + faq_block(HOME_FAQS,
                         "Lawn mowing on the Gold Coast — your questions answered",
                         "Straight answers on price, schedules, acreage and the battery gear.")
-            + cta_band(0) + '</main>')
-    return head(page, 0) + body + footer(0)
+            + cta_band() + '</main>')
+    return head(page) + body + footer()
 
 
 # ==========================================================================
 # ABOUT
 # ==========================================================================
 def about():
-    trail = [("Home", "/"), ("About", "/about.html")]
+    trail = [("Home", "/"), ("About", page_url("about"))]
     faqs = [
         ("Who will actually turn up to mow my lawn?",
          "Shanon Hopton, the owner. Enviro Garden Care & Odd Jobs is an owner-operated business "
@@ -272,12 +271,12 @@ def about():
         "title": "About Us | Battery Powered Lawn Mowing Gold Coast",
         "desc": ("Owner-operated lawn mowing Gold Coast north, run out of Pimpama. Battery powered "
                  "equipment at no extra charge across 19 northern suburbs. Meet Shanon."),
-        "canonical": SITE + "/about.html",
+        "canonical": SITE + page_url("about"),
         "og_image": IMG["about"],
         "body_class": "page-about",
         "schema": [local_business_schema(), breadcrumbs(trail), faq_schema(faqs),
-                   {"@type": "AboutPage", "@id": SITE + "/about.html#webpage",
-                    "url": SITE + "/about.html",
+                   {"@type": "AboutPage", "@id": SITE + page_url("about") + "#webpage",
+                    "url": SITE + page_url("about"),
                     "name": "About Enviro Garden Care & Odd Jobs",
                     "about": {"@id": SITE + "/#business"},
                     "speakable": speakable(), "inLanguage": "en-AU"}],
@@ -351,31 +350,31 @@ def about():
 </section>""".format(leaf=icon("leaf"), clock=icon("clock"), check=icon("check"),
                      shield=icon("shield"))
 
-    body = (header("about.html", 0) + crumbs(trail, 0) + '<main id="main">' + hero + story
+    body = (header("/about/") + crumbs(trail) + '<main id="main">' + hero + story
             + _trust_bar() + values + gallery_section(GALLERY[:4], "Recent jobs around the north")
-            + areas_section(0, "The suburbs we call home")
+            + areas_section("The suburbs we call home")
             + faq_block(faqs, "About Enviro Garden Care &amp; Odd Jobs",
                         "Who we are, how we work and what we are covered for.")
-            + cta_band(0, "Want the bloke who actually mows to quote your block?",
+            + cta_band("Want the bloke who actually mows to quote your block?",
                        "No call centre, no franchise mark-up. Call Shanon direct or send the form.")
             + '</main>')
-    return head(page, 0) + body + footer(0)
+    return head(page) + body + footer()
 
 
 # ==========================================================================
 # SERVICES HUB
 # ==========================================================================
 def services_hub():
-    trail = [("Home", "/"), ("Services", "/services.html")]
+    trail = [("Home", "/"), ("Services", page_url("services"))]
     page = {
         "title": "Lawn &amp; Garden Services Gold Coast | Enviro Garden Care &amp; Odd Jobs",
         "desc": ("Lawn mowing, acreage mowing, garden maintenance, green waste removal, commercial "
                  "grounds care and odd jobs across the Northern Gold Coast. Free quotes: 0407 276 574."),
-        "canonical": SITE + "/services.html",
+        "canonical": SITE + page_url("services"),
         "body_class": "page-services",
         "schema": [local_business_schema(), breadcrumbs(trail),
-                   {"@type": "CollectionPage", "@id": SITE + "/services.html#webpage",
-                    "url": SITE + "/services.html",
+                   {"@type": "CollectionPage", "@id": SITE + page_url("services") + "#webpage",
+                    "url": SITE + page_url("services"),
                     "name": "Lawn & Garden Services Gold Coast",
                     "about": {"@id": SITE + "/#business"},
                     "inLanguage": "en-AU",
@@ -384,7 +383,7 @@ def services_hub():
                         "itemListElement": [{
                             "@type": "ListItem", "position": i + 1,
                             "name": plain(s["name"]),
-                            "url": "%s/services/%s.html" % (SITE, s["slug"]),
+                            "url": SITE + svc_url(s["slug"]),
                         } for i, s in enumerate(SERVICES)]}}],
     }
 
@@ -397,7 +396,7 @@ def services_hub():
     Coomera to five acres at Jacobs Well, scheduled grounds care for body corporates, and the odd jobs
     that have been on the list since Christmas.</p>
     <div class="phero__actions">
-      <a class="btn btn--primary btn--lg" href="contact.html">Get a free quote</a>
+      <a class="btn btn--primary btn--lg" href="/contact/">Get a free quote</a>
       <a class="btn btn--outline btn--lg" href="tel:{tel}">{ph}{phone}</a>
     </div>
   </div>
@@ -414,12 +413,12 @@ def services_hub():
       </div>
       <div class="svcrow__body">
         <span class="svc__icon">{ic}</span>
-        <h2><a href="services/{slug}.html">{name}</a></h2>
+        <h2><a href="/services/{slug}/">{name}</a></h2>
         <p class="svcrow__tag">{tag}</p>
         <p>{intro}</p>
         <ul class="ticks ticks--tight">{incl}</ul>
         <ul class="chips chips--sm">{subs}</ul>
-        <a class="btn btn--primary btn--sm" href="services/{slug}.html">{name} details {ar}</a>
+        <a class="btn btn--primary btn--sm" href="/services/{slug}/">{name} details {ar}</a>
       </div>
     </article>""".format(
             d=i * 60, img=IMG[s["img"]],
@@ -433,28 +432,28 @@ def services_hub():
     listing = ('<section class="section section--svcrows"><div class="wrap">%s</div></section>'
                % "\n    ".join(rows))
 
-    body = (header("services.html", 0) + crumbs(trail, 0) + '<main id="main">' + hero
-            + _trust_bar() + listing + areas_section(0) + cta_band(0) + '</main>')
-    return head(page, 0) + body + footer(0)
+    body = (header("/services/") + crumbs(trail) + '<main id="main">' + hero
+            + _trust_bar() + listing + areas_section() + cta_band() + '</main>')
+    return head(page) + body + footer()
 
 
 # ==========================================================================
 # SERVICE PAGE
 # ==========================================================================
 def service_page(svc):
-    trail = [("Home", "/"), ("Services", "/services.html"),
-             (plain(svc["name"]), "/services/%s.html" % svc["slug"])]
+    trail = [("Home", "/"), ("Services", page_url("services")),
+             (plain(svc["name"]), svc_url(svc["slug"]))]
     page = {
         "title": svc["title"],
         "desc": svc["desc"],
-        "canonical": "%s/services/%s.html" % (SITE, svc["slug"]),
+        "canonical": SITE + svc_url(svc["slug"]),
         "og_image": IMG[svc["img"]],
         "body_class": "page-service page-service--" + svc["slug"],
         "schema": [local_business_schema(), service_schema(svc), breadcrumbs(trail),
                    faq_schema(svc["faqs"]),
                    {"@type": "WebPage",
-                    "@id": "%s/services/%s.html#webpage" % (SITE, svc["slug"]),
-                    "url": "%s/services/%s.html" % (SITE, svc["slug"]),
+                    "@id": SITE + svc_url(svc["slug"]) + "#webpage",
+                    "url": SITE + svc_url(svc["slug"]),
                     "name": plain(svc["title"]),
                     "about": {"@id": SITE + "/#business"},
                     "speakable": speakable(), "inLanguage": "en-AU"}],
@@ -515,7 +514,7 @@ def service_page(svc):
         </div>
       </div>
     </aside>""".format(
-        form=quote_form(1, "svc-quote", compact=True,
+        form=quote_form("svc-quote", compact=True,
                         preselect=svc["name"] if plain(svc["name"]) in [
                             "Lawn Mowing", "Acreage & Ride-On Mowing"] else None,
                         heading="Free quote for " + plain(svc["name"]).lower()),
@@ -536,9 +535,9 @@ def service_page(svc):
       %s
     </div>
   </div>
-</section>""" % _service_cards(1, featured=svc["slug"])
+</section>""" % _service_cards(featured=svc["slug"])
 
-    body = (header("services.html", 1) + crumbs(trail, 1) + '<main id="main">' + hero
+    body = (header("/services/") + crumbs(trail) + '<main id="main">' + hero
             + _trust_bar() + layout
             + gallery_section(GALLERY[:4], "Recent %s jobs" % plain(svc["name"]).lower(),
                               "A few of the blocks we have looked after — %s and the suburbs around it."
@@ -546,17 +545,17 @@ def service_page(svc):
             + others
             + faq_block(svc["faqs"], "%s — common questions" % plain(svc["name"]),
                         "Everything people ask before booking %s." % plain(svc["name"]).lower())
-            + cta_band(1, "Get a price for %s" % svc["keyword"],
+            + cta_band("Get a price for %s" % svc["keyword"],
                        "Send the form or call — most quotes go back out the same day.")
             + '</main>')
-    return head(page, 1) + body + footer(1)
+    return head(page) + body + footer()
 
 
 # ==========================================================================
 # CONTACT
 # ==========================================================================
 def contact():
-    trail = [("Home", "/"), ("Contact", "/contact.html")]
+    trail = [("Home", "/"), ("Contact", page_url("contact"))]
     faqs = [
         ("How fast will I get a quote?",
          "Usually the same day, and almost always within one business day. Standard residential "
@@ -580,11 +579,11 @@ def contact():
         "desc": ("Get a free lawn mowing or garden care quote on the Northern Gold Coast. "
                  "Call 0407 276 574, email hello@envirogardencare.com.au, or send the form — "
                  "same-day replies."),
-        "canonical": SITE + "/contact.html",
+        "canonical": SITE + page_url("contact"),
         "body_class": "page-contact",
         "schema": [local_business_schema(), breadcrumbs(trail), faq_schema(faqs),
-                   {"@type": "ContactPage", "@id": SITE + "/contact.html#webpage",
-                    "url": SITE + "/contact.html",
+                   {"@type": "ContactPage", "@id": SITE + page_url("contact") + "#webpage",
+                    "url": SITE + page_url("contact"),
                     "name": "Contact Enviro Garden Care & Odd Jobs",
                     "about": {"@id": SITE + "/#business"},
                     "speakable": speakable(), "inLanguage": "en-AU"}],
@@ -628,18 +627,18 @@ def contact():
       </div>
     </aside>
   </div>
-</section>""".format(form=quote_form(0, "contact-quote",
+</section>""".format(form=quote_form("contact-quote",
                                      heading="Request your free quote"),
                      ph=icon("phone"), ml=icon("mail"), pin=icon("pin"), clock=icon("clock", "icon icon--sm"),
                      tel=TEL, phone=PHONE, email=BIZ["email"], street=BIZ["street"],
                      sub=BIZ["suburb"], reg=BIZ["region"], pc=BIZ["postcode"],
                      hours=hours_rows, hnote=BIZ["hours_note"], gbp=BIZ["gbp"], fb=BIZ["facebook"])
 
-    body = (header("contact.html", 0) + crumbs(trail, 0) + '<main id="main">' + hero + cards
-            + _trust_bar() + areas_section(0, "Find us on the Northern Gold Coast")
+    body = (header("/contact/") + crumbs(trail) + '<main id="main">' + hero + cards
+            + _trust_bar() + areas_section("Find us on the Northern Gold Coast")
             + faq_block(faqs, "Getting in touch", "Quotes, hours and where we go.")
-            + cta_band(0) + '</main>')
-    return head(page, 0) + body + footer(0)
+            + cta_band() + '</main>')
+    return head(page) + body + footer()
 
 
 # ==========================================================================
@@ -650,16 +649,16 @@ def thank_you():
         "title": "Thank you — your quote request is in | Enviro Garden Care",
         "desc": ("Thanks for contacting Enviro Garden Care & Odd Jobs. Your quote request has been "
                  "received and we will be in touch, usually the same day."),
-        "canonical": SITE + "/thank-you.html",
+        "canonical": SITE + page_url("thank-you"),
         "body_class": "page-thanks",
         "schema": [local_business_schema(),
-                   {"@type": "WebPage", "@id": SITE + "/thank-you.html#webpage",
-                    "url": SITE + "/thank-you.html", "name": "Thank you",
+                   {"@type": "WebPage", "@id": SITE + page_url("thank-you") + "#webpage",
+                    "url": SITE + page_url("thank-you"), "name": "Thank you",
                     "inLanguage": "en-AU"}],
     }
     extra = ('<meta name="robots" content="noindex, follow">')
 
-    svc_links = "".join('<li><a href="services/%s.html">%s</a></li>' % (s["slug"], s["name"])
+    svc_links = "".join('<li><a href="%s">%s</a></li>' % (svc_url(s["slug"]), s["name"])
                         for s in SERVICES)
 
     body = """{hdr}
@@ -687,19 +686,19 @@ def thank_you():
     <div class="thanks__links">
       <h2>While you are here</h2>
       <ul>{svc}</ul>
-      <p><a class="link-arrow" href="index.html">Back to the home page {ar}</a></p>
+      <p><a class="link-arrow" href="/">Back to the home page {ar}</a></p>
     </div>
   </div>
 </section>
 </main>
-""".format(hdr=header("", 0), check=icon("check", "icon"), owner=BIZ["owner"].split()[0],
+""".format(hdr=header(), check=icon("check", "icon"), owner=BIZ["owner"].split()[0],
            tel=TEL, phone=PHONE, ph=icon("phone", "icon icon--sm"), svc=svc_links,
            ar=icon("arrow", "icon icon--sm"))
 
-    html = head(page, 0).replace(
+    html = head(page).replace(
         '<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">',
         extra)
-    return html + body + footer(0)
+    return html + body + footer()
 
 
 # ==========================================================================
@@ -714,7 +713,7 @@ def not_found():
         "body_class": "page-thanks",
         "schema": [local_business_schema()],
     }
-    svc_links = "".join('<li><a href="services/%s.html">%s</a></li>' % (s["slug"], s["name"])
+    svc_links = "".join('<li><a href="%s">%s</a></li>' % (svc_url(s["slug"]), s["name"])
                         for s in SERVICES)
     body = """{hdr}
 <main id="main">
@@ -726,7 +725,7 @@ def not_found():
     <div class="thanks__links">
       <h2>Our services</h2>
       <ul>{svc}</ul>
-      <p><a class="link-arrow" href="index.html">Back to the home page {ar}</a></p>
+      <p><a class="link-arrow" href="/">Back to the home page {ar}</a></p>
     </div>
     <div class="thanks__urgent">
       <h2>Need a quote?</h2>
@@ -736,10 +735,10 @@ def not_found():
   </div>
 </section>
 </main>
-""".format(hdr=header("", 0), svc=svc_links, ar=icon("arrow", "icon icon--sm"),
+""".format(hdr=header(), svc=svc_links, ar=icon("arrow", "icon icon--sm"),
            owner=BIZ["owner"].split()[0], tel=TEL, phone=PHONE,
            ph=icon("phone", "icon icon--sm"))
-    html = head(page, 0).replace(
+    html = head(page).replace(
         '<meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1">',
         '<meta name="robots" content="noindex, follow">')
-    return html + body + footer(0)
+    return html + body + footer()

@@ -52,7 +52,35 @@ class Balance(HTMLParser):
 
 
 pages = sorted(glob.glob(os.path.join(ROOT, "*.html")) +
-               glob.glob(os.path.join(ROOT, "services", "*.html")))
+               glob.glob(os.path.join(ROOT, "*", "index.html")) +
+               glob.glob(os.path.join(ROOT, "services", "*", "index.html")))
+
+
+def resolve(href):
+    """Map a site URL onto the file that serves it.
+
+    Everything is root-relative now, and pages are directory indexes, so
+    "/about/" is served by about/index.html and "/" by index.html.
+    """
+    path = href.split("#")[0].split("?")[0]
+    if not path:
+        return None
+    if not path.startswith("/"):
+        return False          # relative link — no longer expected anywhere
+    path = path.lstrip("/")
+    if path == "" or path.endswith("/"):
+        path += "index.html"
+    return os.path.join(ROOT, path)
+
+
+def url_of(rel):
+    """Inverse of resolve(): the URL a generated file is served at."""
+    rel = rel.replace(os.sep, "/")
+    if rel == "index.html":
+        return "/"
+    if rel.endswith("/index.html"):
+        return "/" + rel[:-len("index.html")]
+    return "/" + rel
 
 print("Checking %d pages\n" % len(pages))
 seen_titles, seen_descs, seen_canon = {}, {}, {}
@@ -84,7 +112,7 @@ for path in pages:
             flat.extend(t if isinstance(t, list) else [t])
         if "LocalBusiness" not in flat:
             err(rel, "JSON-LD missing LocalBusiness")
-        if rel not in ("thank-you.html", "404.html") and "BreadcrumbList" not in flat \
+        if rel not in ("thank-you/index.html", "404.html") and "BreadcrumbList" not in flat \
                 and rel != "index.html":
             warn(rel, "no BreadcrumbList")
 
@@ -136,7 +164,7 @@ for path in pages:
             % src.count("link.msgsndr.com/js/external-tracking.js"))
 
     # --- map embed -------------------------------------------------------
-    if rel in ("index.html", "about.html", "contact.html"):
+    if rel in ("index.html", "about/index.html", "contact/index.html"):
         if "google.com/maps/embed" not in src:
             err(rel, "missing Google Map embed")
 
@@ -145,26 +173,24 @@ for path in pages:
         action = re.search(r'action="([^"]+)"', form)
         if not action:
             err(rel, "form without action")
-        elif not action.group(1).endswith("thank-you.html"):
-            err(rel, "form action does not target thank-you.html: %s" % action.group(1))
+        elif action.group(1) != "/thank-you/":
+            err(rel, "form action is not /thank-you/: %s" % action.group(1))
 
     # --- internal links --------------------------------------------------
-    base = os.path.dirname(path)
-    for href in re.findall(r'href="([^"]+)"', src):
-        if href.startswith(("http", "mailto:", "tel:", "#", "data:")):
-            continue
-        target = href.split("#")[0]
-        if not target:
-            continue
-        resolved = os.path.normpath(os.path.join(base, target))
-        if not os.path.exists(resolved):
-            err(rel, "broken link -> %s" % href)
-    for src_attr in re.findall(r'src="([^"]+)"', src):
-        if src_attr.startswith(("http", "data:")):
-            continue
-        resolved = os.path.normpath(os.path.join(base, src_attr))
-        if not os.path.exists(resolved):
-            err(rel, "broken asset -> %s" % src_attr)
+    for attr in ("href", "src", "action"):
+        for ref in re.findall(r'%s="([^"]+)"' % attr, src):
+            if ref.startswith(("http", "mailto:", "tel:", "#", "data:")):
+                continue
+            resolved = resolve(ref)
+            if resolved is None:
+                continue
+            if resolved is False:
+                err(rel, "relative %s (expected root-relative) -> %s" % (attr, ref))
+                continue
+            if not os.path.exists(resolved):
+                err(rel, "broken %s -> %s" % (attr, ref))
+            elif ref.split("#")[0].endswith(".html") and ref != "/404.html":
+                err(rel, "%s still exposes .html -> %s" % (attr, ref))
 
 # --- duplicates ----------------------------------------------------------
 for t, files in seen_titles.items():
@@ -181,22 +207,25 @@ for c, files in seen_canon.items():
 sitemap = open(os.path.join(ROOT, "sitemap.xml"), encoding="utf-8").read()
 for path in pages:
     rel = os.path.relpath(path, ROOT)
-    if rel in ("thank-you.html", "404.html"):
-        if rel in sitemap:
-            err("sitemap.xml", "%s should not be listed" % rel)
+    needle = url_of(rel)
+    if rel in ("thank-you/index.html", "404.html"):
+        if needle + "<" in sitemap:
+            err("sitemap.xml", "%s should not be listed" % needle)
         continue
-    needle = "/" if rel == "index.html" else "/" + rel.replace(os.sep, "/")
     if needle + "<" not in sitemap:
         err("sitemap.xml", "missing %s" % needle)
+if ".html<" in sitemap:
+    err("sitemap.xml", "sitemap still contains a .html URL")
 
 # --- keyword targets from the research doc -------------------------------
 TARGETS = {
     "index.html": "lawn mowing gold coast",
-    "services/lawn-mowing.html": "lawn mowing coomera",
-    "services/acreage-mowing.html": "acreage mowing gold coast",
-    "services/garden-maintenance.html": "garden maintenance gold coast",
-    "services/green-waste-removal.html": "green waste removal gold coast",
-    "services/commercial-property-maintenance.html": "commercial property maintenance gold coast",
+    "services/lawn-mowing/index.html": "lawn mowing coomera",
+    "services/acreage-mowing/index.html": "acreage mowing gold coast",
+    "services/garden-maintenance/index.html": "garden maintenance gold coast",
+    "services/green-waste-removal/index.html": "green waste removal gold coast",
+    "services/commercial-property-maintenance/index.html":
+        "commercial property maintenance gold coast",
 }
 print("Primary keyword placement (title / H1 / first 100 words):")
 for rel, kw in TARGETS.items():
@@ -210,7 +239,7 @@ for rel, kw in TARGETS.items():
     first100 = " ".join(body.split()[:100])
     marks = [("title", kw in title), ("h1", kw in h1), ("first100", kw in first100)]
     ok = all(m[1] for m in marks)
-    print("  %-46s %s  %s" % (rel, "PASS" if ok else "CHECK",
+    print("  %-52s %s  %s" % (rel, "PASS" if ok else "CHECK",
                               " ".join("%s:%s" % (n, "y" if v else "n") for n, v in marks)))
     if not ok:
         warn(rel, "keyword '%s' missing from: %s"

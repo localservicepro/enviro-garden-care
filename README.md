@@ -11,24 +11,24 @@ comes from that document.
 
 ## Pages
 
-| URL | Primary keyword | Vol/mo | Difficulty |
-|---|---|---|---|
-| `index.html` | lawn mowing gold coast | 320 | 10 |
-| `services/lawn-mowing.html` | lawn mowing coomera | 50 | 13 |
-| `services/acreage-mowing.html` | acreage mowing gold coast | 70 | 12 |
-| `services/garden-maintenance.html` | garden maintenance gold coast | 140 | 13 |
-| `services/green-waste-removal.html` | green waste removal gold coast | 50 | 23 |
-| `services/commercial-property-maintenance.html` | commercial property maintenance gold coast | high intent | — |
-| `services/odd-jobs-handyman.html` | odd jobs handyman gold coast | long-tail | — |
-| `services.html` | services hub (no competing target) | — | — |
-| `about.html` | battery powered lawn mowing gold coast | differentiator | — |
-| `contact.html` | quotes and contact | — | — |
-| `thank-you.html` | form redirect target (`noindex`) | — | — |
-| `404.html` | not found (`noindex`) | — | — |
+| URL | Served by | Primary keyword | Vol/mo | Difficulty |
+|---|---|---|---|---|
+| `/` | `index.html` | lawn mowing gold coast | 320 | 10 |
+| `/services/lawn-mowing/` | `services/lawn-mowing/index.html` | lawn mowing coomera | 50 | 13 |
+| `/services/acreage-mowing/` | `services/acreage-mowing/index.html` | acreage mowing gold coast | 70 | 12 |
+| `/services/garden-maintenance/` | `services/garden-maintenance/index.html` | garden maintenance gold coast | 140 | 13 |
+| `/services/green-waste-removal/` | `services/green-waste-removal/index.html` | green waste removal gold coast | 50 | 23 |
+| `/services/commercial-property-maintenance/` | …`/index.html` | commercial property maintenance gold coast | high intent | — |
+| `/services/odd-jobs-handyman/` | …`/index.html` | odd jobs handyman gold coast | long-tail | — |
+| `/services/` | `services/index.html` | services hub (no competing target) | — | — |
+| `/about/` | `about/index.html` | battery powered lawn mowing gold coast | differentiator | — |
+| `/contact/` | `contact/index.html` | quotes and contact | — | — |
+| `/thank-you/` | `thank-you/index.html` | form redirect target (`noindex`) | — | — |
+| `/404.html` | `404.html` | not found (`noindex`) | — | — |
 
 No two pages share a primary target, per the research's keyword map.
 
-> **Note on `odd-jobs-handyman.html`:** this page is *in addition* to the five service
+> **Note on `/services/odd-jobs-handyman/`:** this page is *in addition* to the five service
 > pages the research specifies. "& Odd Jobs" is half the business name and a real
 > revenue line (flat pack and trampoline assembly, fence painting, flyscreens, local
 > transport), so it earned a page. It targets a distinct long-tail term and cannibalises
@@ -58,11 +58,35 @@ python3 build/check.py     # validates the output (must exit 0)
 `check.py` enforces: valid JSON-LD, one `<h1>` per page, no broken internal links,
 no duplicate titles/descriptions/canonicals, alt text on every image, the tracking
 script exactly once per page, map embeds on home/about/contact, every form action
-pointing at `thank-you.html`, sitemap coverage, and keyword placement in
-title / H1 / first 100 words.
+pointing at `/thank-you/`, sitemap coverage, and keyword placement in
+title / H1 / first 100 words. It also asserts that **no link, asset or form action
+exposes a `.html` extension** (only `/404.html` is allowed) and that every internal
+reference is root-relative and resolves to a real file.
 
-Deploying is just uploading the repository root. There is no build step at runtime,
-no framework and no npm dependency in the shipped site.
+### URLs
+
+Every page is written as a **directory index** (`about/index.html`), so URLs are
+extensionless on any static host — Apache, nginx, GitHub Pages, Netlify, Vercel,
+Cloudflare Pages — with **no rewrite rules and no "pretty URLs" setting**. There is
+nothing to configure.
+
+All internal links, assets and form actions are **root-relative** (`/about/`,
+`/assets/css/style.css`), which assumes the site is served from the domain root. It is
+— canonicals are already absolute at `envirogardencare.com.au`. If it ever moves to a
+subdirectory, `page_url()` in `build/templates.py` is the one place to change.
+
+URLs carry a trailing slash (`/about/`) because that is the literal path the directory
+index serves, and canonicals and `sitemap.xml` match it exactly. Most hosts redirect
+`/about` → `/about/` automatically. If yours is configured the other way round and
+strips trailing slashes, change `page_url()` and rebuild so canonicals keep matching
+the URL actually served — a mismatch there splits ranking signals.
+
+`404.html` stays a flat file at the root because that is where hosts look for it.
+
+### Deploying
+
+Upload the repository root. There is no build step at runtime, no framework and no npm
+dependency in the shipped site.
 
 ---
 
@@ -99,7 +123,7 @@ will have nowhere to land.
 
 - The submit handler **never calls `stopPropagation()`**, so the tracking script's own
   listener still receives the event.
-- The redirect to `thank-you.html` is **held for `CAPTURE_GRACE_MS` (900ms)**. Redirecting
+- The redirect to `/thank-you/` is **held for `CAPTURE_GRACE_MS` (900ms)**. Redirecting
   synchronously can cancel the tracking request mid-flight and silently lose the lead.
   Raise the value if you ever see submissions arriving on the site but not in GHL.
 
@@ -110,8 +134,8 @@ listeners first.
 Honeypot submissions call `stopImmediatePropagation()` — bots get the thank-you page,
 GHL gets no junk contact.
 
-Forms are `method="get"` purely as a no-JS fallback (a native POST to a static `.html`
-is a 405 on most static hosts). With JS running the submit is intercepted, so no field
+Forms are `method="get"` purely as a no-JS fallback (a native POST to a static page is
+a 405 on most static hosts). With JS running the submit is intercepted, so no field
 values ever reach the URL.
 
 ### 2. Trading hours — **assumed, not confirmed**
@@ -155,7 +179,7 @@ it now sits on** once the files are local, and reorder `GALLERY` if any are mism
 - Internal linking: homepage → services → siblings → home, plus breadcrumbs
 
 **Technical**
-- `sitemap.xml` (excludes `thank-you` / `404`) and `robots.txt`
+- Extensionless URLs throughout; `sitemap.xml` (excludes `/thank-you/` and `404`) and `robots.txt`
 - Zero render-blocking JS; site script is `defer`, single stylesheet
 - Every image lazy-loaded with explicit `width`/`height` to hold CLS near zero
 - `preconnect` to fonts and the image CDN

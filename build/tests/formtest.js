@@ -9,7 +9,7 @@ const { chromium } = require('playwright');
   const merge = {full_name:'{{contact.full_name}}',email:'{{contact.email}}',phone:'{{contact.phone}}',
     property_address:'{{contact.property_address}}',property_size:'{{contact.property_size}}',
     service_needed:'{{contact.service_needed}}',job_notes:'{{contact.job_notes}}'};
-  for (const url of ['/index.html','/contact.html','/services/lawn-mowing.html']) {
+  for (const url of ['/','/contact/','/services/lawn-mowing/']) {
     const p = await b.newPage();
     await p.goto('http://127.0.0.1:8123'+url,{waitUntil:'domcontentloaded'});
     const forms = await p.$$eval('.quote__form', fs => fs.map(f => ({
@@ -21,14 +21,14 @@ const { chromium } = require('playwright');
       const names = f.fields.map(x=>x.name);
       T(`${url} #${f.id} has all 7 GHL fields`, expected.every(e=>names.includes(e)), names.join(','));
       T(`${url} #${f.id} merge tags correct`, f.fields.every(x=>merge[x.name]===x.ghl));
-      T(`${url} #${f.id} action -> thank-you`, /thank-you\.html$/.test(f.action||''), f.action);
+      T(`${url} #${f.id} action -> /thank-you/`, f.action === '/thank-you/', f.action);
     }
     await p.close();
   }
 
   // ---- 2. Validation blocks an empty submit ------------------------------
   let p = await b.newPage();
-  await p.goto('http://127.0.0.1:8123/contact.html',{waitUntil:'networkidle'});
+  await p.goto('http://127.0.0.1:8123/contact/',{waitUntil:'networkidle'});
   const before = p.url();
   await p.click('#contact-quote button[type=submit]');
   await p.waitForTimeout(500);
@@ -54,8 +54,8 @@ const { chromium } = require('playwright');
   await p.fill('#contact-quote-email','test@example.com');
   await p.fill('#contact-quote-job_notes','Big dog, side gate unlocked.');
   await p.click('#contact-quote button[type=submit]');
-  await p.waitForURL('**/thank-you.html',{timeout:8000}).catch(()=>{});
-  T('valid submit redirects to thank-you.html', /thank-you\.html$/.test(p.url()), p.url());
+  await p.waitForURL('**/thank-you/',{timeout:8000}).catch(()=>{});
+  T('valid submit redirects to /thank-you/', /\/thank-you\/$/.test(p.url()), p.url());
   const h1 = await p.$eval('h1', e=>e.textContent.trim()).catch(()=>'');
   T('thank-you page renders', /Thanks/i.test(h1), h1);
   const noindex = await p.$eval('meta[name=robots]', e=>e.content).catch(()=>'');
@@ -64,7 +64,7 @@ const { chromium } = require('playwright');
 
   // ---- 5. Payload shape that would be POSTed to GHL ----------------------
   p = await b.newPage();
-  await p.goto('http://127.0.0.1:8123/contact.html',{waitUntil:'networkidle'});
+  await p.goto('http://127.0.0.1:8123/contact/',{waitUntil:'networkidle'});
   const payload = await p.evaluate(() => {
     const f = document.getElementById('contact-quote');
     f.full_name.value='Jane Citizen'; f.email.value='jane@example.com'; f.phone.value='0407 276 574';
@@ -95,7 +95,7 @@ const { chromium } = require('playwright');
     });
     window.addEventListener('beforeunload', () => { window.__navAt = Date.now(); });
   });
-  await p.goto('http://127.0.0.1:8123/contact.html',{waitUntil:'networkidle'});
+  await p.goto('http://127.0.0.1:8123/contact/',{waitUntil:'networkidle'});
   await p.fill('#contact-quote-full_name','Sam Tester');
   await p.fill('#contact-quote-email','sam@example.com');
   await p.fill('#contact-quote-phone','0407 276 574');
@@ -107,8 +107,8 @@ const { chromium } = require('playwright');
   T('captured values are the real field values', cap.d && cap.d.full_name === 'Sam Tester' && cap.d.email === 'sam@example.com');
   const stillHere = !/thank-you/.test(p.url());
   T('redirect is deferred, not immediate', stillHere, stillHere ? 'still on contact.html right after submit' : 'navigated instantly — capture at risk');
-  await p.waitForURL('**/thank-you.html',{timeout:8000}).catch(()=>{});
-  T('redirect still happens', /thank-you\.html$/.test(p.url()), p.url());
+  await p.waitForURL('**/thank-you/',{timeout:8000}).catch(()=>{});
+  T('redirect still happens', /\/thank-you\/$/.test(p.url()), p.url());
   await p.close();
 
   // ---- 8. No PII in the URL on the JS path ------------------------------
@@ -120,7 +120,7 @@ const { chromium } = require('playwright');
     window.__captured = null;
     document.addEventListener('submit', (ev) => { window.__captured = 'yes'; });
   });
-  await p.goto('http://127.0.0.1:8123/contact.html',{waitUntil:'networkidle'});
+  await p.goto('http://127.0.0.1:8123/contact/',{waitUntil:'networkidle'});
   await p.evaluate(() => {
     const f = document.getElementById('contact-quote');
     f.full_name.value='Bot'; f.email.value='bot@spam.com'; f.phone.value='0400000000';
