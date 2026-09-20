@@ -7,44 +7,23 @@
   /* -----------------------------------------------------------------------
      LEAD CAPTURE
 
-     Quote submissions are captured by the GoHighLevel external-tracking
-     script, which listens for submit events on the page and reads the field
-     values. Input names are the GHL contact fields exactly:
+     The quote form POSTs JSON to /api/quote (Vercel function, api/quote.js),
+     which upserts the contact in GoHighLevel and uploads the photos into the
+     Job Photos custom field. Photos are resized here first: canvas, 1600px
+     longest side, JPEG 0.82, max 6, ~3.2 MB total — Vercel caps bodies at
+     4.5 MB, and the re-encode turns an iPhone HEIC into a JPEG GHL accepts.
 
-       full_name, email, phone, property_address,
-       property_size, service_needed, job_notes
-
-     Two things below exist to keep that capture working — do not "tidy" them
-     away:
-
-     1. We never call stopPropagation() on the submit event, so the tracking
-        script's own listener still receives it.
-     2. We hold the redirect for CAPTURE_GRACE_MS so the tracking request has
-        left the browser before the page unloads. Redirecting synchronously
-        can cancel it in-flight and silently lose the lead.
-
-     The tracking script is a plain (non-deferred) tag at the end of <body>
-     and this file is deferred, so its listeners are always registered first.
+     The GHL tracking script also listens for the submit event (attribution +
+     a second capture of the text fields). Two things keep that working:
+       1. never stopPropagation() on submit;
+       2. the redirect waits for the API call and a short grace period, so
+          nothing is cancelled by the unload.
      ----------------------------------------------------------------------- */
-  var CAPTURE_GRACE_MS = 900;
+  var QUOTE_ENDPOINT = '/api/quote';
   var THANK_YOU = '/thank-you/';
-
-  /* -----------------------------------------------------------------------
-     PROPERTY PHOTOS (Change Doc r20)
-
-     The client wants customers to attach photos of the property. The GHL
-     tracking script only reads text field values, so files need their own
-     transport. Set UPLOAD_ENDPOINT to a URL that accepts multipart/form-data
-     (a GHL inbound webhook, or any small upload handler) and the photo field
-     appears. While it is empty the field stays hidden and the form shows a
-     "text or email your photos" line instead — a visitor is never offered an
-     upload that would silently go nowhere.
-
-     Files are POSTed as multipart with the visitor's email and phone so they
-     can be matched to the contact GHL creates from the tracked submission.
-     ----------------------------------------------------------------------- */
-  var UPLOAD_ENDPOINT = '';
-  var UPLOAD_TIMEOUT_MS = 15000;
+  var CAPTURE_GRACE_MS = 900;
+  var API_TIMEOUT_MS = 25000;
+  var PHOTO = { maxFiles: 6, maxSide: 1600, quality: 0.82, totalBytes: 3.0 * 1024 * 1024, fileBytes: 1.4 * 1024 * 1024 };
 
   var root = document.documentElement;
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -205,84 +184,169 @@
   }
 
   function goToThankYou(form, delay) {
-    var target = form.getAttribute('action') || THANK_YOU;
+    var target = THANK_YOU; // never the form action — that is the API
     window.setTimeout(function () { window.location.assign(target); }, delay || 0);
   }
 
+  /* ---------- Photos: resize in the browser ------------------------------ */
   function setupPhotos(form) {
     var wrap = $('.field--file', form);
-    var alt = $('.field--photos-alt', form);
     if (!wrap) return null;
-    if (!UPLOAD_ENDPOINT) {
-      wrap.hidden = true;
-      if (alt) alt.hidden = false;
-      return null;
-    }
-    wrap.hidden = false;
-    if (alt) alt.hidden = true;
-
     var input = wrap.querySelector('input[type="file"]');
     var thumbs = wrap.querySelector('.field__thumbs');
-    var maxFiles = parseInt(input.getAttribute('data-max-files') || '6', 10);
-    var maxBytes = parseFloat(input.getAttribute('data-max-mb') || '8') * 1024 * 1024;
+    input._resized = [];
 
     input.addEventListener('change', function () {
       thumbs.innerHTML = '';
+      input._resized = [];
       var files = Array.prototype.slice.call(input.files || []);
-      var problem = '';
-      if (files.length > maxFiles) problem = 'Please attach up to ' + maxFiles + ' photos.';
-      files.forEach(function (f) {
-        if (f.size > maxBytes) problem = 'Each photo needs to be under ' + Math.round(maxBytes / 1048576) + ' MB.';
-        if (f.type && f.type.indexOf('image/') !== 0) problem = 'Photos only, please (JPG, PNG or HEIC).';
-      });
-      setError(wrap, problem);
-      if (problem) { input.value = ''; return; }
-      files.forEach(function (f) {
-        if (!window.URL || !URL.createObjectURL) return;
-        var img = document.createElement('img');
-        img.alt = '';
-        img.src = URL.createObjectURL(f);
-        img.onload = function () { URL.revokeObjectURL(img.src); };
-        thumbs.appendChild(img);
-      });
+      if (files.length > PHOTO.maxFiles) {
+        setError(wrap, 'Please attach up to ' + PHOTO.maxFiles + ' photos.');
+        input.value = '';
+        return;
+      }
+      var bad = files.filter(function (f) { return f.type && f.type.indexOf('image/') !== 0; });
+      if (bad.length) {
+        setError(wrap, 'Photos only, please (JPG, PNG or HEIC).');
+        input.value = '';
+        return;
+      }
+      setError(wrap, '');
+      wrap.classList.add('is-busy');
+      Promise.all(files.map(resizeImage)).then(function (results) {
+        var total = 0;
+        results.forEach(function (r) {
+          if (!r) return;
+          total += r.bytes;
+          input._resized.push(r);
+          var img = document.createElement('img');
+          img.alt = '';
+          img.src = r.dataUrl;
+          thumbs.appendChild(img);
+        });
+        var skipped = results.filter(function (r) { return !r; }).length;
+        if (skipped) setError(wrap, skipped + ' photo' + (skipped > 1 ? 's' : '') + ' could not be read and will not be sent.');
+        if (total > PHOTO.totalBytes) {
+          setError(wrap, 'Those photos are too large together — try fewer, or smaller ones.');
+          input._resized = [];
+          thumbs.innerHTML = '';
+          input.value = '';
+        }
+      }).then(function () { wrap.classList.remove('is-busy'); });
     });
     return input;
   }
 
-  // Sends photos to UPLOAD_ENDPOINT. Resolves either way — a slow or failed
-  // upload must never stop the visitor reaching the thank-you page, and the
-  // text fields have already been captured by the tracking script.
-  function uploadPhotos(form, input) {
-    if (!input || !input.files || !input.files.length) return Promise.resolve();
-    var fd = new FormData();
-    fd.append('email', (form.email && form.email.value || '').trim());
-    fd.append('phone', (form.phone && form.phone.value || '').trim());
-    fd.append('full_name', (form.full_name && form.full_name.value || '').trim());
-    fd.append('page_url', window.location.href);
-    Array.prototype.forEach.call(input.files, function (f) { fd.append('property_photos[]', f, f.name); });
-    return new Promise(function (resolve) {
-      var done = false;
-      var finish = function () { if (!done) { done = true; resolve(); } };
-      window.setTimeout(finish, UPLOAD_TIMEOUT_MS);
-      fetch(UPLOAD_ENDPOINT, { method: 'POST', body: fd, keepalive: true }).then(finish, finish);
+  // Draws the image onto a canvas at <= maxSide and re-encodes as JPEG. This
+  // is what makes iPhone HEIC uploads work: the browser decodes HEIC, we send
+  // JPEG. Steps quality down if a single photo is still over the per-file cap.
+  function resizeImage(file) {
+    return decodeImage(file).then(function (img) {
+      var w = img.width, h = img.height;
+      var scale = Math.min(1, PHOTO.maxSide / Math.max(w, h));
+      var canvas = document.createElement('canvas');
+      canvas.width = Math.max(1, Math.round(w * scale));
+      canvas.height = Math.max(1, Math.round(h * scale));
+      var ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#fff';                 // PNG/GIF transparency -> white, not black
+      ctx.fillRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+      if (img.close) img.close();
+      var q = PHOTO.quality;
+      var dataUrl = canvas.toDataURL('image/jpeg', q);
+      while (b64Bytes(dataUrl) > PHOTO.fileBytes && q > 0.5) {
+        q -= 0.1;
+        dataUrl = canvas.toDataURL('image/jpeg', q);
+      }
+      return { name: file.name, type: 'image/jpeg', dataUrl: dataUrl, bytes: b64Bytes(dataUrl) };
+    }).catch(function () { return null; });
+  }
+
+  function decodeImage(file) {
+    if (window.createImageBitmap) {
+      // imageOrientation honours EXIF rotation so phone photos come out upright.
+      return createImageBitmap(file, { imageOrientation: 'from-image' })
+        .catch(function () { return createImageBitmap(file); })
+        .catch(function () { return decodeViaImg(file); });
+    }
+    return decodeViaImg(file);
+  }
+
+  function decodeViaImg(file) {
+    return new Promise(function (resolve, reject) {
+      var url = URL.createObjectURL(file);
+      var img = new Image();
+      img.onload = function () { URL.revokeObjectURL(url); resolve(img); };
+      img.onerror = function () { URL.revokeObjectURL(url); reject(new Error('decode')); };
+      img.src = url;
     });
+  }
+
+  function b64Bytes(dataUrl) {
+    var i = dataUrl.indexOf(',');
+    var len = dataUrl.length - i - 1;
+    var pad = dataUrl.slice(-2) === '==' ? 2 : dataUrl.slice(-1) === '=' ? 1 : 0;
+    return Math.floor(len * 3 / 4) - pad;
+  }
+
+  /* ---------- Submit ------------------------------------------------------ */
+  function payloadOf(form, photoInput) {
+    var data = {};
+    $$('[name]', form).forEach(function (c) {
+      if (c.type === 'file' || c.name === 'company_website') return; // honeypot handled before we get here
+      data[c.name] = (c.value || '').trim();
+    });
+    data._t = Number(data._t) || 0;
+    data.photos = (photoInput && photoInput._resized || []).map(function (r) {
+      return { name: r.name, type: r.type, data: r.dataUrl };
+    });
+    data.page_url = window.location.href;
+    return data;
+  }
+
+  function postQuote(data) {
+    var ctrl = window.AbortController ? new AbortController() : null;
+    var timer = ctrl && window.setTimeout(function () { ctrl.abort(); }, API_TIMEOUT_MS);
+    return fetch(QUOTE_ENDPOINT, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data),
+      signal: ctrl ? ctrl.signal : undefined
+    }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (j) {
+        return { status: r.status, body: j };
+      });
+    }).finally(function () { if (timer) window.clearTimeout(timer); });
   }
 
   $$('.quote__form').forEach(function (form) {
     var photoInput = setupPhotos(form);
 
-    // Honeypot — bots fill it, humans never see it.
+    // Honeypot — visually hidden (not display:none), bots fill it, humans never see it.
     var pot = document.createElement('div');
     pot.setAttribute('aria-hidden', 'true');
-    pot.style.cssText = 'position:absolute;left:-9999px;width:1px;height:1px;overflow:hidden';
+    pot.style.cssText = 'position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden';
     pot.innerHTML = '<label>Do not fill this in<input type="text" name="company_website" tabindex="-1" autocomplete="off"></label>';
     form.appendChild(pot);
 
+    // Minimum fill time — stamped when the page renders, checked server-side.
+    var stamp = document.createElement('input');
+    stamp.type = 'hidden';
+    stamp.name = '_t';
+    stamp.value = String(Date.now());
+    form.appendChild(stamp);
+
     var errorBox = $('.quote__error', form);
+    var button = form.querySelector('button[type="submit"]');
+
+    function fail(message) {
+      form.classList.remove('is-sending');
+      if (button) button.classList.remove('is-sending');
+      if (errorBox) { errorBox.textContent = message; errorBox.hidden = false; }
+    }
 
     form.addEventListener('submit', function (e) {
       e.preventDefault();
-
       if (form.classList.contains('is-sending')) return;
       if (errorBox) { errorBox.hidden = true; errorBox.textContent = ''; }
 
@@ -293,8 +357,8 @@
         return;
       }
 
-      // Bots that fill the honeypot get the thank-you page and nothing else:
-      // bail out before the tracking script can log a junk contact.
+      // Bots that fill the honeypot get the thank-you page and nothing else —
+      // and the tracking script does not see the event either.
       var honey = form.querySelector('[name="company_website"]');
       if (honey && honey.value) {
         e.stopImmediatePropagation();
@@ -302,17 +366,25 @@
         return;
       }
 
-      var button = form.querySelector('button[type="submit"]');
       if (button) button.classList.add('is-sending');
       form.classList.add('is-sending');
 
-      // The GHL tracking script reads the submit event after this handler.
-      // Hold the redirect so its request is not cancelled by the unload.
-      // Photos (if any, and if an endpoint is configured) go out in parallel;
-      // the redirect waits for whichever finishes last.
+      // Tracker still receives this submit event (no stopPropagation). Wait
+      // for the API and a grace period before navigating.
       var grace = new Promise(function (r) { window.setTimeout(r, CAPTURE_GRACE_MS); });
-      Promise.all([grace, uploadPhotos(form, photoInput)]).then(function () {
-        goToThankYou(form);
+      var api = postQuote(payloadOf(form, photoInput));
+
+      Promise.all([grace, api]).then(function (results) {
+        var r = results[1];
+        if (r.status >= 200 && r.status < 300 && r.body && r.body.ok) {
+          goToThankYou(form);
+        } else if (r.status === 400) {
+          fail('Something in the form did not look right — please check your phone number and try again.');
+        } else {
+          fail('We could not send that just now. Please try again, or call ' + (form.querySelector('.quote__alt a') || {}).textContent + '.');
+        }
+      }).catch(function () {
+        fail('We could not send that just now. Please try again, or call us.');
       });
     });
 

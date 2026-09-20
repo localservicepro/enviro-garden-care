@@ -704,9 +704,10 @@ FORM_FIELDS = [
      ["One-off job",
       "Regular maintenance (fortnightly / three-weekly)"]),
     # CD r20: photos of the property. Files cannot travel through the tracking
-    # script — see assets/js/main.js UPLOAD_ENDPOINT and README.
-    ("property_photos", "Photos of the property", "{{contact.property_photos}}", "file", False,
-     "Current condition — front, back, and anything overgrown", None),
+    # script — uploaded by api/quote.js into the "Job Photos" file field (key contact.job_photos).
+    ("property_photos", "Photos of the property", "{{contact.job_photos}}", "file", False,
+     "Up to 6 photos of the current condition — front, back, anything overgrown. "
+     "Phone photos are fine; we shrink them before sending.", None),
     ("job_notes", "Job Notes", "{{contact.job_notes}}", "textarea", False,
      "Anything we should know — access, gates, dogs, how long since the last cut…", None),
 ]

@@ -191,13 +191,20 @@ easiest term in the whole research and deserves a page — confirm before using 
 
 ## ⚠️ Before launch
 
-### 1. Lead capture — how it works (no webhook needed)
+### 1. Lead capture — two paths, one form
 
-Quote submissions are captured by the **GoHighLevel external-tracking script**, which
-listens for submit events on the page and reads the field values. Nothing else to
-configure for the text fields.
+Every quote form is `method="post" action="/api/quote"`. With JavaScript running the
+submit is intercepted and sent as JSON to **`api/quote.js`**, a Vercel serverless
+function that upserts the contact into GHL and uploads the photos into the **Job
+Photos** file field. Full details, env vars and the iPhone test are in
+[`api/README.md`](api/README.md). No Zapier, no webhook, no npm dependencies.
 
-Input `name` attributes are the GHL contact fields exactly:
+The **GHL external-tracking script** still sees the same submit event (the handler
+never calls `stopPropagation()`), so the text fields are captured twice — belt and
+braces. The redirect to `/thank-you/` waits for the API response plus
+`CAPTURE_GRACE_MS` (900ms) so neither path is cut off by the unload.
+
+Input `name` attributes are the GHL contact field keys exactly:
 
 | Form label | `name` attribute | GHL merge field |
 |---|---|---|
@@ -207,48 +214,43 @@ Input `name` attributes are the GHL contact fields exactly:
 | Property Address | `property_address` | `{{contact.property_address}}` |
 | Property Size | `property_size` | `{{contact.property_size}}` |
 | Service Needed | `service_needed` | `{{contact.service_needed}}` |
-| Job Type *(new, CD r83)* | `job_type` | `{{contact.job_type}}` |
-| Photos of the property *(new, CD r20)* | `property_photos` | — see below |
+| Job Type *(CD r83)* | `job_type` | `{{contact.job_type}}` |
+| Photos of the property *(CD r20)* | `property_photos` | `{{contact.job_photos}}` (file field, via the API) |
 | Job Notes | `job_notes` | `{{contact.job_notes}}` |
 
-Each field also carries `data-ghl="{{contact.…}}"` so the mapping is readable in the markup.
+Each field also carries `data-ghl="{{contact.…}}"` so the mapping is readable in the
+markup. The server-side mapping lives in the `FIELDS` object at the top of
+`api/quote.js` — change it there, not in the templates.
 
-`property_size`, `service_needed` and **`job_type`** are custom fields — create them in
-GHL (**Settings → Custom Fields**) before the first submission, or those values will
-have nowhere to land. `job_type` values: `One-off job` / `Regular maintenance
-(fortnightly / three-weekly)`.
+**Photos.** Up to 6, resized in the browser (1600px longest side, JPEG q0.82, ~3 MB
+total) before they are sent as base64 — that keeps the request under Vercel's 4.5 MB
+cap and turns iPhone HEIC into JPEG, which GHL accepts. The server re-checks type by
+magic bytes and size. Contact first, photos second: a failed upload still returns
+`ok:true` with `photoError:true`, so a bad image never loses a lead.
 
-**Property photos need their own transport.** The tracking script only reads text
-values; it cannot carry files. `assets/js/main.js` has an `UPLOAD_ENDPOINT` constant:
+**Spam.** A visually hidden honeypot (`company_website`, off-screen, not
+`display:none`) and a minimum fill time (`_t`, stamped at render). Both are handled
+client-side *and* server-side, and both send the bot to `/thank-you/` without creating a
+contact; the honeypot path also calls `stopImmediatePropagation()` so the tracker never
+sees it.
 
-- while it is empty (now), the photo field is hidden and the form shows *"Have photos?
-  Text them to 0407 276 574 or email …"* instead — a visitor is never offered an upload
-  that would go nowhere;
-- set it to any URL that accepts `multipart/form-data` (a GHL inbound webhook, or a
-  small upload handler) and the field appears: up to 6 images, 8 MB each, validated with
-  thumbnails. Files are POSTed as `property_photos[]` alongside `email`, `phone` and
-  `full_name` so they can be matched to the contact the tracker creates.
-
-The alternative is to replace the custom form with an embedded GHL form, which supports
-uploads natively but loses the styling and the tracking-timing safeguards below.
+**No-JS fallback.** The native urlencoded POST hits the same function, which upserts the
+text fields and answers `303 → /thank-you/`. Nothing ever lands in the URL.
 
 **Two things in `assets/js/main.js` exist to keep capture working. Don't "tidy" them away:**
 
-- The submit handler **never calls `stopPropagation()`**, so the tracking script's own
-  listener still receives the event.
-- The redirect to `/thank-you/` is **held for `CAPTURE_GRACE_MS` (900ms)** — and for the
-  photo upload if one is in flight — so nothing is cancelled by the unload.
+- the submit handler never calls `stopPropagation()` on a genuine submit;
+- `goToThankYou()` always navigates to `/thank-you/`, never to the form's `action`
+  (that is the API — a GET on it is a 405).
 
-Load order matters and is already correct: the tracking script is a plain (non-deferred)
-tag at the end of `<body>`, and `main.js` is deferred, so the tracker registers its
-listeners first.
+Load order matters and is already correct: the tracking script is a plain
+(non-deferred) tag at the end of `<body>`, and `main.js` is deferred, so the tracker
+registers its listeners first.
 
-Honeypot submissions call `stopImmediatePropagation()` — bots get the thank-you page,
-GHL gets no junk contact.
-
-Forms are `method="get"` purely as a no-JS fallback (a native POST to a static page is
-a 405 on most static hosts). With JS running the submit is intercepted, so no field
-values ever reach the URL.
+**Deploy checklist:** `GHL_LOCATION_ID`, `GHL_PIT_TOKEN`, `GHL_JOB_PHOTOS_FIELD_ID` set in
+the Vercel project (done, per client); run `scripts/list-custom-fields.mjs` once to
+confirm the Job Photos field **ID** and that the duplicated custom-field keys resolve
+to the intended twins; then the iPhone test in `api/README.md`.
 
 ### 2. Trading hours — **still an assumption**
 

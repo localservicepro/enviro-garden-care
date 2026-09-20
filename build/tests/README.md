@@ -7,7 +7,8 @@ These are development aids, not part of the deployed site.
 python3 -m http.server 8123 &
 npm i -D playwright@1.49.1
 
-node build/tests/formtest.js   # quote form: GHL fields, validation, thank-you redirect
+node --test build/tests/quote.test.js   # api/quote.js: mocked GHL, no browser, no server needed
+node build/tests/formtest.js   # quote form: GHL fields, validation, mocked /api/quote, photos → base64 JPEG, redirect
 node build/tests/navtest.js    # services dropdown + mobile drawer submenu
 node build/tests/shot.js       # screenshots + layout/JS error sweep
 node build/tests/gcheck.js     # gallery grid geometry

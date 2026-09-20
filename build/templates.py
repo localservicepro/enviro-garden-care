@@ -390,23 +390,16 @@ def quote_form(form_id="quote-form", compact=False, preselect=None, heading=None
             control = ('<select id="%s-%s" name="%s" data-ghl="%s"%s>%s</select>'
                        % (form_id, name, name, merge, req, "".join(opts)))
         elif kind == "file":
-            # CD r20. Rendered hidden until main.js confirms an upload endpoint is
-            # configured; otherwise a "text or email your photos" line shows instead,
-            # because the tracking script cannot carry files.
+            # CD r20. Photos are resized in the browser and sent to /api/quote,
+            # which uploads them into the Job Photos custom field in GHL.
             control = ('<input type="file" id="%s-%s" name="%s" data-ghl="%s" '
-                       'accept="image/*" multiple data-max-files="6" data-max-mb="8">'
+                       'accept="image/*" multiple>'
                        '<span class="field__hint">%s</span>'
                        '<div class="field__thumbs" aria-live="polite"></div>'
                        % (form_id, name, name, merge, placeholder))
-            rows.append('<div class="field field--wide field--file" hidden>'
+            rows.append('<div class="field field--wide field--file">'
                         '<label for="%s-%s">%s</label>%s</div>'
                         % (form_id, name, label, control))
-            rows.append('<div class="field field--wide field--photos-alt">'
-                        '<p>%s <strong>Have photos of the property?</strong> Text them to '
-                        '<a href="sms:%s">%s</a> or email <a href="mailto:%s">%s</a> after you '
-                        'send this — it helps us get the price right.</p></div>'
-                        % (icon("camera", "icon icon--sm"), BIZ["phone_e164"],
-                           BIZ["phone_display"], BIZ["email"], BIZ["email"]))
             continue
         elif kind == "textarea":
             control = ('<textarea id="%s-%s" name="%s" data-ghl="%s" rows="4" '
@@ -429,11 +422,10 @@ def quote_form(form_id="quote-form", compact=False, preselect=None, heading=None
 
     return """<div class="quote{cls}">
   {head}
-  <!-- method="get" is the no-JS fallback only: a native POST to a static page
-       is a 405 on most static hosts. With JS the submit is intercepted, so no
-       field values ever reach the URL. Capture is handled by the GHL tracking
-       script — see assets/js/main.js. -->
-  <form class="quote__form" id="{fid}" method="get" action="/thank-you/" novalidate>
+  <!-- With JS the submit is intercepted and sent as JSON to /api/quote (see
+       assets/js/main.js). Without JS the browser posts urlencoded to the same
+       function, which answers 303 -> /thank-you/. -->
+  <form class="quote__form" id="{fid}" method="post" action="/api/quote" enctype="application/x-www-form-urlencoded" novalidate>
     <div class="quote__grid">
       {rows}
     </div>

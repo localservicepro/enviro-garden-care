@@ -68,6 +68,8 @@ def resolve(href):
     if not path.startswith("/"):
         return False          # relative link — no longer expected anywhere
     path = path.lstrip("/")
+    if path.startswith("api/"):
+        return os.path.join(ROOT, path + ".js")            # Vercel function
     if path == "" or path.endswith("/"):
         path += "index.html"
     return os.path.join(ROOT, path)
@@ -185,8 +187,10 @@ for path in pages:
         action = re.search(r'action="([^"]+)"', form)
         if not action:
             err(rel, "form without action")
-        elif action.group(1) != "/thank-you/":
-            err(rel, "form action is not /thank-you/: %s" % action.group(1))
+        elif action.group(1) != "/api/quote":
+            err(rel, "form action is not /api/quote: %s" % action.group(1))
+        if 'method="post"' not in form:
+            err(rel, "form must POST to the API")
 
     # --- internal links --------------------------------------------------
     for attr in ("href", "src", "action"):
