@@ -4,7 +4,7 @@
 import json
 import re
 from data import (SITE, BIZ, MAP_EMBED, TRACKING_ID, IMG, SERVICES, ALL_SUBURBS,
-                  AREA_GROUPS, FORM_FIELDS)
+                  AREA_GROUPS, FORM_FIELDS, CITABLE, PRICE, RANGE, RANGE_TAIL)
 
 
 def plain(html):
@@ -51,6 +51,8 @@ ICONS = {
     "star": '<path d="m12 3.5 2.6 5.6 6 .8-4.4 4.2 1.1 6-5.3-2.9-5.3 2.9 1.1-6L3.4 9.9l6-.8z"/>',
     "check": '<path d="m4 12.5 5 5L20 6.5"/>',
     "arrow": '<path d="M5 12h14M13 6l6 6-6 6"/>',
+    "home": '<path d="M3 11.5 12 4l9 7.5"/><path d="M5.5 10v9.5h13V10"/><path d="M10 19.5v-5h4v5"/>',
+    "camera": '<path d="M4 8h3l1.5-2h7L17 8h3v11H4z"/><circle cx="12" cy="13" r="3.2"/>',
 }
 
 
@@ -78,26 +80,23 @@ def local_business_schema():
         "@id": SITE + "/#business",
         "name": BIZ["name"],
         "alternateName": "Enviro Garden Care",
-        "description": plain(
-            "Enviro Garden Care & Odd Jobs is a Pimpama-based lawn mowing and garden "
-            "maintenance business servicing the Northern Gold Coast from Coomera to Yatala "
-            "with both fuel and battery-powered equipment."),
+        "description": plain(CITABLE),
         "url": SITE + "/",
         "telephone": BIZ["phone_e164"],
         "email": BIZ["email"],
-        "founder": {"@type": "Person", "name": BIZ["owner"]},
         "image": IMG["hero"],
         "logo": IMG["logo"],
         "priceRange": "$$",
         "currenciesAccepted": "AUD",
-        "address": {
-            "@type": "PostalAddress",
-            "streetAddress": BIZ["street"],
-            "addressLocality": BIZ["suburb"],
-            "addressRegion": BIZ["region"],
-            "postalCode": BIZ["postcode"],
-            "addressCountry": BIZ["country"],
-        },
+        # CD r94 (awaiting client): street kept in hidden schema only so the NAP
+        # matches the Google Business Profile. Toggle in data.py.
+        "address": dict(
+            [("@type", "PostalAddress")]
+            + ([("streetAddress", BIZ["street"])] if BIZ["show_street_in_schema"] else [])
+            + [("addressLocality", BIZ["suburb"]),
+               ("addressRegion", BIZ["region"]),
+               ("postalCode", BIZ["postcode"]),
+               ("addressCountry", BIZ["country"])]),
         "geo": {"@type": "GeoCoordinates",
                 "latitude": BIZ["lat"], "longitude": BIZ["lng"]},
         "hasMap": BIZ["gbp"],
@@ -108,7 +107,7 @@ def local_business_schema():
         "knowsAbout": ["Lawn mowing", "Acreage mowing", "Ride-on mowing",
                        "Garden maintenance", "Hedge trimming", "Weed control",
                        "Green waste removal", "Commercial grounds maintenance",
-                       "Battery-powered lawn equipment"],
+                       "Odd jobs and minor handyman repairs"],
         "hasOfferCatalog": {
             "@type": "OfferCatalog",
             "name": "Lawn and garden services — Northern Gold Coast",
@@ -275,7 +274,7 @@ def header(active=""):
       </ul>
       <div class="nav__cta">
         <a class="btn btn--ghost" href="tel:{tel}">{ph_icon}{phone}</a>
-        <a class="btn btn--primary" href="/contact/">Get a free quote</a>
+        <a class="btn btn--primary" href="/contact/">Get a free estimate</a>
       </div>
     </nav>
     <a class="header-call" href="tel:{tel}" aria-label="Call {phone}">{ph_icon}</a>
@@ -287,7 +286,7 @@ def header(active=""):
     <div class="wrap megamenu__inner">
       <div class="megamenu__lead">
         <span class="eyebrow">Our services</span>
-        <p>Lawn, garden and grounds care across 19 suburbs of the Northern Gold Coast — plus the odd jobs nobody else will quote.</p>
+        <p>Lawn, garden and grounds care from Parkwood to Windaroo and all suburbs in between — plus the odd jobs we fit in through the quieter months.</p>
         <a class="link-arrow" href="/services/">See all services {ar}</a>
       </div>
       <ul class="megamenu__grid">{svc}</ul>
@@ -339,15 +338,15 @@ def footer():
         <address>
           <a class="site-footer__phone" href="tel:{tel}">{phone}</a>
           <a href="mailto:{email}">{email}</a>
-          <span>{street}<br>{sub} {reg} {pc}</span>
+          <span>{sub} {reg} {pc}</span>
         </address>
-        <div class="hours">{hours}</div>
-        <p class="hours__note">{hnote}</p>
+        <div class="hours">{hours}</div>{hnote}
       </div>
     </div>
     <div class="site-footer__areas">
       <h2>Areas we service</h2>
       <ul>{areas}</ul>
+      <p class="site-footer__areas-note">Parkwood to Windaroo and all suburbs in between.</p>
     </div>
     <div class="site-footer__base">
       <p>&copy; <span id="year">2026</span> {biz}. All rights reserved. ABN available on request.</p>
@@ -356,7 +355,7 @@ def footer():
   </div>
 </footer>
 <a class="callbar" href="tel:{tel}">
-  {ph_icon}<span>Call {phone}</span><em>Free quote · 7 days</em>
+  {ph_icon}<span>Call {phone}</span><em>Free estimate · Mon–Sat</em>
 </a>
 <script src="/assets/js/main.js" defer></script>
 <script src="https://link.msgsndr.com/js/external-tracking.js" data-tracking-id="{track}"></script>
@@ -365,10 +364,12 @@ def footer():
 """.format(biz=BIZ["name"], logo=IMG["logo"], svc=svc_links, areas=areas,
            tel=BIZ["phone_e164"], phone=BIZ["phone_display"], email=BIZ["email"],
            street=BIZ["street"], sub=BIZ["suburb"], reg=BIZ["region"], pc=BIZ["postcode"],
-           hours=hours, hnote=BIZ["hours_note"], fb=BIZ["facebook"], gbp=BIZ["gbp"],
-           citable=("A Pimpama-based lawn mowing and garden maintenance business servicing "
-                    "the Northern Gold Coast from Coomera to Yatala, with both fuel and "
-                    "battery-powered equipment."),
+           hours=hours,
+           hnote=('\n        <p class="hours__note">%s</p>' % BIZ["hours_note"]) if BIZ["hours_note"] else "",
+           fb=BIZ["facebook"], gbp=BIZ["gbp"],
+           citable=("A Pimpama-based, family-owned lawn mowing and garden maintenance business "
+                    "servicing the Northern Gold Coast from Parkwood to Windaroo and all "
+                    "suburbs in between."),
            track=TRACKING_ID, ph_icon=icon("phone", "icon icon--sm"))
 
 
@@ -388,6 +389,25 @@ def quote_form(form_id="quote-form", compact=False, preselect=None, heading=None
                 opts.append('<option value="%s"%s>%s</option>' % (plain(o), sel, o))
             control = ('<select id="%s-%s" name="%s" data-ghl="%s"%s>%s</select>'
                        % (form_id, name, name, merge, req, "".join(opts)))
+        elif kind == "file":
+            # CD r20. Rendered hidden until main.js confirms an upload endpoint is
+            # configured; otherwise a "text or email your photos" line shows instead,
+            # because the tracking script cannot carry files.
+            control = ('<input type="file" id="%s-%s" name="%s" data-ghl="%s" '
+                       'accept="image/*" multiple data-max-files="6" data-max-mb="8">'
+                       '<span class="field__hint">%s</span>'
+                       '<div class="field__thumbs" aria-live="polite"></div>'
+                       % (form_id, name, name, merge, placeholder))
+            rows.append('<div class="field field--wide field--file" hidden>'
+                        '<label for="%s-%s">%s</label>%s</div>'
+                        % (form_id, name, label, control))
+            rows.append('<div class="field field--wide field--photos-alt">'
+                        '<p>%s <strong>Have photos of the property?</strong> Text them to '
+                        '<a href="sms:%s">%s</a> or email <a href="mailto:%s">%s</a> after you '
+                        'send this — it helps us get the price right.</p></div>'
+                        % (icon("camera", "icon icon--sm"), BIZ["phone_e164"],
+                           BIZ["phone_display"], BIZ["email"], BIZ["email"]))
+            continue
         elif kind == "textarea":
             control = ('<textarea id="%s-%s" name="%s" data-ghl="%s" rows="4" '
                        'placeholder="%s"%s></textarea>'
@@ -404,8 +424,8 @@ def quote_form(form_id="quote-form", compact=False, preselect=None, heading=None
     head_html = ""
     if heading:
         head_html = ('<div class="quote__head"><h2>%s</h2>'
-                     '<p>Tell us about the property and we will come back with a price — '
-                     'usually the same day.</p></div>' % heading)
+                     '<p>Tell us about the property and we will come back with %s — '
+                     'usually the same day.</p></div>' % (heading, PRICE))
 
     return """<div class="quote{cls}">
   {head}
@@ -418,13 +438,14 @@ def quote_form(form_id="quote-form", compact=False, preselect=None, heading=None
       {rows}
     </div>
     <div class="quote__consent">
-      <p>By sending this you agree we can contact you about your quote. No spam, no shared data.</p>
+      <p>By sending this you agree we can contact you about your estimate. No spam, no shared data.</p>
     </div>
     <button type="submit" class="btn btn--primary btn--block">
-      <span class="btn__label">Get my free quote</span>
+      <span class="btn__label">Get my free estimate</span>
       <span class="btn__spin" aria-hidden="true"></span>
     </button>
     <p class="quote__alt">Prefer to talk? Call <a href="tel:{tel}">{phone}</a> — you will get {owner}, not a call centre.</p>
+    <p class="quote__fine">Every price is approximate and confirmed on inspection.</p>
     <p class="quote__error" role="alert" hidden></p>
   </form>
 </div>""".format(cls=" quote--compact" if compact else "", head=head_html, fid=form_id,
@@ -466,9 +487,9 @@ def faq_block(faqs, title="Frequently asked questions",
 
 
 def areas_section(heading="Where we mow on the Northern Gold Coast", intro=None):
-    intro = intro or ("Nineteen suburbs, one truck, no travel surcharge. We work the northern "
-                      "corridor from Yatala down to Parkwood — if you are on this list, you are "
-                      "on our run.")
+    intro = intro or ("Nineteen named suburbs, one truck, no travel surcharge. We work the "
+                      "Northern Gold Coast from Windaroo down to Parkwood, and any suburb in "
+                      "between — if you are on this list, you are covered.")
     cards = []
     for name, blurb, subs in AREA_GROUPS:
         chips = "".join('<li>%s</li>' % s for s in subs)
@@ -487,26 +508,27 @@ def areas_section(heading="Where we mow on the Northern Gold Coast", intro=None)
     <div class="areas">
       <div class="areas__list">
         {cards}
+        <p class="areas__tail reveal">…and any suburb in between Parkwood and Windaroo. Not sure? Ring — we probably drive past you.</p>
       </div>
       <div class="areas__map">
         {map}
         <div class="areas__card reveal">
-          <p class="areas__addr"><strong>{biz}</strong><br>{street}, {sub} {reg} {pc}</p>
+          <p class="areas__addr"><strong>{biz}</strong><br>Based in {sub} {reg} {pc}</p>
           <a class="btn btn--ghost btn--sm" href="{gbp}" target="_blank" rel="noopener">Open in Google Maps</a>
         </div>
       </div>
     </div>
   </div>
 </section>""".format(heading=heading, intro=intro, cards="\n        ".join(cards),
-                     map=map_embed(), biz=BIZ["name"], street=BIZ["street"],
+                     map=map_embed(), biz=BIZ["name"],
                      sub=BIZ["suburb"], reg=BIZ["region"], pc=BIZ["postcode"],
                      gbp=BIZ["gbp"], pin=icon("pin", "icon icon--sm"))
 
 
 def cta_band(title=None, text=None):
     title = title or "Get your lawn back on a schedule"
-    text = text or ("Free quote, no obligation, and an honest answer about when we can "
-                    "actually get there.")
+    text = text or ("Free estimate, no obligation — an approximate price pending inspection, "
+                    "and an honest answer about when we can actually get there.")
     return """<section class="cta" style="--cta-img:url('{img}')">
   <div class="wrap cta__inner reveal">
     <div>
@@ -514,7 +536,7 @@ def cta_band(title=None, text=None):
       <p>{text}</p>
     </div>
     <div class="cta__actions">
-      <a class="btn btn--primary btn--lg" href="/contact/">Get a free quote</a>
+      <a class="btn btn--primary btn--lg" href="/contact/">Get a free estimate</a>
       <a class="btn btn--outline btn--lg" href="tel:{tel}">{ph}{phone}</a>
     </div>
   </div>

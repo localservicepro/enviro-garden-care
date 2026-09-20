@@ -27,7 +27,24 @@
      and this file is deferred, so its listeners are always registered first.
      ----------------------------------------------------------------------- */
   var CAPTURE_GRACE_MS = 900;
-  var THANK_YOU = 'thank-you.html';
+  var THANK_YOU = '/thank-you/';
+
+  /* -----------------------------------------------------------------------
+     PROPERTY PHOTOS (Change Doc r20)
+
+     The client wants customers to attach photos of the property. The GHL
+     tracking script only reads text field values, so files need their own
+     transport. Set UPLOAD_ENDPOINT to a URL that accepts multipart/form-data
+     (a GHL inbound webhook, or any small upload handler) and the photo field
+     appears. While it is empty the field stays hidden and the form shows a
+     "text or email your photos" line instead — a visitor is never offered an
+     upload that would silently go nowhere.
+
+     Files are POSTed as multipart with the visitor's email and phone so they
+     can be matched to the contact GHL creates from the tracked submission.
+     ----------------------------------------------------------------------- */
+  var UPLOAD_ENDPOINT = '';
+  var UPLOAD_TIMEOUT_MS = 15000;
 
   var root = document.documentElement;
   var reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
@@ -167,7 +184,7 @@
     var firstBad = null;
     $$('.field', form).forEach(function (field) {
       var control = field.querySelector('input,select,textarea');
-      if (!control) return;
+      if (!control || control.type === 'file') return;
       var value = (control.value || '').trim();
       var label = (field.querySelector('label') || {}).textContent || 'This field';
       label = label.replace('*', '').trim();
@@ -192,7 +209,68 @@
     window.setTimeout(function () { window.location.assign(target); }, delay || 0);
   }
 
+  function setupPhotos(form) {
+    var wrap = $('.field--file', form);
+    var alt = $('.field--photos-alt', form);
+    if (!wrap) return null;
+    if (!UPLOAD_ENDPOINT) {
+      wrap.hidden = true;
+      if (alt) alt.hidden = false;
+      return null;
+    }
+    wrap.hidden = false;
+    if (alt) alt.hidden = true;
+
+    var input = wrap.querySelector('input[type="file"]');
+    var thumbs = wrap.querySelector('.field__thumbs');
+    var maxFiles = parseInt(input.getAttribute('data-max-files') || '6', 10);
+    var maxBytes = parseFloat(input.getAttribute('data-max-mb') || '8') * 1024 * 1024;
+
+    input.addEventListener('change', function () {
+      thumbs.innerHTML = '';
+      var files = Array.prototype.slice.call(input.files || []);
+      var problem = '';
+      if (files.length > maxFiles) problem = 'Please attach up to ' + maxFiles + ' photos.';
+      files.forEach(function (f) {
+        if (f.size > maxBytes) problem = 'Each photo needs to be under ' + Math.round(maxBytes / 1048576) + ' MB.';
+        if (f.type && f.type.indexOf('image/') !== 0) problem = 'Photos only, please (JPG, PNG or HEIC).';
+      });
+      setError(wrap, problem);
+      if (problem) { input.value = ''; return; }
+      files.forEach(function (f) {
+        if (!window.URL || !URL.createObjectURL) return;
+        var img = document.createElement('img');
+        img.alt = '';
+        img.src = URL.createObjectURL(f);
+        img.onload = function () { URL.revokeObjectURL(img.src); };
+        thumbs.appendChild(img);
+      });
+    });
+    return input;
+  }
+
+  // Sends photos to UPLOAD_ENDPOINT. Resolves either way — a slow or failed
+  // upload must never stop the visitor reaching the thank-you page, and the
+  // text fields have already been captured by the tracking script.
+  function uploadPhotos(form, input) {
+    if (!input || !input.files || !input.files.length) return Promise.resolve();
+    var fd = new FormData();
+    fd.append('email', (form.email && form.email.value || '').trim());
+    fd.append('phone', (form.phone && form.phone.value || '').trim());
+    fd.append('full_name', (form.full_name && form.full_name.value || '').trim());
+    fd.append('page_url', window.location.href);
+    Array.prototype.forEach.call(input.files, function (f) { fd.append('property_photos[]', f, f.name); });
+    return new Promise(function (resolve) {
+      var done = false;
+      var finish = function () { if (!done) { done = true; resolve(); } };
+      window.setTimeout(finish, UPLOAD_TIMEOUT_MS);
+      fetch(UPLOAD_ENDPOINT, { method: 'POST', body: fd, keepalive: true }).then(finish, finish);
+    });
+  }
+
   $$('.quote__form').forEach(function (form) {
+    var photoInput = setupPhotos(form);
+
     // Honeypot — bots fill it, humans never see it.
     var pot = document.createElement('div');
     pot.setAttribute('aria-hidden', 'true');
@@ -230,7 +308,12 @@
 
       // The GHL tracking script reads the submit event after this handler.
       // Hold the redirect so its request is not cancelled by the unload.
-      goToThankYou(form, CAPTURE_GRACE_MS);
+      // Photos (if any, and if an endpoint is configured) go out in parallel;
+      // the redirect waits for whichever finishes last.
+      var grace = new Promise(function (r) { window.setTimeout(r, CAPTURE_GRACE_MS); });
+      Promise.all([grace, uploadPhotos(form, photoInput)]).then(function () {
+        goToThankYou(form);
+      });
     });
 
     // Clear a field's error as soon as the visitor starts fixing it.

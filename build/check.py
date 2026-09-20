@@ -156,6 +156,18 @@ for path in pages:
         if "loading=" not in tag:
             warn(rel, "img without loading attr: %s" % tag[:70])
 
+    # --- no photo used more than once on a page (CD r16 / r31) -----------
+    srcs = re.findall(r'<img\b[^>]*\bsrc="([^"]+)"', src)
+    srcs += re.findall(r"url\('([^']+)'\)", src)          # hero / cta backgrounds
+    seen_src = {}
+    for u in srcs:
+        key = u.split("=w")[0]                             # ignore width variants
+        seen_src[key] = seen_src.get(key, 0) + 1
+    for key, n in seen_src.items():
+        # The logo sits in both header and footer by design.
+        if n > 1 and "1z4Ip6GLPeDBuyDfUf-Vy28bBA0MB_R4c" not in key and not key.endswith(".svg"):
+            err(rel, "same photo used %d times on the page: …%s" % (n, key[-30:]))
+
     # --- tracking + analytics -------------------------------------------
     if "link.msgsndr.com/js/external-tracking.js" not in src:
         err(rel, "missing GHL tracking script")
@@ -179,7 +191,7 @@ for path in pages:
     # --- internal links --------------------------------------------------
     for attr in ("href", "src", "action"):
         for ref in re.findall(r'%s="([^"]+)"' % attr, src):
-            if ref.startswith(("http", "mailto:", "tel:", "#", "data:")):
+            if ref.startswith(("http", "mailto:", "tel:", "sms:", "#", "data:")):
                 continue
             resolved = resolve(ref)
             if resolved is None:
@@ -191,6 +203,54 @@ for path in pages:
                 err(rel, "broken %s -> %s" % (attr, ref))
             elif ref.split("#")[0].endswith(".html") and ref != "/404.html":
                 err(rel, "%s still exposes .html -> %s" % (attr, ref))
+
+# --- Change Doc guard (client review, 15 & 21 Sep 2026) ------------------
+# Words and claims the client asked to remove site-wide. Checked against the
+# visible text of every page (scripts and JSON-LD stripped), so a future copy
+# edit cannot quietly reintroduce them.
+BANNED = [
+    ("corridor", "CD r7 — service-area wording"),
+    ("brisbane", "CD r8"),
+    ("monthly", "CD r9 — frequencies are fortnightly / three-weekly / one-off"),
+    ("sunday", "CD r10"),
+    ("hopton", "CD r14 — first name only"),
+    ("cullen", "CD r88 — street never in visible copy"),
+    ("no extra charge", "CD r12 — battery claim"),
+    ("zero extra charge", "CD r12 — battery claim"),
+    ("we let you choose", "CD r12"),
+    ("early starts without", "CD r64"),
+    ("drop sheet", "CD r53"),
+    ("free quote", "CD r13 — price is approximate, pending inspection"),
+    ("mowing round", "CD r15"),
+    ("fence painting", "CD r69"),
+    ("picture hanging", "CD r69"),
+    ("pimpama to coomera", "CD r17"),
+    ("coomera to yatala", "CD r18"),
+    ("yatala down to parkwood", "CD r76"),
+]
+for path in pages:
+    rel = os.path.relpath(path, ROOT)
+    src = open(path, encoding="utf-8").read()
+    visible = re.sub(r"<(script|style)\b.*?</\1>", " ", src, flags=re.S)
+    visible = re.sub(r"<!--.*?-->", " ", visible, flags=re.S)
+    visible = html.unescape(re.sub(r"<[^>]+>", " ", visible)).lower()
+    for word, why in BANNED:
+        n = visible.count(word)
+        if n:
+            err(rel, "banned phrase %r x%d (%s)" % (word, n, why))
+    # Battery may be mentioned, but only as "on request" — never as a headline
+    # feature (CD r12). Cap it, and never alongside a no-charge claim.
+    # One "available on request" line plus the FAQ the client asked for (CD r34)
+    # is four or five mentions; more than that is battery creeping back in.
+    nb = visible.count("battery")
+    if nb > 5:
+        err(rel, "'battery' appears %d times — CD r12 allows one line plus the FAQ" % nb)
+    if re.search(r"battery[^.]{0,60}(no extra|zero extra|free of charge|same price)", visible):
+        err(rel, "battery described as no-extra-charge (CD r12)")
+    for m in re.finditer(r"green waste[^.]{0,80}(taken away|removed|leaves with)", visible):
+        window = visible[m.start(): m.end() + 60]
+        if "additional charge" not in window and "extra charge" not in window and "green waste bin" not in window:
+            err(rel, "green waste removal stated without 'additional charge' (CD r11): …%s…" % window[:90])
 
 # --- duplicates ----------------------------------------------------------
 for t, files in seen_titles.items():

@@ -21,7 +21,7 @@ comes from that document.
 | `/services/commercial-property-maintenance/` | …`/index.html` | commercial property maintenance gold coast | high intent | — |
 | `/services/odd-jobs-handyman/` | …`/index.html` | odd jobs handyman gold coast | long-tail | — |
 | `/services/` | `services/index.html` | services hub (no competing target) | — | — |
-| `/about/` | `about/index.html` | battery powered lawn mowing gold coast | differentiator | — |
+| `/about/` | `about/index.html` | family-owned lawn mowing (was *battery powered* — see Strategy flags) | differentiator | — |
 | `/contact/` | `contact/index.html` | quotes and contact | — | — |
 | `/thank-you/` | `thank-you/index.html` | form redirect target (`noindex`) | — | — |
 | `/404.html` | `404.html` | not found (`noindex`) | — | — |
@@ -90,16 +90,112 @@ dependency in the shipped site.
 
 ---
 
-## ⚠️ Before launch
+## Client review — Change Doc applied
 
-Two items need the client's sign-off. Lead capture (section 1) is already wired —
-it is documented here because the wiring is easy to break.
+The client's review (Google Sheet **Change Doc – Enviro Garden Care & Odd Jobs**, rows
+7–94, from the 15 Sep Loom plus LSP's 21 Sep additions) has been applied. Every row is
+cited in the source as `CD r<n>` where it lands. In summary:
+
+| Theme | Rows | What changed |
+|---|---|---|
+| Service area wording | 7, 17, 18, 22, 32, 37, 47–48, 51–52, 56, 59–60, 67, 76, 79 | "Parkwood to Windaroo and all suburbs in between" everywhere; no "corridor" |
+| Brisbane | 8, 21, 40, 87 | Every mention removed |
+| Frequencies | 9, 23, 30, 33, 38, 42, 65 | Fortnightly / three-weekly (Apr–Sep) / one-off. No "monthly" |
+| Sundays | 10, 29, 34, 77, 81, 86 | Every mention removed |
+| Green waste | 11, 26, 30, 36, 39, 41, 43, 46, 49, 54, 57, 62, 84 | Default is the customer's green bin; removal only "for an additional charge"; trust-bar item gone |
+| Battery | 12, 29, 34, 43, 61, 63, 64, 71, 78, 89, 90 | No longer a feature; one "available on request" line + the FAQ the client asked for |
+| Pricing language | 13, 19, 45, 80, 82, 85 | "An approximate price, pending inspection"; buttons say *free estimate*, never *free quote* |
+| Owner & address | 14, 73, 88, 94 | "Shanon of Pimpama"; "Pimpama QLD 4209" only in visible copy |
+| "Round" → "business" | 15, 72, 74 | Family-owned business wording |
+| Odd jobs | 68, 69 | "…during the quieter months"; fence painting and picture hanging removed |
+| Form | 20, 83 | Job type dropdown; property-photo upload (see Lead capture) |
+| Metas & schema | 89, 90, 91 | Rewritten to match |
+| Photos | 16, 23–28, 31, 44, 50, 55, 58, 66, 70, 75 | See **Photos** below — partly done, needs eyes |
+
+`build/check.py` now fails the build if any banned phrase (corridor, Brisbane, monthly,
+Sunday, surname, street, "free quote", "no extra charge", …) reappears in visible copy,
+if "battery" creeps back beyond one line plus its FAQ, if green-waste removal is stated
+without "additional charge", or if any photo is used twice on a page.
+
+**Rows still awaiting the client (92–94):** the Coomera wording at Loom 11:35 (implemented
+as "remove corridor"), the three-weekly option (implemented per row 9), and whether the
+street address may stay in the hidden schema (implemented as *yes* — see below).
+
+### ⚠️ Strategy flags for the client conversation
+
+Three of the client's requests cut against the SEO research. Each was applied as asked,
+with the least-damaging implementation, but the client should hear the trade-off:
+
+1. **Battery-powered mowing was the research's differentiator.** "Nobody on page one
+   owns the quiet/battery angle" drove the About page target (*battery powered lawn
+   mowing gold coast*), a planned blog post on Sunday mowing noise, and an AEO FAQ. The
+   client says petrol is used most of the time and battery is on request only — so the
+   claim was never true and had to go. The About page now targets *family-owned lawn
+   mowing* instead. If Shanon is willing to *actually* run battery gear by default on
+   residential jobs, the original angle is worth reinstating; otherwise it is gone for good.
+2. **The homepage H1 lost its two highest-value suburbs.** "Pimpama to Coomera" became
+   "Parkwood to Windaroo" (row 17). Pimpama is the home suburb (already ranking 12th for
+   *lawn mowing pimpama*); Coomera is the #1 local target (50/mo). Parkwood and Windaroo
+   have no measured search volume. Mitigation applied: the head term stays in the H1 and
+   Pimpama, Coomera, Ormeau, Helensvale and Hope Island are named in the very next
+   sentence, which satisfies the research's placement rule. Worth asking whether
+   "Pimpama to Coomera" could stay in the H1 with the Parkwood–Windaroo range in the
+   sentence below — that is the stronger arrangement.
+3. **Removing the street address weakens local NAP signals.** The research listed the
+   full address in the footer as a fix. It is now in the hidden `LocalBusiness` schema
+   only (row 94, pending). If Shanon also wants it out of the schema, the GBP should be
+   switched to a service-area listing so the two stay consistent — and expect a small
+   local-pack hit either way.
+
+Minor, no action needed: "Get a free quote" became "Get a free estimate" on every
+button (an estimate *is* an approximate price, and it keeps the CTA short); the odd-jobs
+page now says those jobs are seasonal, which will reduce enquiries but is the truth.
+
+### Photos — partly done, needs someone with eyes on the folder
+
+The client's core complaint was wrong and duplicated photos. What is fixed with
+certainty (from the client's own descriptions in the Loom):
+
+- Lawn Mowing card ↔ Acreage card swapped (each was showing the other's photo)
+- Commercial card and page use the `van 1.jpg` / `van 2.jpg` uploads
+- Two byte-identical re-uploads dropped; `check.py` now fails on any duplicate per page
+- Every page has its own gallery instead of the same four photos everywhere
+
+What could **not** be done here: the build environment cannot fetch image bytes from
+Drive, so the 15 UUID-named photos in the **Review images** folder
+(`1V6Bf9lBqDxaI-CE35rUcyfAPFJ7UvBCl`) have been placed **blind**. Open `build/data.py`,
+search for `TODO` and `UNVERIFIED`, and assign by eye. The slots that need a specific
+subject:
+
+| Slot | Needs | Currently |
+|---|---|---|
+| `IMG["svc_garden"]` (Garden card) | a hedge photo | `new_01` — unverified |
+| `IMG["svc_odd"]` (Odd Jobs card) | residential, not acreage | `orig_1` — unverified |
+| `GALLERY_BY_SERVICE["garden-maintenance"]` ×4 | hedges / gardens | `new_11`–`new_14` |
+| `GALLERY_BY_SERVICE["green-waste-removal"]` | the trailer tipping green waste | `new_15` |
+| `GALLERY_BY_SERVICE["lawn-mowing"]` | "his daughter giving a thumbs up" | guessed as `1lyKrO…` (the 800×800 square) |
+| Home gallery tiles 3, 4, 5, 9 | hedge / clean-up / lawn / garden | `new_02`–`new_05` |
+
+Also flagged: the **Review images** folder is owned by the client. For hot-linking to
+work it must be shared "anyone with the link", or — better — download everything,
+convert to WebP, and repoint `drive()` in `build/data.py` to `/assets/img/`. Every image
+on the site resolves through `POOL` in that one file.
+
+A curated set (`a1-hero.webp`, `a1-about.webp`, `a1-work-01…08.webp`) was also uploaded
+to the Temporary Photos folder on 13 Sep by someone at LSP; it is not referenced here
+because its contents are unknown. It also contains an **NDIS Registered Provider** badge.
+If Shanon is NDIS-registered, *ndis lawn mowing gold coast* (50/mo, difficulty 5) is the
+easiest term in the whole research and deserves a page — confirm before using the badge.
+
+---
+
+## ⚠️ Before launch
 
 ### 1. Lead capture — how it works (no webhook needed)
 
 Quote submissions are captured by the **GoHighLevel external-tracking script**, which
 listens for submit events on the page and reads the field values. Nothing else to
-configure.
+configure for the text fields.
 
 Input `name` attributes are the GHL contact fields exactly:
 
@@ -111,21 +207,37 @@ Input `name` attributes are the GHL contact fields exactly:
 | Property Address | `property_address` | `{{contact.property_address}}` |
 | Property Size | `property_size` | `{{contact.property_size}}` |
 | Service Needed | `service_needed` | `{{contact.service_needed}}` |
+| Job Type *(new, CD r83)* | `job_type` | `{{contact.job_type}}` |
+| Photos of the property *(new, CD r20)* | `property_photos` | — see below |
 | Job Notes | `job_notes` | `{{contact.job_notes}}` |
 
 Each field also carries `data-ghl="{{contact.…}}"` so the mapping is readable in the markup.
 
-`property_size` and `service_needed` are custom fields — create them in GHL
-(**Settings → Custom Fields**) before the first submission, or those two values
-will have nowhere to land.
+`property_size`, `service_needed` and **`job_type`** are custom fields — create them in
+GHL (**Settings → Custom Fields**) before the first submission, or those values will
+have nowhere to land. `job_type` values: `One-off job` / `Regular maintenance
+(fortnightly / three-weekly)`.
+
+**Property photos need their own transport.** The tracking script only reads text
+values; it cannot carry files. `assets/js/main.js` has an `UPLOAD_ENDPOINT` constant:
+
+- while it is empty (now), the photo field is hidden and the form shows *"Have photos?
+  Text them to 0407 276 574 or email …"* instead — a visitor is never offered an upload
+  that would go nowhere;
+- set it to any URL that accepts `multipart/form-data` (a GHL inbound webhook, or a
+  small upload handler) and the field appears: up to 6 images, 8 MB each, validated with
+  thumbnails. Files are POSTed as `property_photos[]` alongside `email`, `phone` and
+  `full_name` so they can be matched to the contact the tracker creates.
+
+The alternative is to replace the custom form with an embedded GHL form, which supports
+uploads natively but loses the styling and the tracking-timing safeguards below.
 
 **Two things in `assets/js/main.js` exist to keep capture working. Don't "tidy" them away:**
 
 - The submit handler **never calls `stopPropagation()`**, so the tracking script's own
   listener still receives the event.
-- The redirect to `/thank-you/` is **held for `CAPTURE_GRACE_MS` (900ms)**. Redirecting
-  synchronously can cancel the tracking request mid-flight and silently lose the lead.
-  Raise the value if you ever see submissions arriving on the site but not in GHL.
+- The redirect to `/thank-you/` is **held for `CAPTURE_GRACE_MS` (900ms)** — and for the
+  photo upload if one is in flight — so nothing is cancelled by the unload.
 
 Load order matters and is already correct: the tracking script is a plain (non-deferred)
 tag at the end of `<body>`, and `main.js` is deferred, so the tracker registers its
@@ -138,32 +250,26 @@ Forms are `method="get"` purely as a no-JS fallback (a native POST to a static p
 a 405 on most static hosts). With JS running the submit is intercepted, so no field
 values ever reach the URL.
 
-### 2. Trading hours — **assumed, not confirmed**
+### 2. Trading hours — **still an assumption**
 
-`Mon–Fri 7:00–17:00, Sat 7:00–15:00` is an assumption. It was not in the research
-document and is published in the footer, on the contact page and in `LocalBusiness`
-schema. Confirm with Shanon and correct `BIZ["hours"]` in `build/data.py`, then rebuild.
-It must match the Google Business Profile exactly.
+`Mon–Fri 7:00–17:00, Sat 7:00–15:00` was assumed on the first build. The client's review
+removed the Sunday line but did not correct or confirm these. They are published in the
+footer, on the contact page and in `LocalBusiness` schema — confirm with Shanon and
+correct `BIZ["hours"]` in `build/data.py`. They must match the Google Business Profile.
 
-### 3. Images — **replace the Drive hot-links before launch**
+### 3. Review quotes are placeholders
 
-The client photography is served from the Drive folder supplied
-(`1fNAUinCZXQD56NgmTM1Dd5FK92IUXXuf`) via Drive's public image CDN:
+The three quotes in the homepage **Reviews** section are representative summaries
+written for the build, not verbatim customer reviews, and they carry "Verified Google
+review · <suburb>" attributions. **Replace them with real reviews from the Google
+Business Profile before launch**, or remove the section. They live in `home()` in
+`build/pages.py`.
 
-```
-https://lh3.googleusercontent.com/d/<FILE_ID>=w1600
-```
+### 4. Images — localise before launch
 
-This works, but Drive is not a production image host — it rate-limits and the
-folder must stay shared as "anyone with the link". **Before launch:** download the
-originals, compress them to WebP, drop them in `assets/img/`, and change the
-`drive()` helper at the top of `build/data.py` to return a local path. Every image
-on the site resolves through `IMG` and `GALLERY` in that one file, so it is a
-single-function change.
-
-Alt text is written per the research (service + suburb). Because the photographs
-could not be viewed while building, **re-check that each alt line matches the image
-it now sits on** once the files are local, and reorder `GALLERY` if any are mismatched.
+See **Photos** above. Everything is hot-linked from Google Drive's image CDN, which
+rate-limits and depends on folder sharing. Download, convert to WebP, drop in
+`assets/img/`, and change `drive()` in `build/data.py`.
 
 ---
 

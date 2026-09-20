@@ -5,10 +5,11 @@ const { chromium } = require('playwright');
   const T = (label, ok, extra='') => results.push(`${ok?'PASS':'FAIL'}  ${label}${extra?' — '+extra:''}`);
 
   // ---- 1. GHL field mapping present on every form ------------------------
-  const expected = ['full_name','email','phone','property_address','property_size','service_needed','job_notes'];
+  const expected = ['full_name','email','phone','property_address','property_size','service_needed','job_type','job_notes'];
   const merge = {full_name:'{{contact.full_name}}',email:'{{contact.email}}',phone:'{{contact.phone}}',
     property_address:'{{contact.property_address}}',property_size:'{{contact.property_size}}',
-    service_needed:'{{contact.service_needed}}',job_notes:'{{contact.job_notes}}'};
+    service_needed:'{{contact.service_needed}}',job_type:'{{contact.job_type}}',job_notes:'{{contact.job_notes}}',
+    property_photos:'{{contact.property_photos}}'};
   for (const url of ['/','/contact/','/services/lawn-mowing/']) {
     const p = await b.newPage();
     await p.goto('http://127.0.0.1:8123'+url,{waitUntil:'domcontentloaded'});
@@ -34,9 +35,9 @@ const { chromium } = require('playwright');
   await p.waitForTimeout(500);
   T('empty submit is blocked', p.url() === before, p.url());
   const invalid = await p.$$eval('[aria-invalid="true"]', e=>e.length);
-  T('all 5 required fields flagged invalid', invalid === 5, `${invalid} flagged`);
+  T('all 6 required fields flagged invalid', invalid === 6, `${invalid} flagged`);
   const msgs = await p.$$eval('.field__msg', e=>e.length);
-  T('inline error messages shown', msgs === 5, `${msgs} messages`);
+  T('inline error messages shown', msgs === 6, `${msgs} messages`);
 
   // ---- 3. Bad email is rejected -----------------------------------------
   await p.fill('#contact-quote-full_name','Test User');
@@ -44,6 +45,7 @@ const { chromium } = require('playwright');
   await p.fill('#contact-quote-phone','0400000000');
   await p.fill('#contact-quote-property_address','1 Test St, Coomera');
   await p.selectOption('#contact-quote-service_needed',{index:1});
+  await p.selectOption('#contact-quote-job_type',{index:1});
   await p.click('#contact-quote button[type=submit]');
   await p.waitForTimeout(400);
   T('invalid email rejected', p.url() === before);
@@ -69,12 +71,13 @@ const { chromium } = require('playwright');
     const f = document.getElementById('contact-quote');
     f.full_name.value='Jane Citizen'; f.email.value='jane@example.com'; f.phone.value='0407 276 574';
     f.property_address.value='12 Example St, Ormeau'; f.property_size.selectedIndex=3;
-    f.service_needed.selectedIndex=2; f.job_notes.value='Hedges too.';
-    const d={}; [...f.querySelectorAll('[name]')].forEach(c=>{ if(c.name!=='company_website') d[c.name]=c.value.trim(); });
+    f.service_needed.selectedIndex=2; f.job_type.selectedIndex=2; f.job_notes.value='Hedges too.';
+    const d={}; [...f.querySelectorAll('[name]')].forEach(c=>{ if(c.name!=='company_website' && c.type!=='file') d[c.name]=c.value.trim(); });
     return d;
   });
   console.log('\nExample GHL payload:\n' + JSON.stringify(payload,null,2));
   T('payload keys match GHL contact fields', expected.every(k=>k in payload));
+  T('job_type carries the once-off / regular choice (CD r83)', /Regular maintenance/.test(payload.job_type), payload.job_type);
 
   // ---- 6. Honeypot ------------------------------------------------------
   const hp = await p.$eval('#contact-quote [name=company_website]', e=>({
@@ -101,6 +104,7 @@ const { chromium } = require('playwright');
   await p.fill('#contact-quote-phone','0407 276 574');
   await p.fill('#contact-quote-property_address','9 Cullen St, Pimpama');
   await p.selectOption('#contact-quote-service_needed',{index:1});
+  await p.selectOption('#contact-quote-job_type',{index:1});
   await p.click('#contact-quote button[type=submit]');
   const cap = await p.evaluate(() => ({ d: window.__captured, at: window.__capturedAt }));
   T('tracking-style listener received the submit', !!cap.d, cap.d ? Object.keys(cap.d).filter(k=>k!=='company_website').join(',') : 'nothing captured');
@@ -124,13 +128,71 @@ const { chromium } = require('playwright');
   await p.evaluate(() => {
     const f = document.getElementById('contact-quote');
     f.full_name.value='Bot'; f.email.value='bot@spam.com'; f.phone.value='0400000000';
-    f.property_address.value='x'; f.service_needed.selectedIndex=1;
+    f.property_address.value='x'; f.service_needed.selectedIndex=1; f.job_type.selectedIndex=1;
     f.querySelector('[name=company_website]').value='http://spam.example';
   });
   await p.click('#contact-quote button[type=submit]');
   await p.waitForTimeout(300);
   const botCap = await p.evaluate(() => window.__captured);
   T('honeypot submission is NOT passed to the tracker', botCap === null, String(botCap));
+  await p.close();
+
+  // ---- 10. Property photos field (CD r20) ------------------------------
+  p = await b.newPage({ viewport:{width:1440,height:900} });
+  await p.goto('http://127.0.0.1:8123/',{waitUntil:'networkidle'});
+  const homeFile = await p.$eval('#hero-quote .field--file', e => getComputedStyle(e).display);
+  T('home hero form hides the photo field when no endpoint is set (computed display)', homeFile === 'none', homeFile);
+  await p.close();
+
+  p = await b.newPage();
+  await p.goto('http://127.0.0.1:8123/contact/',{waitUntil:'networkidle'});
+  const noEp = await p.evaluate(() => {
+    const f = document.getElementById('contact-quote');
+    const fileWrap = f.querySelector('.field--file'), alt = f.querySelector('.field--photos-alt');
+    // computed display, not the attribute — an author display rule can defeat [hidden]
+    const gone = el => !el || getComputedStyle(el).display === 'none' || el.getBoundingClientRect().height === 0;
+    return { hasField: !!fileWrap, fieldHidden: gone(fileWrap), altShown: alt && !gone(alt),
+             altText: alt ? alt.textContent.replace(/\s+/g,' ').trim() : '' };
+  });
+  T('photo field exists in markup', noEp.hasField);
+  T('photo field is hidden while no upload endpoint is set', noEp.fieldHidden);
+  T('"text or email your photos" line shows instead', noEp.altShown && /0407 276 574/.test(noEp.altText), noEp.altText.slice(0,80));
+  await p.close();
+
+  // With an endpoint configured, the field appears and files are validated + previewed.
+  p = await b.newPage();
+  await p.route('**/assets/js/main.js', async r => {
+    const body = (await r.fetch()).text ? await (await r.fetch()).text() : '';
+    r.fulfill({ contentType:'application/javascript', body: body.replace("var UPLOAD_ENDPOINT = '';", "var UPLOAD_ENDPOINT = 'http://127.0.0.1:8123/upload-test';") });
+  });
+  let uploaded = null;
+  await p.route('**/upload-test', async r => { uploaded = r.request().postDataBuffer() ? r.request().postDataBuffer().length : 0; r.fulfill({status:200, body:'ok'}); });
+  await p.goto('http://127.0.0.1:8123/contact/',{waitUntil:'networkidle'});
+  const withEp = await p.evaluate(() => {
+    const f = document.getElementById('contact-quote');
+    const gone = el => !el || getComputedStyle(el).display === 'none';
+    return { fieldHidden: gone(f.querySelector('.field--file')), altHidden: gone(f.querySelector('.field--photos-alt')) };
+  });
+  T('photo field shows once UPLOAD_ENDPOINT is set', !withEp.fieldHidden && withEp.altHidden);
+  const png = Buffer.from('iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNkYPhfDwAChwGA60e6kgAAAABJRU5ErkJggg==','base64');
+  await p.setInputFiles('#contact-quote-property_photos', [{name:'front.png', mimeType:'image/png', buffer:png},{name:'back.png', mimeType:'image/png', buffer:png}]);
+  await p.waitForTimeout(200);
+  T('thumbnails render for attached photos', (await p.$$eval('#contact-quote .field__thumbs img', e=>e.length)) === 2);
+  await p.setInputFiles('#contact-quote-property_photos', [{name:'notes.txt', mimeType:'text/plain', buffer:Buffer.from('x')}]);
+  await p.waitForTimeout(200);
+  const rejected = await p.$eval('#contact-quote .field--file', e => (e.querySelector('.field__msg')||{}).textContent || '');
+  T('non-image attachment is rejected', /Photos only/.test(rejected), rejected);
+  await p.setInputFiles('#contact-quote-property_photos', [{name:'front.png', mimeType:'image/png', buffer:png}]);
+  await p.fill('#contact-quote-full_name','Photo Tester');
+  await p.fill('#contact-quote-email','photo@example.com');
+  await p.fill('#contact-quote-phone','0407 276 574');
+  await p.fill('#contact-quote-property_address','1 Test St, Ormeau');
+  await p.selectOption('#contact-quote-service_needed',{index:1});
+  await p.selectOption('#contact-quote-job_type',{index:1});
+  await p.click('#contact-quote button[type=submit]');
+  await p.waitForURL('**/thank-you/',{timeout:8000}).catch(()=>{});
+  T('photos were POSTed to the upload endpoint before redirect', uploaded !== null && uploaded > 0, `${uploaded} bytes`);
+  T('redirect still lands on thank-you with photos attached', /\/thank-you\/$/.test(p.url()), p.url());
   await p.close();
 
   await b.close();

@@ -47,6 +47,9 @@
 }
 
 *,*::before,*::after{box-sizing:border-box}
+/* Author display rules (e.g. .field{display:flex}) would otherwise beat the UA's
+   [hidden]{display:none} — the photo field showed with no upload endpoint. */
+[hidden]{display:none!important}
 html{-webkit-text-size-adjust:100%;scroll-behavior:smooth;scroll-padding-top:96px;overflow-x:hidden}
 body{
   margin:0;background:var(--bg);color:var(--ink);
@@ -348,6 +351,8 @@ strong{font-weight:650;color:var(--green-900)}
 .mapwrap iframe{width:100%;height:clamp(300px,42vh,420px);border:0;display:block}
 .areas__card{background:var(--white);border:1px solid var(--line-2);border-radius:var(--radius);padding:1.15rem 1.35rem;margin-top:1rem;display:flex;flex-wrap:wrap;gap:.9rem;align-items:center;justify-content:space-between;box-shadow:var(--shadow-sm)}
 .areas__addr{font-size:.9rem;color:var(--ink-2);margin:0}
+.areas__tail{font-size:.9rem;color:var(--ink-2);padding:.2rem .35rem 0;margin:0}
+.areas__tail::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--lime-500);margin-right:.55rem;vertical-align:middle}
 
 /* ---------- Reviews ---------------------------------------------------- */
 .reviews{display:grid;grid-template-columns:repeat(3,1fr);gap:clamp(1rem,2vw,1.5rem)}
@@ -423,6 +428,17 @@ strong{font-weight:650;color:var(--green-900)}
 .field input:focus,.field select:focus,.field textarea:focus{outline:0;border-color:var(--green-500);background:var(--white);box-shadow:0 0 0 4px rgba(42,129,84,.13)}
 .field input[aria-invalid="true"],.field select[aria-invalid="true"],.field textarea[aria-invalid="true"]{border-color:#c0562f;box-shadow:0 0 0 4px rgba(192,86,47,.12)}
 .field__msg{font-size:.76rem;color:#c0562f;font-weight:550}
+.field__hint{font-size:.76rem;color:var(--ink-3);line-height:1.4}
+.field input[type="file"]{padding:.55rem .7rem;background:var(--white);cursor:pointer;font-size:.86rem}
+.field input[type="file"]::file-selector-button{font:inherit;font-size:.82rem;font-weight:600;color:var(--green-800);background:var(--sand-100);border:1px solid var(--line);border-radius:100px;padding:.4rem .85rem;margin-right:.7rem;cursor:pointer}
+.field input[type="file"]::file-selector-button:hover{background:var(--sand-200)}
+.field__thumbs{display:flex;flex-wrap:wrap;gap:.4rem}
+.field__thumbs:empty{display:none}
+.field__thumbs img{width:58px;height:58px;object-fit:cover;border-radius:8px;border:1px solid var(--line-2)}
+.field--photos-alt p{position:relative;display:block;margin:0;padding:.7rem .85rem .7rem 2.15rem;font-size:.82rem;color:var(--ink-2);line-height:1.5;background:var(--surface-2);border:1px dashed var(--sand-300);border-radius:10px}
+.field--photos-alt .icon{position:absolute;left:.8rem;top:.78rem;color:var(--green-500)}
+.field--photos-alt a{font-weight:600;white-space:nowrap}
+.quote__fine{margin-top:.5rem;font-size:.76rem;color:var(--ink-3);text-align:center}
 .quote__consent{margin:1rem 0 .9rem}
 .quote__consent p{font-size:.78rem;color:var(--ink-3);line-height:1.5}
 .quote__alt{margin-top:.9rem;font-size:.85rem;color:var(--ink-3);text-align:center}
@@ -485,6 +501,7 @@ strong{font-weight:650;color:var(--green-900)}
 .site-footer__areas{border-top:1px solid rgba(255,255,255,.12);padding-block:1.75rem}
 .site-footer__areas ul{display:flex;flex-wrap:wrap;gap:.4rem .5rem}
 .site-footer__areas li{font-size:.8rem;color:rgba(255,255,255,.6);background:rgba(255,255,255,.06);padding:.28rem .65rem;border-radius:100px}
+.site-footer__areas-note{margin:.85rem 0 0;font-size:.82rem;color:rgba(255,255,255,.55)}
 .site-footer__base{border-top:1px solid rgba(255,255,255,.12);padding-top:1.5rem;display:flex;flex-wrap:wrap;gap:.6rem 1.5rem;justify-content:space-between;font-size:.8rem;color:rgba(255,255,255,.45)}
 .site-footer__base p{margin:0}
 
