@@ -110,7 +110,7 @@ cited in the source as `CD r<n>` where it lands. In summary:
 | Odd jobs | 68, 69 | "…during the quieter months"; fence painting and picture hanging removed |
 | Form | 20, 83 | Job type dropdown; property-photo upload (see Lead capture) |
 | Metas & schema | 89, 90, 91 | Rewritten to match |
-| Photos | 16, 23–28, 31, 44, 50, 55, 58, 66, 70, 75 | See **Photos** below — partly done, needs eyes |
+| Photos | 16, 23–28, 31, 44, 50, 55, 58, 66, 70, 75 | Every slot assigned by eye from the full folder (23 Sep) — see **Photos** |
 
 `build/check.py` now fails the build if any banned phrase (corridor, Brisbane, monthly,
 Sunday, surname, street, "free quote", "no extra charge", …) reappears in visible copy,
@@ -144,41 +144,54 @@ Minor, no action needed: "Get a free quote" became "Get a free estimate" on ever
 button (an estimate *is* an approximate price, and it keeps the CTA short); the odd-jobs
 page now says those jobs are seasonal, which will reduce enquiries but is the truth.
 
-### Photos — partly done, needs someone with eyes on the folder
+### Photos — assigned by eye on 23 Sep
 
-The client's core complaint was wrong and duplicated photos. What is fixed with
-certainty (from the client's own descriptions in the Loom):
+Every file in both Drive folders (47) was downloaded through the Drive connector and
+looked at, then every slot was reassigned to match its section. The catalogue lives as
+comments in `POOL` in `build/data.py`. What the look revealed:
 
-- Lawn Mowing card ↔ Acreage card swapped (each was showing the other's photo)
-- Commercial card and page use the `van 1.jpg` / `van 2.jpg` uploads
-- Two byte-identical re-uploads dropped; `check.py` now fails on any duplicate per page
-- Every page has its own gallery instead of the same four photos everywhere
+- Four of the "originals" are the same before/after collage at four sizes; the
+  four ride-on shots are one riverside scene; `hero` and one 14 Sep upload are the same
+  house-14 lawn; `van 2`/`van 3` are 640px copies of a 14 Sep upload. Only the largest
+  copy of each scene is used now.
+- The file labelled "mower close-up" was actually Shanon's daughter hosing the lawn. It is
+  no longer the home-page "why" image (that is now the top-down manicured lawn, `resi 3`).
+- **Deliberately not used:** `commercial 3` (night shot, readable number plate on a
+  parked car), `commercial 2` (other businesses' signage and a "FOR SALE" sign in the ute),
+  two 14 Sep uploads with readable plates on customers'/neighbours' cars, and the sunset
+  trailer frame whose own plate is readable (the side-on frame from the same evening is
+  used instead). `garden cleanup.png` (7.5 MB) could not be fetched to check and is unused
+  — a JPG export of it would be usable.
+- **Two things for the client to confirm:** (1) the About-page gallery now uses the photo
+  of Shanon with his two children behind the mower, and the daughter thumbs-up photo stays
+  on the home, lawn-mowing and odd-jobs pages as requested in the Loom — both show
+  children's faces, which is his call; (2) the van photo at the industrial estate shows the
+  van's own number plate. Both are one-line swaps in `IMG`/galleries if he prefers not.
 
-What could **not** be done here: the build environment cannot fetch image bytes from
-Drive, so the 15 UUID-named photos in the **Review images** folder
-(`1V6Bf9lBqDxaI-CE35rUcyfAPFJ7UvBCl`) have been placed **blind**. Open `build/data.py`,
-search for `TODO` and `UNVERIFIED`, and assign by eye. The slots that need a specific
-subject:
+| Slot | Now |
+|---|---|
+| Home hero | house-14 lawn with the EGC "proudly maintained by" sign |
+| Home "why" | top-down manicured lawn + box hedge with the ute and trailer (`resi 3`) |
+| About image | elevated mown front lawn, ute + trailer kerbside (`resi 2`) |
+| CTA band | side-on branded trailer against cane at sunset |
+| Lawn Mowing card | `resi 1` — mown small front lawn from the carport |
+| Acreage card | `acreage 1` — zero-turn on a mown acreage lawn, blue sky |
+| Garden card | close-up of a freshly squared-off hedge |
+| Green Waste card | trailer tipping green waste, sunny |
+| Commercial card | `commercial 1` — branded trailer outside industrial units |
+| Odd Jobs card | nature strip along a stone-clad house with the EGC ute (residential) |
+| Galleries | hedges on the garden page, acreage on the acreage page, trailer + before/after on green waste, vehicles on commercial — see `GALLERY_*` |
 
-| Slot | Needs | Currently |
-|---|---|---|
-| `IMG["svc_garden"]` (Garden card) | a hedge photo | `new_01` — unverified |
-| `IMG["svc_odd"]` (Odd Jobs card) | residential, not acreage | `orig_1` — unverified |
-| `GALLERY_BY_SERVICE["garden-maintenance"]` ×4 | hedges / gardens | `new_11`–`new_14` |
-| `GALLERY_BY_SERVICE["green-waste-removal"]` | the trailer tipping green waste | `new_15` |
-| `GALLERY_BY_SERVICE["lawn-mowing"]` | "his daughter giving a thumbs up" | guessed as `1lyKrO…` (the 800×800 square) |
-| Home gallery tiles 3, 4, 5, 9 | hedge / clean-up / lawn / garden | `new_02`–`new_05` |
+Alt text now describes what is in frame. No suburb is claimed for a photo unless the
+client says where it was taken; earlier alts had guessed suburbs and those are gone.
 
-Also flagged: the **Review images** folder is owned by the client. For hot-linking to
-work it must be shared "anyone with the link", or — better — download everything,
-convert to WebP, and repoint `drive()` in `build/data.py` to `/assets/img/`. Every image
-on the site resolves through `POOL` in that one file.
+Hot-linking still depends on the client's **Review images** folder staying shared
+"anyone with the link". Before launch, download everything, convert to WebP, drop it in
+`assets/img/` and repoint `drive()` in `build/data.py`.
 
-A curated set (`a1-hero.webp`, `a1-about.webp`, `a1-work-01…08.webp`) was also uploaded
-to the Temporary Photos folder on 13 Sep by someone at LSP; it is not referenced here
-because its contents are unknown. It also contains an **NDIS Registered Provider** badge.
-If Shanon is NDIS-registered, *ndis lawn mowing gold coast* (50/mo, difficulty 5) is the
-easiest term in the whole research and deserves a page — confirm before using the badge.
+An **NDIS Registered Provider** badge sits in the Temporary Photos folder. If Shanon is
+NDIS-registered, *ndis lawn mowing gold coast* (50/mo, difficulty 5) is the easiest term
+in the whole research and deserves a page — confirm before using the badge.
 
 ---
 
@@ -277,7 +290,9 @@ name, suburb if given), paste them into `REVIEWS`, set `placeholder` to `False`,
 
 See **Photos** above. Everything is hot-linked from Google Drive's image CDN, which
 rate-limits and depends on folder sharing. Download, convert to WebP, drop in
-`assets/img/`, and change `drive()` in `build/data.py`.
+`assets/img/`, and change `drive()` in `build/data.py`. Two photos are portrait
+(the family photo and the sunset ride-on); the gallery tiles crop them with
+`object-fit: cover`, so check them once on a phone.
 
 ---
 

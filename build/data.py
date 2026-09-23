@@ -112,68 +112,67 @@ PRICE = "an approximate price, pending inspection"
 # All client photography is served from Google Drive's public image CDN.
 # Two folders:
 #   TEMP   = "Temporary Photos"  1fNAUinCZXQD56NgmTM1Dd5FK92IUXXuf  (originals from old site)
-#   REVIEW = "Review images"     1V6Bf9lBqDxaI-CE35rUcyfAPFJ7UvBCl  (client uploads, 14 Sep)
+#   REVIEW = "Review images"     1V6Bf9lBqDxaI-CE35rUcyfAPFJ7UvBCl  (client uploads, 14 + 22 Sep)
 #
-# CD r16: no photo used more than once; every photo must match its section.
+# CD r16: no photo used more than once per page; every photo must match its section.
 #
-# HOW THESE WERE ASSIGNED — read before changing:
-# The build environment cannot fetch image bytes from Drive, so nobody has
-# looked at these photos here. Subjects marked CONFIRMED come from the client's
-# own Loom review, which described what each existing photo shows. Subjects
-# marked UNVERIFIED are best guesses. Slots marked TODO need a human to open
-# the Review images folder and pick the right file. See README "Photos".
+# HOW THESE WERE ASSIGNED — every file below was downloaded through the Drive
+# connector and looked at on 23 Sep 2026. Subjects are what is actually in
+# frame. Several "originals" turned out to be the same picture at different
+# sizes; only the largest copy of each is kept. See README "Photos" for the
+# full catalogue, including the files deliberately NOT used (readable number
+# plates, third-party branding, a night shot).
 def drive(file_id, width=1600):
     return "https://lh3.googleusercontent.com/d/%s=w%d" % (file_id, width)
 
 
 POOL = {
-    # ---- CONFIRMED by the client's Loom (15 Sep) --------------------------
-    "lawn_front_yard":   "1---Fr4ddP5c3s3TQXofTzuk1WaHesQUw",  # residential front yard (Loom 03:52)
-    "acreage_a":         "1q-NSWe2ZeTKZ-SYcBX3Z0yr7AvNPPEQh",  # acreage (Loom 03:24)
-    "acreage_b":         "1a-nqGc_KouyxhtTicg7UZjQhNGeXxph2",  # acreage (Loom 05:17)
-    "rideon_paddock":    "1H0FhMI3oExVvBKcKR0TpdXdUKe94NzJ3",  # ride-on in a paddock (Loom 04:29)
-    "lawn_best":         "1zjOeo0z5zYz4Ba0HN1e9OHgLxmgj2Bew",  # "keep the first photo" (Loom 14:38, 33:05)
-    "van_1":             "11ZFwWYMrZXG9iJ8TFCCzAlPlMUB_vrN9",  # van 1.jpg  (REVIEW, named by client)
-    "van_2":             "1msGblCcKbIJUURADZPt0EWK7zRLytb4L",  # van 2.jpg  (REVIEW, named by client)
-    # ---- UNVERIFIED: one of these three is "his daughter giving a thumbs up",
-    #      the other two are ride-on shots (Loom 14:38). 800x800 square crop is
-    #      the likeliest portrait.
-    "daughter_thumbs_up": "1lyKrO6tPH4RE_HlatcfzRa4lSNnvEQ3S",
-    "rideon_a":           "1_aHGRK3aF7Kg9uNxKCz9PqEBSbbOptt4",
-    "rideon_b":           "1mLEYN2LQBdPPtNPH0NNJwGuU0BzK9sRu",
-    # ---- Originals from the old site, not described in the Loom (UNVERIFIED)
-    "hero":              "1v50z_PLo_6Ft-U027nD1Q-VtFtzRv_Xc",
-    "about_wide":        "143PG3RJgZnpXDnlPHb_a46vdUOxSkmAt",
-    "mower_closeup":     "1rW_quVFoi_MST6FW435CSSBQWHyHEnfN",
-    "cta_wide":          "1W0FUz2hRBXCJFPdlxeDhYnGM4HMW8ukx",
-    "trailer_yard":      "1DPTCRjv7eyJcpsk1p_rqeUkWd7HVkRWs",
-    "orig_1":            "1_VURECkgTaVDnDm2B1sp2zPrc8Cd8ptj",
-    "orig_2":            "1obEOqbWZwZPv-53mxuynPhS3WWcv77AY",
-    "orig_3":            "1a8xV5xmVlqIahKg-RtXf3w6oNGzxw2aW",
-    "orig_4":            "1oAo_C-cAicH_lNhtk8UvXwiWdq_tnSRk",
-    # ---- Client uploads, 14 Sep, REVIEW folder. UUID filenames, subjects
-    #      unknown here. The Loom says these include hedge trimming, acreage,
-    #      good lawns, and the trailer tipping green waste. TODO: assign by eye.
-    "new_01": "1h79qYOoDPBng6SSenOEHcYIfUZ2vZ-nW",
-    "new_02": "1ORgY0NvlAxy05ZaSelqmi4rAqqtUBE3F",
-    "new_03": "1gmsb2rpSRSp25MnY89K-IOVxYegYmqfI",
-    "new_04": "14TsqNanmSn5YDJ1hcwNf4crnbG87GIBr",
-    "new_05": "1d7XgBEn2duZCx_54PMXAs01Zl0RSeusU",
-    "new_06": "1FvgsB5hdp5EGRDScfq12RWdaBJ-_oMnQ",
-    "new_07": "1E4B0dz7DFxZYvmN_NhpTjWPZt99k1JvI",
-    "new_08": "1_kih-rfuc8AmFUwv49v24EG8TVry-W-a",
-    "new_09": "1x6_wqV7i5fBQA61vTA1tU8BKnKARp0SI",
-    "new_10": "1Y2xndc22sPNQ1ffGEVwh4l7XZxADWg-u",
-    "new_11": "1PRrgncT5s_zPnrIQNyB6weiGnKAgQKwK",
-    "new_12": "1xv1OlHToJ3W-MuFg0suMa_tGB_HG0A-3",
-    "new_13": "1WdN_2XoR--tN9ui3N789wQFj52P4U-mb",
-    "new_14": "1-OvA64ri2XSv9rpxudLJPIklDXgON57I",
-    "new_15": "1z7ntkfjfHxIbfLLfOLpgcqRPS7MGlCBT",
+    # ---- Client uploads 22 Sep, named by the client (all 1920x1440 JPG) ----
+    "resi_1":        "14xziNswK0nBuYw_EmJEV9WuOL9qiRYyk",  # mown small front lawn from the carport, EGC trailer at edge
+    "resi_2":        "1TExm0WDLLzCpPTlPjBgbp0IQwYfBnrQf",  # elevated view, mown front lawn, ute + trailer kerbside
+    "resi_3":        "1kBkZeMU73WmPeNEsJITK8_shqnIOaI9H",  # near top-down: manicured lawn, clipped box hedge, ute + trailer
+    "acreage_1":     "1teoT6Wp1pMou3r89v0PHOOD1dZEQTZF8",  # Hustler zero-turn on mown acreage lawn, gums, cane, blue sky
+    "acreage_2":     "1kA25zHtvNTMa4nXHo0saucEXvgbfADqs",  # Hustler beside a wall of unmown chest-high grass
+    "garden_mulch":  "1-NptyUyR1DZT8ub444JoBER1JVny8fGT",  # freshly mulched bed of golden canes along a colorbond fence
+    "commercial_1":  "1iacBzoG5NBUfnn2uMoH8kNWj0Yo_kgTY",  # branded trailer outside industrial units at sunset
+    # not used: "commercial 2" (third-party signage, FOR SALE sign), "commercial 3"
+    # (night shot, readable plate), "garden cleanup.png" (7.5 MB, could not be
+    # fetched to check), "van 3"/"sunset 1"/"sunset 2"/"image0 (6)" (640px copies).
+    # ---- Client uploads 14 Sep (UUID filenames, all 1920x1440 JPG) ----
+    "trailer_tip_sun": "1h79qYOoDPBng6SSenOEHcYIfUZ2vZ-nW",  # trailer tipping green waste at the facility, sunny
+    "hedge_tall":      "1gmsb2rpSRSp25MnY89K-IOVxYegYmqfI",  # tall clipped lilly-pilly hedge beside a driveway
+    "acreage_dam":     "14TsqNanmSn5YDJ1hcwNf4crnbG87GIBr",  # wide acreage lawn sloping to a dam, horse yards, shed
+    "hedge_waterfront":"1d7XgBEn2duZCx_54PMXAs01Zl0RSeusU",  # long box hedge along a waterfront house
+    "topiary":         "1FvgsB5hdp5EGRDScfq12RWdaBJ-_oMnQ",  # three ball-clipped topiary shrubs in a pebble bed
+    "family_mower":    "1E4B0dz7DFxZYvmN_NhpTjWPZt99k1JvI",  # Shanon with two young children behind the stand-on mower (PORTRAIT, faces)
+    "lawn_sign_14":    "1_kih-rfuc8AmFUwv49v24EG8TVry-W-a",  # immaculate front lawn with the EGC "proudly maintained by" sign
+    "naturestrip_56":  "1x6_wqV7i5fBQA61vTA1tU8BKnKARp0SI",  # mown nature strip on a new-estate street, EGC yard sign
+    "hedge_beds":      "1Y2xndc22sPNQ1ffGEVwh4l7XZxADWg-u",  # clipped box hedges + grass tree in raised timber beds
+    "naturestrip_16":  "1PRrgncT5s_zPnrIQNyB6weiGnKAgQKwK",  # nature strip along a stone-clad house, EGC ute + trailer
+    "van_estate":      "1xv1OlHToJ3W-MuFg0suMa_tGB_HG0A-3",  # branded van at the industrial estate (own van plate readable)
+    "hedge_squared":   "1WdN_2XoR--tN9ui3N789wQFj52P4U-mb",  # close-up of a freshly squared-off tall hedge
+    "trailer_sunset":  "1z7ntkfjfHxIbfLLfOLpgcqRPS7MGlCBT",  # side-on branded trailer, cane field, orange sunset (no plate)
+    # not used: 1ORgY0NvlAxy05ZaSelqmi4rAqqtUBE3F (readable plate on a customer's
+    # car + dog), 1-OvA64ri2XSv9rpxudLJPIklDXgON57I (neighbours' plates readable).
+    # ---- Originals from the old site (webp) — largest copy of each scene ----
+    "hero":            "1v50z_PLo_6Ft-U027nD1Q-VtFtzRv_Xc",  # 2560px: same house-14 lawn + sign as lawn_sign_14
+    "rideon_river":    "143PG3RJgZnpXDnlPHb_a46vdUOxSkmAt",  # 2016px: Hustler on a huge mown riverside field, daytime
+    "rideon_sunset":   "1q-NSWe2ZeTKZ-SYcBX3Z0yr7AvNPPEQh",  # 1920x2560 PORTRAIT: Hustler on the riverside field at sunset
+    "trailer_tip_grey":"1DPTCRjv7eyJcpsk1p_rqeUkWd7HVkRWs",  # 2560px: trailer tipping green waste, overcast
+    "before_after":    "1---Fr4ddP5c3s3TQXofTzuk1WaHesQUw",  # 1176px square: before/after collage of an overgrown nature strip
+    "daughter":        "1oAo_C-cAicH_lNhtk8UvXwiWdq_tnSRk",  # 1200px square: Shanon's daughter, thumbs up, hosing the lawn (face)
+    "lawn_best":       "1zjOeo0z5zYz4Ba0HN1e9OHgLxmgj2Bew",  # 1200px: striped front lawn, colorbond fence — the client's "keep the first photo"
+    "van_low":         "1msGblCcKbIJUURADZPt0EWK7zRLytb4L",  # 640px: low-angle branded van over a mown lawn ("van 1.jpg")
+    # not used: 1W0FUz2hRBXCJFPdlxeDhYnGM4HMW8ukx (trailer plate readable; trailer_sunset
+    # is the same evening), 1rW_quVFoi_MST6FW435CSSBQWHyHEnfN (child's face, alternate
+    # frame of "daughter"), and the smaller copies of the scenes above:
+    # 1H0FhMI3oExVvBKcKR0TpdXdUKe94NzJ3, 1_aHGRK3aF7Kg9uNxKCz9PqEBSbbOptt4,
+    # 1mLEYN2LQBdPPtNPH0NNJwGuU0BzK9sRu, 1a-nqGc_KouyxhtTicg7UZjQhNGeXxph2,
+    # 1_VURECkgTaVDnDm2B1sp2zPrc8Cd8ptj, 1obEOqbWZwZPv-53mxuynPhS3WWcv77AY,
+    # 1a8xV5xmVlqIahKg-RtXf3w6oNGzxw2aW, 1lyKrO6tPH4RE_HlatcfzRa4lSNnvEQ3S,
+    # 11ZFwWYMrZXG9iJ8TFCCzAlPlMUB_vrN9.
     "logo":   "1z4Ip6GLPeDBuyDfUf-Vy28bBA0MB_R4c",
 }
-# Dropped on purpose (CD r31 duplicates): 18ZBWMoFM85uHZxZcbEnA7CiffkFJh3XK and
-# 1hRPbL8HOlTA5vqsIXN_DsauLAq0B4JwQ / 1mF8psxPv9zzz2ILyZo6rycpaLdQr3SDU are
-# byte-identical re-uploads of photos already in the pool.
 
 
 def P(key, width=1200):
@@ -182,87 +181,89 @@ def P(key, width=1200):
 
 IMG = {
     "logo":           P("logo", 320),
-    "hero":           P("hero", 1800),
-    "about":          P("about_wide"),
-    "why":            P("mower_closeup"),
-    "cta":            P("cta_wide", 1800),
-    # Service cards — CD r23-r28.
-    "svc_mowing":     P("lawn_front_yard"),   # CONFIRMED residential (was acreage)
-    "svc_acreage":    P("acreage_a"),         # CONFIRMED acreage (was residential)
-    "svc_garden":     P("new_01"),            # TODO: must be a hedge photo
-    "svc_green":      P("trailer_yard"),      # UNVERIFIED
-    "svc_commercial": P("van_1"),             # CONFIRMED van outside a property
-    "svc_odd":        P("orig_1"),            # TODO: must be residential, not acreage
+    "hero":           P("hero", 1800),          # house-14 lawn with the EGC sign
+    "about":          P("resi_2"),              # elevated mown lawn with the ute + trailer
+    "why":            P("resi_3"),              # manicured lawn + box hedge, top-down
+    "cta":            P("trailer_sunset", 1800),
+    # Service cards — CD r23-r28, each matching its service.
+    "svc_mowing":     P("resi_1"),              # residential front lawn
+    "svc_acreage":    P("acreage_1"),           # zero-turn on an acreage lawn
+    "svc_garden":     P("hedge_squared"),       # hedge (CD r23)
+    "svc_green":      P("trailer_tip_sun"),     # trailer tipping green waste
+    "svc_commercial": P("commercial_1"),        # branded trailer at an industrial estate
+    "svc_odd":        P("naturestrip_16"),      # residential, not acreage (CD r28)
     # Services hub hero — must not be any of the six card images above.
     "services_hero":  P("lawn_best", 1800),
 }
 
 # Per-page galleries — CD r31, r44, r50, r55, r58, r66, r70, r75.
-# Each list is unique within itself; cross-page reuse is kept to the photos
-# the client explicitly said to keep.
+# Each list is unique within itself and against that page's hero/cards;
+# cross-page reuse is fine. Alt text describes what is in frame; no suburb is
+# claimed for a photo unless the client tells us where it was taken.
 def _g(key, alt, width=900):
     return (P(key, width), alt)
 
 
 GALLERY_HOME = [  # 9 tiles: first is the 2x2 feature (CD r31: one of each only)
-    _g("lawn_best",        "Freshly mowed lawn with crisp edges — lawn mowing Gold Coast by Enviro Garden Care, Pimpama"),
-    _g("acreage_b",        "Acreage block mown with a ride-on mower — acreage mowing Gold Coast, Ormeau Hills"),
-    _g("new_02",           "Trimmed hedge and tidy garden bed — garden maintenance Gold Coast, Helensvale"),        # TODO verify hedge
-    _g("new_03",           "Yard cleared and green waste loaded for removal — green waste removal Gold Coast, Pimpama"),  # TODO verify
-    _g("new_05",           "Residential front lawn after a regular mow — lawn mowing Coomera by Enviro Garden Care"),  # TODO verify lawn
-    _g("van_2",            "Enviro Garden Care van outside a commercial property — commercial property maintenance Gold Coast, Yatala"),
-    _g("orig_3",           "Edges and paths trimmed after mowing — lawn care Gold Coast northern suburbs"),
-    _g("daughter_thumbs_up", "A job well done — family-owned lawn mowing on the Northern Gold Coast"),
-    _g("new_04",           "Established garden maintained — garden maintenance Gold Coast, Hope Island"),            # TODO verify
+    _g("lawn_best",       "Freshly mowed front lawn with crisp edges — lawn mowing Gold Coast by Enviro Garden Care, Pimpama"),
+    _g("acreage_dam",     "Acreage lawn mown down to the dam, horse yards behind — acreage mowing Gold Coast"),
+    _g("hedge_tall",      "Tall lilly-pilly hedge clipped straight beside a driveway — hedge trimming Northern Gold Coast"),
+    _g("trailer_tip_grey","Enviro Garden Care trailer tipping green waste at the facility — green waste removal Gold Coast"),
+    _g("lawn_sign_14",    "Immaculate front lawn with the Enviro Garden Care yard sign — regular lawn mowing Northern Gold Coast"),
+    _g("van_estate",      "Enviro Garden Care van at an industrial estate — commercial property maintenance Gold Coast"),
+    _g("garden_mulch",    "Garden bed freshly mulched along a colorbond fence — garden maintenance Gold Coast"),
+    _g("daughter",        "Thumbs up on a freshly mowed lawn — family-owned lawn mowing on the Northern Gold Coast"),
+    _g("topiary",         "Ball-clipped topiary shrubs in a pebble bed — garden maintenance Northern Gold Coast"),
 ]
 
 GALLERY_ABOUT = [  # CD r75: keep the first, then nice lawns and hedges
-    _g("lawn_best",   "Freshly mowed lawn with crisp edges — Enviro Garden Care &amp; Odd Jobs, Pimpama"),
-    _g("new_05",      "Neat residential lawn — lawn mowing Northern Gold Coast"),                                    # TODO verify lawn
-    _g("new_06",      "Hedges trimmed square — garden maintenance Northern Gold Coast"),                            # TODO verify hedge
-    _g("new_07",      "Well-kept lawn and garden — family-owned lawn care, Northern Gold Coast"),                   # TODO verify
+    _g("lawn_best",       "Freshly mowed front lawn with crisp edges — Enviro Garden Care &amp; Odd Jobs, Pimpama"),
+    _g("family_mower",    "Shanon and the kids with the stand-on mower — family-owned lawn mowing, Northern Gold Coast"),
+    _g("lawn_sign_14",    "Front lawn kept immaculate, with the Enviro Garden Care yard sign — regular mowing clients"),
+    _g("hedge_beds",      "Clipped box hedges and a grass tree in raised timber beds — garden maintenance Northern Gold Coast"),
 ]
 
 GALLERY_BY_SERVICE = {
-    "lawn-mowing": [  # CD r44: keep first + daughter; two ride-ons out, better lawns in
-        _g("lawn_best",          "Freshly mowed lawn with crisp edges — lawn mowing Coomera by Enviro Garden Care"),
-        _g("daughter_thumbs_up", "Thumbs up on a freshly mowed lawn — family-owned lawn mowing, Northern Gold Coast"),
-        _g("new_08",             "Residential lawn after a fortnightly mow — lawn mowing Upper Coomera"),          # TODO verify lawn
-        _g("new_09",             "Striped lawn and clean edges — lawn mowing Coomera Waters"),                     # TODO verify lawn
+    "lawn-mowing": [  # CD r44: keep first + daughter; ride-ons out, real lawns in
+        _g("lawn_best",      "Freshly mowed front lawn with crisp edges — lawn mowing Coomera by Enviro Garden Care"),
+        _g("daughter",       "Thumbs up on a freshly mowed lawn — family-owned lawn mowing, Northern Gold Coast"),
+        _g("lawn_sign_14",   "Front lawn after a regular mow, Enviro Garden Care yard sign on the retaining wall — lawn mowing Northern Gold Coast"),
+        _g("naturestrip_56", "Nature strip and front lawn mown on a new-estate street — lawn mowing Coomera growth belt"),
     ],
     "acreage-mowing": [  # CD r50: keep the ride-on, everything else acreage
-        # acreage_a is this page's hero image, so it is not repeated here.
-        _g("rideon_paddock", "Ride-on mower on a large block — acreage mowing Gold Coast, Jacobs Well"),
-        _g("acreage_b",      "Lifestyle lot cut and tidied — acreage mowing Gold Coast, Yatala"),
-        _g("rideon_a",       "Ride-on mowing a house paddock — acreage mowing Gold Coast, Willowvale"),             # UNVERIFIED
-        _g("new_10",         "Rural block slashed and mown — acreage mowing Gold Coast, Stapylton"),                # TODO verify acreage
+        # acreage_1 is this page's hero/card image, so it is not repeated here.
+        _g("rideon_river",   "Zero-turn ride-on on a large mown riverside block — acreage mowing Gold Coast"),
+        _g("acreage_dam",    "Acreage lawn mown down to the dam with horse yards behind — acreage mowing Gold Coast"),
+        _g("acreage_2",      "Zero-turn beside chest-high unmown grass — before and after on an acreage block"),
+        _g("rideon_sunset",  "Ride-on mower on a riverside paddock at sunset — acreage mowing Northern Gold Coast"),
     ],
     "garden-maintenance": [  # CD r55: all hedge trimming and garden photos
-        _g("new_11", "Hedge trimmed to straight lines and a level top — hedge trimming Gold Coast, Helensvale"),   # TODO verify hedge
-        _g("new_12", "Garden beds weeded and mulched — garden maintenance Gold Coast, Hope Island"),               # TODO verify garden
-        _g("new_13", "Shrubs pruned and shaped — garden maintenance Gold Coast, Sanctuary Cove"),                  # TODO verify garden
-        _g("new_14", "Established garden kept tidy — garden maintenance Gold Coast, Pacific Pines"),               # TODO verify garden
+        # hedge_squared is this page's hero/card image, so it is not repeated here.
+        _g("hedge_tall",       "Tall lilly-pilly hedge clipped straight beside a driveway — hedge trimming Gold Coast"),
+        _g("hedge_waterfront", "Long box hedge trimmed level along a waterfront home — hedge trimming Northern Gold Coast"),
+        _g("topiary",          "Ball-clipped topiary shrubs in a white-pebble bed — garden maintenance Gold Coast"),
+        _g("garden_mulch",     "Golden cane palms in a freshly mulched bed — mulching and garden maintenance Gold Coast"),
     ],
     "green-waste-removal": [  # CD r58: mix of lawns, hedges, acreage + trailer tipping green waste.
-        # trailer_yard is this page's hero image, so it is not repeated here.
-        _g("new_15",       "Trailer tipping green waste at the depot — green waste removal Gold Coast"),           # TODO verify trailer
-        _g("acreage_b",    "Overgrown block cut back — site clean-up Gold Coast, Ormeau"),
-        _g("orig_2",       "Yard cleared and tidied — green waste removal Gold Coast, Oxenford"),                  # UNVERIFIED
-        _g("orig_4",       "Hedges and lawn tidied after a clean-up — green waste removal Gold Coast, Coomera"),   # UNVERIFIED
+        # trailer_tip_sun is this page's hero/card image, so it is not repeated here.
+        _g("trailer_tip_grey", "Trailer tipping a load of green waste at the facility — green waste removal Gold Coast"),
+        _g("before_after",     "Before and after: overgrown nature strip and front yard cut back and tidied — yard clean-up Gold Coast"),
+        _g("acreage_dam",      "Acreage block cut back to the dam — site clean-up Northern Gold Coast"),
+        _g("hedge_beds",       "Hedges clipped and beds tidied after a clean-up — green waste removal Northern Gold Coast"),
     ],
-    "commercial-property-maintenance": [  # CD r66: van outside commercial properties.
-        # van_1 is this page's hero image, so it is not repeated here.
-        _g("van_2",  "Van parked outside a commercial property — grounds maintenance Gold Coast, Stapylton"),
-        _g("orig_4", "Grounds kept neat on a commercial site — commercial lawn care Gold Coast, Arundel"),         # UNVERIFIED
-        _g("orig_2", "Common-area lawn mowed and edged — body corporate grounds maintenance Gold Coast"),          # UNVERIFIED
-        _g("orig_3", "Car park edges and paths trimmed — commercial grounds maintenance Gold Coast, Yatala"),      # UNVERIFIED
+    "commercial-property-maintenance": [  # CD r66: vehicles outside commercial properties.
+        # commercial_1 is this page's hero/card image, so it is not repeated here.
+        _g("van_estate",     "Enviro Garden Care van at an industrial estate — commercial grounds maintenance Gold Coast"),
+        _g("van_low",        "Branded van parked over a freshly mown verge — commercial lawn care Gold Coast"),
+        _g("naturestrip_56", "Street verge mown on a new estate — body corporate and estate grounds maintenance Gold Coast"),
+        _g("resi_3",         "Lawn and box hedge kept sharp, ute and trailer on site — scheduled grounds maintenance Gold Coast"),
     ],
     "odd-jobs-handyman": [  # CD r70: no handyman photos exist — all different, no doubles.
-        # lawn_front_yard already appears on this page in the Lawn Mowing card.
-        _g("orig_2",            "Residential property — odd jobs and lawn care, Pimpama"),
-        _g("daughter_thumbs_up","Happy customer — odd jobs and handyman help, Northern Gold Coast"),
-        _g("orig_3",            "Tidy yard and edges — odd jobs Gold Coast, Coomera"),
-        _g("mower_closeup",     "Enviro Garden Care equipment — odd jobs and garden care, Upper Coomera"),
+        # naturestrip_16 is this page's hero/card image, so it is not repeated here.
+        _g("before_after",  "Before and after: an overgrown yard brought back — odd jobs and yard clean-ups, Northern Gold Coast"),
+        _g("daughter",      "Happy customer — odd jobs and handyman help, Northern Gold Coast"),
+        _g("topiary",       "Topiary shrubs and pebble bed tidied — odd jobs and garden care Gold Coast"),
+        _g("resi_2",        "Front lawn mown, ute and trailer kerbside — odd jobs and lawn care, Northern Gold Coast"),
     ],
 }
 
