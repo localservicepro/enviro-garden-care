@@ -52,7 +52,37 @@ class Balance(HTMLParser):
 
 
 pages = sorted(glob.glob(os.path.join(ROOT, "*.html")) +
-               glob.glob(os.path.join(ROOT, "services", "*.html")))
+               glob.glob(os.path.join(ROOT, "*", "index.html")) +
+               glob.glob(os.path.join(ROOT, "services", "*", "index.html")))
+
+
+def resolve(href):
+    """Map a site URL onto the file that serves it.
+
+    Everything is root-relative now, and pages are directory indexes, so
+    "/about/" is served by about/index.html and "/" by index.html.
+    """
+    path = href.split("#")[0].split("?")[0]
+    if not path:
+        return None
+    if not path.startswith("/"):
+        return False          # relative link — no longer expected anywhere
+    path = path.lstrip("/")
+    if path.startswith("api/"):
+        return os.path.join(ROOT, path + ".js")            # Vercel function
+    if path == "" or path.endswith("/"):
+        path += "index.html"
+    return os.path.join(ROOT, path)
+
+
+def url_of(rel):
+    """Inverse of resolve(): the URL a generated file is served at."""
+    rel = rel.replace(os.sep, "/")
+    if rel == "index.html":
+        return "/"
+    if rel.endswith("/index.html"):
+        return "/" + rel[:-len("index.html")]
+    return "/" + rel
 
 print("Checking %d pages\n" % len(pages))
 seen_titles, seen_descs, seen_canon = {}, {}, {}
@@ -84,7 +114,7 @@ for path in pages:
             flat.extend(t if isinstance(t, list) else [t])
         if "LocalBusiness" not in flat:
             err(rel, "JSON-LD missing LocalBusiness")
-        if rel not in ("thank-you.html", "404.html") and "BreadcrumbList" not in flat \
+        if rel not in ("thank-you/index.html", "404.html") and "BreadcrumbList" not in flat \
                 and rel != "index.html":
             warn(rel, "no BreadcrumbList")
 
@@ -128,6 +158,18 @@ for path in pages:
         if "loading=" not in tag:
             warn(rel, "img without loading attr: %s" % tag[:70])
 
+    # --- no photo used more than once on a page (CD r16 / r31) -----------
+    srcs = re.findall(r'<img\b[^>]*\bsrc="([^"]+)"', src)
+    srcs += re.findall(r"url\('([^']+)'\)", src)          # hero / cta backgrounds
+    seen_src = {}
+    for u in srcs:
+        key = u.split("=w")[0]                             # ignore width variants
+        seen_src[key] = seen_src.get(key, 0) + 1
+    for key, n in seen_src.items():
+        # The logo sits in both header and footer by design.
+        if n > 1 and "1z4Ip6GLPeDBuyDfUf-Vy28bBA0MB_R4c" not in key and not key.endswith(".svg"):
+            err(rel, "same photo used %d times on the page: …%s" % (n, key[-30:]))
+
     # --- tracking + analytics -------------------------------------------
     if "link.msgsndr.com/js/external-tracking.js" not in src:
         err(rel, "missing GHL tracking script")
@@ -136,7 +178,7 @@ for path in pages:
             % src.count("link.msgsndr.com/js/external-tracking.js"))
 
     # --- map embed -------------------------------------------------------
-    if rel in ("index.html", "about.html", "contact.html"):
+    if rel in ("index.html", "about/index.html", "contact/index.html"):
         if "google.com/maps/embed" not in src:
             err(rel, "missing Google Map embed")
 
@@ -145,26 +187,67 @@ for path in pages:
         action = re.search(r'action="([^"]+)"', form)
         if not action:
             err(rel, "form without action")
-        elif not action.group(1).endswith("thank-you.html"):
-            err(rel, "form action does not target thank-you.html: %s" % action.group(1))
+        elif action.group(1) != "/api/quote":
+            err(rel, "form action is not /api/quote: %s" % action.group(1))
+        if 'method="post"' not in form:
+            err(rel, "form must POST to the API")
 
     # --- internal links --------------------------------------------------
-    base = os.path.dirname(path)
-    for href in re.findall(r'href="([^"]+)"', src):
-        if href.startswith(("http", "mailto:", "tel:", "#", "data:")):
-            continue
-        target = href.split("#")[0]
-        if not target:
-            continue
-        resolved = os.path.normpath(os.path.join(base, target))
-        if not os.path.exists(resolved):
-            err(rel, "broken link -> %s" % href)
-    for src_attr in re.findall(r'src="([^"]+)"', src):
-        if src_attr.startswith(("http", "data:")):
-            continue
-        resolved = os.path.normpath(os.path.join(base, src_attr))
-        if not os.path.exists(resolved):
-            err(rel, "broken asset -> %s" % src_attr)
+    for attr in ("href", "src", "action"):
+        for ref in re.findall(r'%s="([^"]+)"' % attr, src):
+            if ref.startswith(("http", "mailto:", "tel:", "sms:", "#", "data:")):
+                continue
+            resolved = resolve(ref)
+            if resolved is None:
+                continue
+            if resolved is False:
+                err(rel, "relative %s (expected root-relative) -> %s" % (attr, ref))
+                continue
+            if not os.path.exists(resolved):
+                err(rel, "broken %s -> %s" % (attr, ref))
+            elif ref.split("#")[0].endswith(".html") and ref != "/404.html":
+                err(rel, "%s still exposes .html -> %s" % (attr, ref))
+
+# --- Change Doc guard (client review, 15 & 21 Sep 2026) ------------------
+# Words and claims the client asked to remove site-wide. Checked against the
+# visible text of every page (scripts and JSON-LD stripped), so a future copy
+# edit cannot quietly reintroduce them.
+BANNED = [
+    ("corridor", "CD r7 — service-area wording"),
+    ("battery", "client 23 Sep — no battery wording at all"),
+    ("brisbane", "CD r8"),
+    ("monthly", "CD r9 — frequencies are fortnightly / three-weekly / one-off"),
+    ("sunday", "CD r10"),
+    ("hopton", "CD r14 — first name only"),
+    ("cullen", "CD r88 — street never in visible copy"),
+    ("no extra charge", "CD r12 — battery claim"),
+    ("zero extra charge", "CD r12 — battery claim"),
+    ("we let you choose", "CD r12"),
+    ("early starts without", "CD r64"),
+    ("drop sheet", "CD r53"),
+    ("free quote", "CD r13 — price is approximate, pending inspection"),
+    ("mowing round", "CD r15"),
+    ("fence painting", "CD r69"),
+    ("picture hanging", "CD r69"),
+    # "pimpama to coomera" was banned by CD r17; the client reinstated it for the
+    # homepage H1 on 23 Sep (Parkwood–Windaroo stays as the smaller line under it).
+    ("coomera to yatala", "CD r18"),
+    ("yatala down to parkwood", "CD r76"),
+]
+for path in pages:
+    rel = os.path.relpath(path, ROOT)
+    src = open(path, encoding="utf-8").read()
+    visible = re.sub(r"<(script|style)\b.*?</\1>", " ", src, flags=re.S)
+    visible = re.sub(r"<!--.*?-->", " ", visible, flags=re.S)
+    visible = html.unescape(re.sub(r"<[^>]+>", " ", visible)).lower()
+    for word, why in BANNED:
+        n = visible.count(word)
+        if n:
+            err(rel, "banned phrase %r x%d (%s)" % (word, n, why))
+    for m in re.finditer(r"green waste[^.]{0,80}(taken away|removed|leaves with)", visible):
+        window = visible[m.start(): m.end() + 60]
+        if "additional charge" not in window and "extra charge" not in window and "green waste bin" not in window:
+            err(rel, "green waste removal stated without 'additional charge' (CD r11): …%s…" % window[:90])
 
 # --- duplicates ----------------------------------------------------------
 for t, files in seen_titles.items():
@@ -181,22 +264,25 @@ for c, files in seen_canon.items():
 sitemap = open(os.path.join(ROOT, "sitemap.xml"), encoding="utf-8").read()
 for path in pages:
     rel = os.path.relpath(path, ROOT)
-    if rel in ("thank-you.html", "404.html"):
-        if rel in sitemap:
-            err("sitemap.xml", "%s should not be listed" % rel)
+    needle = url_of(rel)
+    if rel in ("thank-you/index.html", "404.html"):
+        if needle + "<" in sitemap:
+            err("sitemap.xml", "%s should not be listed" % needle)
         continue
-    needle = "/" if rel == "index.html" else "/" + rel.replace(os.sep, "/")
     if needle + "<" not in sitemap:
         err("sitemap.xml", "missing %s" % needle)
+if ".html<" in sitemap:
+    err("sitemap.xml", "sitemap still contains a .html URL")
 
 # --- keyword targets from the research doc -------------------------------
 TARGETS = {
     "index.html": "lawn mowing gold coast",
-    "services/lawn-mowing.html": "lawn mowing coomera",
-    "services/acreage-mowing.html": "acreage mowing gold coast",
-    "services/garden-maintenance.html": "garden maintenance gold coast",
-    "services/green-waste-removal.html": "green waste removal gold coast",
-    "services/commercial-property-maintenance.html": "commercial property maintenance gold coast",
+    "services/lawn-mowing/index.html": "lawn mowing coomera",
+    "services/acreage-mowing/index.html": "acreage mowing gold coast",
+    "services/garden-maintenance/index.html": "garden maintenance gold coast",
+    "services/green-waste-removal/index.html": "green waste removal gold coast",
+    "services/commercial-property-maintenance/index.html":
+        "commercial property maintenance gold coast",
 }
 print("Primary keyword placement (title / H1 / first 100 words):")
 for rel, kw in TARGETS.items():
@@ -210,7 +296,7 @@ for rel, kw in TARGETS.items():
     first100 = " ".join(body.split()[:100])
     marks = [("title", kw in title), ("h1", kw in h1), ("first100", kw in first100)]
     ok = all(m[1] for m in marks)
-    print("  %-46s %s  %s" % (rel, "PASS" if ok else "CHECK",
+    print("  %-52s %s  %s" % (rel, "PASS" if ok else "CHECK",
                               " ".join("%s:%s" % (n, "y" if v else "n") for n, v in marks)))
     if not ok:
         warn(rel, "keyword '%s' missing from: %s"
@@ -218,6 +304,12 @@ for rel, kw in TARGETS.items():
     density = body.count(kw) / max(len(body.split()), 1) * 100 * len(kw.split())
     print("       density %.2f%% (%d exact matches, %d words)"
           % (density, body.count(kw), len(body.split())))
+
+# Review quotes must be real before launch (client approved picking three, 23 Sep).
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import data as _data
+if any(r.get("placeholder") for r in _data.REVIEWS):
+    warn("build/data.py", "REVIEWS are placeholders — paste three real five-star Google reviews (text, first name, suburb) and set placeholder=False")
 
 print("\n%d error(s), %d warning(s)" % (len(errors), len(warnings)))
 for e in errors:

@@ -3,8 +3,11 @@
 
     python3 build/build.py
 
-Writes index.html, about.html, services.html, contact.html, thank-you.html,
-404.html, services/*.html, sitemap.xml and robots.txt into the repository root.
+Pages are written as directory indexes (about/index.html) so every URL is
+extensionless — /about/, /services/lawn-mowing/ — on any static host, with no
+rewrite rules or host-specific "pretty URL" setting required.
+
+404.html stays a flat file at the root because that is where hosts look for it.
 """
 
 import os
@@ -16,6 +19,7 @@ ROOT = os.path.dirname(HERE)
 sys.path.insert(0, HERE)
 
 from data import SITE, SERVICES  # noqa: E402
+from templates import page_url, svc_url  # noqa: E402
 import pages  # noqa: E402
 
 TODAY = datetime.date.today().isoformat()
@@ -41,7 +45,7 @@ def sitemap(urls):
 def robots():
     return """User-agent: *
 Allow: /
-Disallow: /thank-you.html
+Disallow: /thank-you/
 
 # AI and answer engines are explicitly welcome to read and cite this site.
 User-agent: GPTBot
@@ -67,20 +71,20 @@ def main():
     print("Building %s" % SITE)
 
     write("index.html", pages.home())
-    write("about.html", pages.about())
-    write("services.html", pages.services_hub())
-    write("contact.html", pages.contact())
-    write("thank-you.html", pages.thank_you())
+    write("about/index.html", pages.about())
+    write("services/index.html", pages.services_hub())
+    write("contact/index.html", pages.contact())
+    write("thank-you/index.html", pages.thank_you())
     write("404.html", pages.not_found())
 
     for svc in SERVICES:
-        write("services/%s.html" % svc["slug"], pages.service_page(svc))
+        write("services/%s/index.html" % svc["slug"], pages.service_page(svc))
 
-    urls = [(SITE + "/", "weekly", "1.0"),
-            (SITE + "/services.html", "monthly", "0.9")]
-    urls += [("%s/services/%s.html" % (SITE, s["slug"]), "monthly", "0.9") for s in SERVICES]
-    urls += [(SITE + "/about.html", "monthly", "0.7"),
-             (SITE + "/contact.html", "monthly", "0.8")]
+    urls = [(SITE + page_url(), "weekly", "1.0"),
+            (SITE + page_url("services"), "monthly", "0.9")]
+    urls += [(SITE + svc_url(s["slug"]), "monthly", "0.9") for s in SERVICES]
+    urls += [(SITE + page_url("about"), "monthly", "0.7"),
+             (SITE + page_url("contact"), "monthly", "0.8")]
     write("sitemap.xml", sitemap(urls))
     write("robots.txt", robots())
 

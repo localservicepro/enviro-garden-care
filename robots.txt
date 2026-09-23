@@ -1,6 +1,6 @@
 User-agent: *
 Allow: /
-Disallow: /thank-you.html
+Disallow: /thank-you/
 
 # AI and answer engines are explicitly welcome to read and cite this site.
 User-agent: GPTBot

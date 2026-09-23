@@ -4,12 +4,12 @@ const { chromium } = require('playwright');
   const browser = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
   const errs = [];
   for (const [name, url, w, h, full] of [
-    ['home-desktop', '/index.html', 1440, 1000, true],
-    ['home-mobile', '/index.html', 390, 844, true],
-    ['service', '/services/acreage-mowing.html', 1440, 1000, true],
-    ['contact', '/contact.html', 1440, 1000, true],
-    ['thanks', '/thank-you.html', 1440, 1000, true],
-    ['about', '/about.html', 1440, 1000, true],
+    ['home-desktop', '/', 1440, 1000, true],
+    ['home-mobile', '/', 390, 844, true],
+    ['service', '/services/acreage-mowing/', 1440, 1000, true],
+    ['contact', '/contact/', 1440, 1000, true],
+    ['thanks', '/thank-you/', 1440, 1000, true],
+    ['about', '/about/', 1440, 1000, true],
   ]) {
     const page = await browser.newPage({ viewport: { width: w, height: h }, deviceScaleFactor: 1 });
     page.on('console', m => { if (m.type() === 'error') errs.push(`${name}: console ${m.text()}`); });
