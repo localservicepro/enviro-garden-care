@@ -100,10 +100,10 @@ cited in the source as `CD r<n>` where it lands. In summary:
 |---|---|---|
 | Service area wording | 7, 17, 18, 22, 32, 37, 47–48, 51–52, 56, 59–60, 67, 76, 79 | "Parkwood to Windaroo and all suburbs in between" everywhere; no "corridor" |
 | Brisbane | 8, 21, 40, 87 | Every mention removed |
-| Frequencies | 9, 23, 30, 33, 38, 42, 65 | Fortnightly / three-weekly (Apr–Sep) / one-off. No "monthly" |
+| Frequencies | 9, 23, 30, 33, 38, 42, 65, 93 | Fortnightly, three-weekly through winter, or one-off (confirmed 23 Sep). No "monthly" |
 | Sundays | 10, 29, 34, 77, 81, 86 | Every mention removed |
 | Green waste | 11, 26, 30, 36, 39, 41, 43, 46, 49, 54, 57, 62, 84 | Default is the customer's green bin; removal only "for an additional charge"; trust-bar item gone |
-| Battery | 12, 29, 34, 43, 61, 63, 64, 71, 78, 89, 90 | No longer a feature; one "available on request" line + the FAQ the client asked for |
+| Battery | 12, 29, 34, 43, 61, 63, 64, 71, 78, 89, 90 | Removed entirely (client, 23 Sep) — `check.py` fails on the word |
 | Pricing language | 13, 19, 45, 80, 82, 85 | "An approximate price, pending inspection"; buttons say *free estimate*, never *free quote* |
 | Owner & address | 14, 73, 88, 94 | "Shanon of Pimpama"; "Pimpama QLD 4209" only in visible copy |
 | "Round" → "business" | 15, 72, 74 | Family-owned business wording |
@@ -114,38 +114,31 @@ cited in the source as `CD r<n>` where it lands. In summary:
 
 `build/check.py` now fails the build if any banned phrase (corridor, Brisbane, monthly,
 Sunday, surname, street, "free quote", "no extra charge", …) reappears in visible copy,
-if "battery" creeps back beyond one line plus its FAQ, if green-waste removal is stated
+if "battery" reappears anywhere, if green-waste removal is stated
 without "additional charge", or if any photo is used twice on a page.
 
-**Rows still awaiting the client (92–94):** the Coomera wording at Loom 11:35 (implemented
-as "remove corridor"), the three-weekly option (implemented per row 9), and whether the
-street address may stay in the hidden schema (implemented as *yes* — see below).
+**Rows 92–94 closed by the client on 23 Sep:** "corridor" is out site-wide (row 92,
+enforced by `check.py`); frequencies are fortnightly, three-weekly through winter, or
+one-off (row 93); the street address stays in the hidden schema and the Google map but
+out of visible copy (row 94).
 
-### ⚠️ Strategy flags for the client conversation
+### Strategy flags — resolved by the client on 23 Sep
 
-Three of the client's requests cut against the SEO research. Each was applied as asked,
-with the least-damaging implementation, but the client should hear the trade-off:
+Three of the client's review requests cut against the SEO research. They were raised
+with the client; the outcomes:
 
-1. **Battery-powered mowing was the research's differentiator.** "Nobody on page one
-   owns the quiet/battery angle" drove the About page target (*battery powered lawn
-   mowing gold coast*), a planned blog post on Sunday mowing noise, and an AEO FAQ. The
-   client says petrol is used most of the time and battery is on request only — so the
-   claim was never true and had to go. The About page now targets *family-owned lawn
-   mowing* instead. If Shanon is willing to *actually* run battery gear by default on
-   residential jobs, the original angle is worth reinstating; otherwise it is gone for good.
-2. **The homepage H1 lost its two highest-value suburbs.** "Pimpama to Coomera" became
-   "Parkwood to Windaroo" (row 17). Pimpama is the home suburb (already ranking 12th for
-   *lawn mowing pimpama*); Coomera is the #1 local target (50/mo). Parkwood and Windaroo
-   have no measured search volume. Mitigation applied: the head term stays in the H1 and
-   Pimpama, Coomera, Ormeau, Helensvale and Hope Island are named in the very next
-   sentence, which satisfies the research's placement rule. Worth asking whether
-   "Pimpama to Coomera" could stay in the H1 with the Parkwood–Windaroo range in the
-   sentence below — that is the stronger arrangement.
-3. **Removing the street address weakens local NAP signals.** The research listed the
-   full address in the footer as a fix. It is now in the hidden `LocalBusiness` schema
-   only (row 94, pending). If Shanon also wants it out of the schema, the GBP should be
-   switched to a service-area listing so the two stay consistent — and expect a small
-   local-pack hit either way.
+1. **Battery-powered mowing is gone for good.** The research's differentiator ("nobody
+   on page one owns the quiet/battery angle") was never true — petrol does most jobs and
+   the client does not want battery mentioned at all. Every battery line and the battery
+   FAQ have been removed; `check.py` now fails the build on the word. The About page
+   targets *family-owned lawn mowing* instead.
+2. **The homepage H1 has its suburbs back.** The client agreed: the H1 is *Lawn Mowing
+   Gold Coast — Pimpama to Coomera and the Northern Suburbs*, with *Parkwood to Windaroo
+   and all suburbs in between* as a smaller line directly beneath it (`.hero__range`).
+   The CD r17 ban on "Pimpama to Coomera" in `check.py` was lifted for this.
+3. **Street address stays behind the scenes.** In `LocalBusiness` schema and the Google
+   map embed, out of visible copy. The GBP keeps its physical address, so NAP stays
+   consistent.
 
 Minor, no action needed: "Get a free quote" became "Get a free estimate" on every
 button (an estimate *is* an approximate price, and it keeps the CTA short); the odd-jobs
@@ -252,20 +245,33 @@ the Vercel project (done, per client); run `scripts/list-custom-fields.mjs` once
 confirm the Job Photos field **ID** and that the duplicated custom-field keys resolve
 to the intended twins; then the iPhone test in `api/README.md`.
 
-### 2. Trading hours — **still an assumption**
+### 2. Trading hours — confirmed, but the GBP disagrees
 
-`Mon–Fri 7:00–17:00, Sat 7:00–15:00` was assumed on the first build. The client's review
-removed the Sunday line but did not correct or confirm these. They are published in the
-footer, on the contact page and in `LocalBusiness` schema — confirm with Shanon and
-correct `BIZ["hours"]` in `build/data.py`. They must match the Google Business Profile.
+The client confirmed `Mon–Fri 7:00–17:00, Sat 7:00–15:00` on 23 Sep and added that
+**Saturday is phone enquiries only — no on-site work**. The footer now labels Saturday
+"phone only" with a note, and the contact FAQ says the same. Both stay in
+`openingHoursSpecification` because the business is reachable on Saturdays.
 
-### 3. Review quotes are placeholders
+**Mismatch to fix on Google:** the Business Profile listing data (checked 23 Sep) shows
+Mon–Fri 8:00–17:00 and Sat 8:00–12:00. The site and the GBP must match — either the
+client corrects the GBP to 7–5 / 7–3, or tells us the GBP is right and `BIZ["hours"]` in
+`build/data.py` changes. Until then Google may show the site's hours as inconsistent.
 
-The three quotes in the homepage **Reviews** section are representative summaries
-written for the build, not verbatim customer reviews, and they carry "Verified Google
-review · <suburb>" attributions. **Replace them with real reviews from the Google
-Business Profile before launch**, or remove the section. They live in `home()` in
-`build/pages.py`.
+### 3. Review quotes — rating verified, quotes still placeholders
+
+The **4.9 from 62 Google reviews** in the hero and the Reviews header is real: it comes
+from the Business Profile listing data on 23 Sep (60 five-star, 1 two-star, 1 one-star).
+It is visible text only — it is deliberately *not* in schema, because Google disallows
+self-serving `aggregateRating` on a `LocalBusiness`.
+
+The client has approved picking any three five-star reviews. The review text itself could
+not be fetched from the build environment (Google Maps, Localsearch, Needa Trades and
+Growerslink are all blocked, and the Zapier Google Business Profile app needs an OAuth
+connection that cannot be completed non-interactively). So the three quotes are still the
+representative placeholders, now held in `REVIEWS` in `build/data.py` with
+`placeholder: True`, and **`check.py` warns on every build until they are replaced**.
+To finish: open the GBP reviews, copy three five-star reviews verbatim (text, first
+name, suburb if given), paste them into `REVIEWS`, set `placeholder` to `False`, rebuild.
 
 ### 4. Images — localise before launch
 
@@ -309,7 +315,7 @@ rate-limits and depends on folder sharing. Download, convert to WebP, drop in
 **Local**
 - Full street address in the footer, contact page and schema
 - Google Maps embed on home (service areas), about and contact
-- Suburbs grouped as the research recommends: Coomera corridor / Helensvale–Hope Island /
+- Suburbs grouped as the research recommends: Coomera growth belt / Helensvale–Hope Island /
   Ormeau–Yatala acreage belt
 
 ---

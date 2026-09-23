@@ -220,6 +220,7 @@ strong{font-weight:650;color:var(--green-900)}
   background:linear-gradient(transparent 62%,rgba(122,201,67,.42) 62%);
   padding-inline:.08em;
 }
+.hero__range{color:var(--lime-300);font-weight:650;letter-spacing:.01em;font-size:clamp(.95rem,.9rem + .25vw,1.08rem);margin-top:.7rem;text-transform:none}
 .hero__lead{color:rgba(255,255,255,.86);font-size:clamp(1.02rem,.98rem + .3vw,1.18rem);max-width:52ch;margin-top:1.25rem}
 .hero__ticks{margin-top:1.5rem;display:grid;gap:.6rem}
 .hero__ticks li{display:flex;align-items:flex-start;gap:.6rem;color:rgba(255,255,255,.9);font-size:.97rem}

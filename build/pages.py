@@ -1,7 +1,7 @@
 # -*- coding: utf-8 -*-
 """Page bodies. Copy follows the SEO research spec in build/seo-research-source.html."""
 
-from data import (SITE, BIZ, IMG, SERVICES, ALL_SUBURBS, HOME_FAQS, CITABLE, CITABLE_ABOUT,
+from data import (SITE, BIZ, IMG, SERVICES, ALL_SUBURBS, HOME_FAQS, CITABLE, CITABLE_ABOUT, GOOGLE_RATING, REVIEWS,
                   GALLERY_HOME, GALLERY_ABOUT, GALLERY_BY_SERVICE, PRICE, FREQ)
 from templates import (head, header, footer, icon, quote_form, map_embed, faq_block,
                        areas_section, cta_band, gallery_section, crumbs, plain,
@@ -78,7 +78,8 @@ def home():
   <div class="wrap hero__inner">
     <div class="hero__copy">
       <span class="tag tag--glow"><i></i>Now booking across 19 northern suburbs</span>
-      <h1>Lawn Mowing Gold Coast — <span class="hl">Northern Suburbs</span> from Parkwood to Windaroo</h1>
+      <h1>Lawn Mowing Gold Coast — <span class="hl">Pimpama to Coomera</span> and the Northern Suburbs</h1>
+      <p class="hero__range">Parkwood to Windaroo and all suburbs in between</p>
       <p class="hero__lead speakable">{citable} Based in Pimpama and mowing Coomera, Ormeau, Helensvale and Hope Island fortnightly.</p>
       <ul class="hero__ticks">
         <li>{ck} Mow, edge and blow down — clippings in your green bin</li>
@@ -91,7 +92,7 @@ def home():
       </div>
       <div class="hero__proof">
         <div class="stars" aria-hidden="true">{stars}</div>
-        <p>Rated by Gold Coast locals on <a href="{gbp}" target="_blank" rel="noopener">Google</a> — mowing the north since day one.</p>
+        <p>Rated RATING_VALUE from RATING_COUNT reviews on <a href="{gbp}" target="_blank" rel="noopener">Google</a> by Northern Gold Coast locals.</p>
       </div>
     </div>
     <div class="hero__form" id="quote">
@@ -124,7 +125,7 @@ def home():
       We cover everything from a courtyard in a new Coomera estate to five acres at Jacobs Well, plus the
       hedges, weeds, clean-ups and odd jobs that come with owning a block in south-east Queensland.</p>
       <ul class="ticks">
-        <li>{ck} <strong>Fortnightly, three-weekly or one-off</strong> — your schedule, not a contract</li>
+        <li>{ck} <strong>Fortnightly, three-weekly through winter, or one-off</strong> — your schedule, not a contract</li>
         <li>{ck} <strong>One point of contact</strong> from first call to invoice</li>
         <li>{ck} <strong>Green waste removal available</strong> for an additional charge</li>
         <li>{ck} <strong>Fully insured</strong> for residential, strata and commercial work</li>
@@ -175,7 +176,7 @@ def home():
         <div class="why__item"><strong>One family, one phone number</strong><span>Ring {owner}. No dispatch queue, no "the crew will be in your area on Thursday".</span></div>
         <div class="why__item"><strong>Turns up on the day</strong><span>Fortnightly through summer, three-weekly through winter, or a one-off. You get a message when it is done.</span></div>
         <div class="why__item"><strong>Honest pricing</strong><span>An approximate price, pending inspection — then it stays that price.</span></div>
-        <div class="why__item"><strong>Battery equipment on request</strong><span>Petrol gear does most of the work. For a noise-sensitive site, ask when you book and we will make it happen or adjust the date.</span></div>
+        <div class="why__item"><strong>Fully insured</strong><span>Public liability cover for residential, strata, commercial and acreage work. Certificate of currency on request.</span></div>
       </div>
     </div>
   </div>
@@ -205,33 +206,25 @@ def home():
     reviews = """<section class="section section--reviews" id="reviews">
   <div class="wrap">
     <div class="section__head reveal">
-      <span class="eyebrow">{stars} Reviews</span>
+      <span class="eyebrow">{stars} {rv} from {rc} Google reviews</span>
       <h2>What Northern Gold Coast locals say</h2>
-      <p>Read the full set on our <a href="{gbp}" target="_blank" rel="noopener">Google Business Profile</a>
-      and <a href="{fb}" target="_blank" rel="noopener">Facebook page</a>.</p>
+      <p>Read all {rc} on our <a href="{gbp}" target="_blank" rel="noopener">Google Business Profile</a>
+      or our <a href="{fb}" target="_blank" rel="noopener">Facebook page</a>.</p>
     </div>
     <div class="reviews">
-      <blockquote class="review reveal" style="--d:0ms">
-        <div class="stars" aria-hidden="true">{s5}</div>
-        <p>“Turns up when he says he will, which is more than I can say for the last three mowers I tried. Lawn looks sharp and the edges are actually done.”</p>
-        <cite>Verified Google review · Coomera</cite>
-      </blockquote>
-      <blockquote class="review reveal" style="--d:90ms">
-        <div class="stars" aria-hidden="true">{s5}</div>
-        <p>“We have just over an acre at Ormeau Hills that had got away from us. Slashed, cut back and cleaned up in a day, and now he keeps it on a cycle.”</p>
-        <cite>Verified Google review · Ormeau Hills</cite>
-      </blockquote>
-      <blockquote class="review reveal" style="--d:180ms">
-        <div class="stars" aria-hidden="true">{s5}</div>
-        <p>“Fortnightly through summer and he has not missed one. The yard is done before we get home from work and the price has never changed.”</p>
-        <cite>Verified Google review · Upper Coomera</cite>
-      </blockquote>
+      {quotes}
     </div>
-    <p class="reviews__note reveal">Reviews are shown in summary. Full, dated reviews live on Google — tap through to read them all.</p>
+    <p class="reviews__note reveal">Five-star Google reviews, quoted as written. Full, dated reviews live on Google — tap through to read them all.</p>
   </div>
 </section>""".format(stars=icon("star", "icon icon--sm"), gbp=BIZ["gbp"], fb=BIZ["facebook"],
-                     s5="".join(icon("star", "icon icon--star") for _ in range(5)))
+                     rv=GOOGLE_RATING["value"], rc=GOOGLE_RATING["count"],
+                     quotes="\n      ".join(
+                         '<blockquote class="review reveal" style="--d:%dms"><div class="stars" aria-hidden="true">%s</div>'
+                         '<p>“%s”</p><cite>%s</cite></blockquote>'
+                         % (i * 90, "".join(icon("star", "icon icon--star") for _ in range(5)), r["text"], r["who"])
+                         for i, r in enumerate(REVIEWS)))
 
+    hero = hero.replace("RATING_VALUE", GOOGLE_RATING["value"]).replace("RATING_COUNT", GOOGLE_RATING["count"])
     body = (header("/") + '<main id="main">' + hero + _trust_bar() + intro
             + services + why + process + gallery_section(GALLERY_HOME, feature=True)
             + areas_section("Where we mow on the Northern Gold Coast",
@@ -241,7 +234,7 @@ def home():
             + reviews
             + faq_block(HOME_FAQS,
                         "Lawn mowing on the Gold Coast — your questions answered",
-                        "Straight answers on price, schedules, acreage and the battery gear.")
+                        "Straight answers on price, schedules, acreage and green waste.")
             + cta_band() + '</main>')
     return head(page) + body + footer()
 
@@ -256,9 +249,6 @@ def about():
          "Shanon, the owner. Enviro Garden Care & Odd Jobs is a family-owned business based in "
          "Pimpama — the person who prices your job is the person who does it and the person you "
          "call if something is not right."),
-        ("Do you use battery-powered equipment?",
-         "Petrol equipment is used for most jobs. Battery equipment can be used upon request — "
-         "mention it when you book and we will make it happen or adjust the booking date to suit."),
         ("Are you insured?",
          "Yes. We carry public liability insurance covering residential, strata, commercial and "
          "acreage work, and can supply a current certificate of currency on request."),
@@ -270,7 +260,7 @@ def about():
     page = {
         "title": "About Us | Family-Owned Lawn Mowing, Northern Gold Coast",
         "desc": ("Family-owned lawn mowing business run by Shanon of Pimpama, servicing the "
-                 "Northern Gold Coast from Parkwood to Windaroo. Fortnightly, three-weekly or one-off."),
+                 "Northern Gold Coast, Parkwood to Windaroo. Fortnightly, three-weekly in winter, or one-off."),
         "canonical": SITE + page_url("about"),
         "og_image": IMG["about"],
         "body_class": "page-about",
@@ -333,9 +323,9 @@ def about():
     </div>
     <div class="values">
       <article class="value reveal" style="--d:0ms">{leaf}<h3>Environmentally considered</h3>
-        <p>Battery equipment can be used upon request, green waste disposed of properly rather than
-        dumped, and mowing heights set to keep lawns healthy through a subtropical summer instead of
-        scalping them.</p></article>
+        <p>Clippings in your green bin rather than landfill, green waste disposed of properly rather
+        than dumped, and mowing heights set to keep lawns healthy through a subtropical summer instead
+        of scalping them.</p></article>
       <article class="value reveal" style="--d:70ms">{clock}<h3>We turn up</h3>
         <p>The single most common complaint about mowing contractors is that they vanish. You get a
         schedule, a message when the job is done, and a phone number that a human answers.</p></article>
@@ -498,7 +488,7 @@ def service_page(svc):
         <h2>Why book Enviro Garden Care &amp; Odd Jobs</h2>
         <p>{citable} Book {kw} with us and you deal with {owner} from the first phone call to the
         invoice — there is no franchise fee in your price and no rotating crew. Green waste removal is
-        available for an additional charge, and battery equipment is available on request.</p>
+        available for an additional charge.</p>
       </div>
     </div>""".format(intro=svc["intro"], blocks="\n      ".join(blocks),
                      name=svc["name"], subs=subs, citable=CITABLE, owner=BIZ["owner"],
@@ -562,7 +552,8 @@ def contact():
          "mowing gets an approximate price, pending inspection; acreage and clean-ups need a look "
          "at the block first. Photos of the property help us get it right."),
         ("What are your hours?",
-         "We are on the tools Monday to Friday from 7am to 5pm and Saturday from 7am to 3pm."),
+         "We are on the tools Monday to Friday from 7am to 5pm. Saturday 7am to 3pm is phone "
+         "enquiries only — no on-site work."),
         ("Which suburbs do you cover?",
          "Nineteen suburbs of the Northern Gold Coast: Coomera, Upper Coomera, Coomera Waters, "
          "Pimpama, Ormeau, Ormeau Hills, Oxenford, Helensvale, Hope Island, Sanctuary Cove, "
@@ -672,7 +663,7 @@ def thank_you():
       <ol class="thanks__steps">
         <li><span>1</span><div><strong>We read the details</strong><p>Address, property size and the service you need — that is usually enough to price it.</p></div></li>
         <li><span>2</span><div><strong>We call or email an approximate price</strong><p>Pending inspection — whether it is fortnightly mowing, acreage, a clean-up or a commercial site.</p></div></li>
-        <li><span>3</span><div><strong>You get booked in</strong><p>Pick fortnightly, three-weekly or a one-off. We confirm the first visit and you are away.</p></div></li>
+        <li><span>3</span><div><strong>You get booked in</strong><p>Pick fortnightly (three-weekly through winter) or a one-off. We confirm the first visit and you are away.</p></div></li>
       </ol>
     </div>
     <div class="thanks__urgent">

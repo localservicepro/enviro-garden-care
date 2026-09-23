@@ -36,14 +36,15 @@ BIZ = {
     "lng": "153.32468",
     "facebook": "https://www.facebook.com/p/Enviro-Garden-Care-Odd-Jobs-100088271821117/",
     "gbp": "https://maps.app.goo.gl/Q28zDvYDuuXLZRQh9",
-    # NOTE: trading hours remain an assumption — the client's review did not
-    # correct them, but did not explicitly confirm them either. See README.
+    # Confirmed by the client (23 Sep): these hours are correct. Saturday is
+    # phone enquiries only — no on-site work. NOTE: the Google Business Profile
+    # currently shows Mon–Fri 8–5, Sat 8–12; the client should align it.
     "hours": [
         (["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], "07:00", "17:00", "Mon – Fri"),
-        (["Saturday"], "07:00", "15:00", "Saturday"),
+        (["Saturday"], "07:00", "15:00", "Saturday (phone only)"),
     ],
     # CD r10 / r81 / r86: no Sunday wording, no battery wording here.
-    "hours_note": "",
+    "hours_note": "Saturday is phone enquiries only — no on-site work.",
 }
 
 MAP_EMBED = (
@@ -77,10 +78,30 @@ CITABLE_ABOUT = (
     "and all suburbs in between."
 )
 
-# Mowing frequencies — CD r9 (r93 awaiting confirmation, implemented as r9):
-# fortnightly (standard), three-weekly April–September, one-off. Never monthly.
-FREQ = "fortnightly, three-weekly or one-off"
+# Mowing frequencies — CD r9, confirmed by the client 23 Sep (closes r93):
+# fortnightly, three-weekly through winter, or one-off. Never monthly.
+FREQ = "fortnightly, three-weekly through winter, or one-off"
 FREQ_SHORT = "fortnightly or one-off"
+
+# Google rating — verified from the Business Profile listing data on 23 Sep 2026
+# (4.9 from 62 reviews, 60 of them five-star). Visible text only; NOT put into
+# schema — Google disallows self-serving aggregateRating on LocalBusiness.
+GOOGLE_RATING = {"value": "4.9", "count": "62"}
+
+# Three five-star Google reviews for the homepage. The client has approved
+# picking any three (23 Sep). The review text could not be fetched from this
+# build environment (Google Maps and every review aggregator are blocked), so
+# these three are PLACEHOLDERS — the build prints a warning while
+# "placeholder" is True. Paste the real text, first name and suburb, then flip
+# the flag. Keep them verbatim; do not tidy the customer's wording.
+REVIEWS = [
+    {"placeholder": True, "who": "Google review · Coomera",
+     "text": "Turns up when he says he will, which is more than I can say for the last three mowers I tried. Lawn looks sharp and the edges are actually done."},
+    {"placeholder": True, "who": "Google review · Ormeau Hills",
+     "text": "We have just over an acre at Ormeau Hills that had got away from us. Slashed, cut back and cleaned up in a day, and now he keeps it on a cycle."},
+    {"placeholder": True, "who": "Google review · Upper Coomera",
+     "text": "Fortnightly through summer and he has not missed one. The yard is done before we get home from work and the price has never changed."},
+]
 
 # Pricing language — CD r13: a property cannot be quoted without inspection.
 PRICE = "an approximate price, pending inspection"
@@ -281,7 +302,7 @@ SERVICES = [
                  "blow down, fortnightly or one-off. Approximate price, pending inspection — "
                  "0407 276 574."),
         # CD r37 / r38 / r92: no "corridor", no "monthly".
-        "tagline": ("Fortnightly, three-weekly or one-off mowing across Coomera, Upper Coomera "
+        "tagline": ("Fortnightly, three-weekly through winter, or one-off mowing across Coomera, Upper Coomera "
                     "and any other suburb between Parkwood and Windaroo."),
         "audience": "Homeowners, renters and strata in the Coomera growth belt",
         "img": "svc_mowing",
@@ -292,7 +313,7 @@ SERVICES = [
             "Regular <strong>lawn mowing in Coomera</strong> keeps a new-estate lawn looking "
             "like the display home rather than the vacant block next door. Enviro Garden Care "
             "&amp; Odd Jobs mows across Coomera, Upper Coomera, Coomera Waters and any other "
-            "suburb between Parkwood and Windaroo on a fortnightly, three-weekly or one-off "
+            "suburb between Parkwood and Windaroo on a fortnightly (three-weekly through winter) or one-off "
             "schedule, from our base ten minutes up the road in Pimpama."),
         "body": [
             ("What a standard mow includes", [
@@ -303,10 +324,10 @@ SERVICES = [
                 "Clippings and green waste placed in your green waste bin",
                 "Gates closed, pets kept in mind, and a message when we are done if you are not home",
             ]),
-            # CD r42: fortnightly Oct–Mar; fortnightly or three-weekly Apr–Sep; one-off.
+            # CD r42, simplified by the client 23 Sep: fortnightly; three-weekly through winter; one-off.
             ("Schedules that suit south-east Queensland grass", [
-                "<strong>Fortnightly, October to March</strong> — couch and kikuyu run hard through the wet season",
-                "<strong>Fortnightly or three-weekly, April to September</strong> — growth slows, and so does your bill",
+                "<strong>Fortnightly through the growing season</strong> — couch and kikuyu run hard through the wet season",
+                "<strong>Three-weekly through winter</strong> — growth slows, and so does your bill",
                 "<strong>One-off tidy-ups</strong> for inspections, end of lease, or a block that has got away from you",
                 "<strong>Holiday cover</strong> so you are not coming home to knee-high grass",
             ]),
@@ -314,8 +335,8 @@ SERVICES = [
         "faqs": [
             ("Do you do lawn mowing in Coomera and Upper Coomera?",
              "Yes. We service Coomera, Upper Coomera, Coomera Waters and any other suburb "
-             "between Parkwood and Windaroo from our base in Pimpama, with fortnightly and "
-             "three-weekly schedules for residential and strata properties."),
+             "between Parkwood and Windaroo from our base in Pimpama, with fortnightly "
+             "schedules (three-weekly through winter) for residential and strata properties."),
             ("How much does lawn mowing cost on the Gold Coast?",
              "Most standard residential lawns in Pimpama, Coomera and Helensvale fall into a set "
              "per-visit rate; larger or overgrown blocks are priced on size and access. Regular "
@@ -537,8 +558,7 @@ SERVICES = [
             "whether you have to chase the contractor. We run scheduled grounds and lawn care for "
             "body corporates, retail sites and industrial estates across Yatala, Stapylton, "
             "Arundel, Hope Island and all other suburbs between Parkwood and Windaroo — on a set "
-            "roster, with low-noise battery equipment available upon request for customer-facing "
-            "premises."),
+            "roster you can put straight into the budget."),
         "body": [
             ("What a scheduled site visit covers", [
                 "Lawn and common-area mowing on an agreed roster",
@@ -552,7 +572,7 @@ SERVICES = [
             # CD r63 / r64 / r65
             ("Why managers keep us on the roster", [
                 "<strong>One contact.</strong> You deal with Shanon, not a call centre and a rotating crew",
-                "<strong>Low-noise option.</strong> Battery equipment available upon request for tenanted, retail and customer-facing sites",
+                "<strong>Timed around tenants.</strong> Early or after-hours weekday visits by arrangement for retail and customer-facing sites",
                 "<strong>Reporting.</strong> Photos after each visit if your body corporate or owner wants a record",
                 "<strong>Fixed schedule, fixed price.</strong> Priced per fortnight so it goes straight into the budget",
             ]),
@@ -562,12 +582,10 @@ SERVICES = [
             ("Can you handle body corporate or commercial grounds maintenance on the Northern Gold Coast?",
              "Yes. Scheduled grounds maintenance for body corporates, retail sites and industrial "
              "estates across Yatala, Stapylton, Arundel and Hope Island, and any other suburb "
-             "between Parkwood and Windaroo, with low-noise equipment available upon request for "
-             "customer-facing premises."),
+             "between Parkwood and Windaroo, on a set roster with one point of contact."),
             ("Do you work outside business hours?",
-             "By arrangement, yes. Battery equipment is available upon request for sites where "
-             "noise is a concern, and after-hours or Saturday visits can be scheduled for "
-             "tenanted premises."),
+             "By arrangement, yes. Early-morning or after-hours weekday visits can be scheduled "
+             "for tenanted premises where a mid-day mow would get in the way."),
             ("Do you provide photos or reports after each visit?",
              "Yes, on request. Many of our body corporate and property manager clients get photos "
              "after every scheduled visit as a record for owners."),
@@ -647,22 +665,17 @@ HOME_FAQS = [
      "approximate price, pending inspection."),
     ("Do you do lawn mowing in Coomera and Upper Coomera?",
      "Yes. We service Coomera, Upper Coomera, Coomera Waters and any other suburb between "
-     "Parkwood and Windaroo from our base in Pimpama, with fortnightly and three-weekly "
-     "schedules for residential and strata properties."),
+     "Parkwood and Windaroo from our base in Pimpama, with fortnightly schedules "
+     "(three-weekly through winter) for residential and strata properties."),
     ("Do you mow acreage properties near Jacobs Well and Yatala?",
      "Yes. Ride-on and acreage mowing for lifestyle lots and rural blocks across Jacobs Well, "
      "Yatala, Stapylton, Ormeau Hills, Willowvale and Windaroo, including slashing, brush "
      "cutting and clean-up."),
-    # CD r34
-    ("Do you use battery-powered equipment?",
-     "Petrol equipment is used for most jobs. If battery equipment is needed — for noise, "
-     "fumes or a sensitive site — discuss it with us when you book and we can make it happen "
-     "or move the booking date to suit."),
     # CD r35
     ("Can you handle body corporate or commercial grounds maintenance on the Northern Gold Coast?",
      "Yes. Scheduled grounds maintenance for body corporates, retail sites and industrial estates "
      "across Yatala, Stapylton, Arundel and Hope Island, and any other suburb between Parkwood "
-     "and Windaroo, with low-noise equipment available upon request for customer-facing premises."),
+     "and Windaroo, on a set roster with one point of contact."),
     # CD r36
     ("Do you take the green waste away after mowing or hedge trimming?",
      "Mostly it goes in your green waste bin. We can take it away for an additional charge, "
@@ -702,7 +715,7 @@ FORM_FIELDS = [
     # CD r83: once-off vs regular. New custom field in GHL.
     ("job_type", "Job Type", "{{contact.job_type}}", "select", True, None,
      ["One-off job",
-      "Regular maintenance (fortnightly / three-weekly)"]),
+      "Regular maintenance (fortnightly, three-weekly in winter)"]),
     # CD r20: photos of the property. Files cannot travel through the tracking
     # script — uploaded by api/quote.js into the "Job Photos" file field (key contact.job_photos).
     ("property_photos", "Photos of the property", "{{contact.job_photos}}", "file", False,

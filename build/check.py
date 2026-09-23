@@ -214,6 +214,7 @@ for path in pages:
 # edit cannot quietly reintroduce them.
 BANNED = [
     ("corridor", "CD r7 — service-area wording"),
+    ("battery", "client 23 Sep — no battery wording at all"),
     ("brisbane", "CD r8"),
     ("monthly", "CD r9 — frequencies are fortnightly / three-weekly / one-off"),
     ("sunday", "CD r10"),
@@ -228,7 +229,8 @@ BANNED = [
     ("mowing round", "CD r15"),
     ("fence painting", "CD r69"),
     ("picture hanging", "CD r69"),
-    ("pimpama to coomera", "CD r17"),
+    # "pimpama to coomera" was banned by CD r17; the client reinstated it for the
+    # homepage H1 on 23 Sep (Parkwood–Windaroo stays as the smaller line under it).
     ("coomera to yatala", "CD r18"),
     ("yatala down to parkwood", "CD r76"),
 ]
@@ -242,15 +244,6 @@ for path in pages:
         n = visible.count(word)
         if n:
             err(rel, "banned phrase %r x%d (%s)" % (word, n, why))
-    # Battery may be mentioned, but only as "on request" — never as a headline
-    # feature (CD r12). Cap it, and never alongside a no-charge claim.
-    # One "available on request" line plus the FAQ the client asked for (CD r34)
-    # is four or five mentions; more than that is battery creeping back in.
-    nb = visible.count("battery")
-    if nb > 5:
-        err(rel, "'battery' appears %d times — CD r12 allows one line plus the FAQ" % nb)
-    if re.search(r"battery[^.]{0,60}(no extra|zero extra|free of charge|same price)", visible):
-        err(rel, "battery described as no-extra-charge (CD r12)")
     for m in re.finditer(r"green waste[^.]{0,80}(taken away|removed|leaves with)", visible):
         window = visible[m.start(): m.end() + 60]
         if "additional charge" not in window and "extra charge" not in window and "green waste bin" not in window:
@@ -311,6 +304,12 @@ for rel, kw in TARGETS.items():
     density = body.count(kw) / max(len(body.split()), 1) * 100 * len(kw.split())
     print("       density %.2f%% (%d exact matches, %d words)"
           % (density, body.count(kw), len(body.split())))
+
+# Review quotes must be real before launch (client approved picking three, 23 Sep).
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import data as _data
+if any(r.get("placeholder") for r in _data.REVIEWS):
+    warn("build/data.py", "REVIEWS are placeholders — paste three real five-star Google reviews (text, first name, suburb) and set placeholder=False")
 
 print("\n%d error(s), %d warning(s)" % (len(errors), len(warnings)))
 for e in errors:
