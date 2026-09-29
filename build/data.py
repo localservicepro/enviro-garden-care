@@ -88,19 +88,21 @@ FREQ_SHORT = "fortnightly or one-off"
 # schema — Google disallows self-serving aggregateRating on LocalBusiness.
 GOOGLE_RATING = {"value": "4.9", "count": "62"}
 
-# Three five-star Google reviews for the homepage. The client has approved
-# picking any three (23 Sep). The review text could not be fetched from this
-# build environment (Google Maps and every review aggregator are blocked), so
-# these three are PLACEHOLDERS — the build prints a warning while
-# "placeholder" is True. Paste the real text, first name and suburb, then flip
-# the flag. Keep them verbatim; do not tidy the customer's wording.
+# Five-star Google reviews for the homepage, supplied by LSP as screenshots
+# from the Business Profile on 29 Sep 2026 and quoted exactly as written
+# (spelling and all). Names are shown as first name + initial. Set
+# "placeholder": True on any entry that is not a real review — check.py warns.
 REVIEWS = [
-    {"placeholder": True, "who": "Google review · Coomera",
-     "text": "Turns up when he says he will, which is more than I can say for the last three mowers I tried. Lawn looks sharp and the edges are actually done."},
-    {"placeholder": True, "who": "Google review · Ormeau Hills",
-     "text": "We have just over an acre at Ormeau Hills that had got away from us. Slashed, cut back and cleaned up in a day, and now he keeps it on a cycle."},
-    {"placeholder": True, "who": "Google review · Upper Coomera",
-     "text": "Fortnightly through summer and he has not missed one. The yard is done before we get home from work and the price has never changed."},
+    {"placeholder": False, "who": "Bradley C. · Google review",
+     "text": "Shanon did an absolute ripper of a job for me today. My entire property was severely overgrown and he made short work of it at a level of professionalism that is unparalleled. Highly recommend Shanon and his incredible work. 10/10 Thanks again mate and I\u2019ll see you next time."},
+    {"placeholder": False, "who": "Mark C. · Google review · regular client, 3 years",
+     "text": "Excellent level of service and communication professional work have engaged Enviro Garden Care for the last 3 years to do regular lawn and garden maintenance"},
+    {"placeholder": False, "who": "Kelly T. · Google review",
+     "text": "Love this service. Shanon has great eye for detail, edges always perfect. Pricing more than fair. Highly recommend."},
+    {"placeholder": False, "who": "Angel M. · Google review",
+     "text": "The best gardener i have ever had, communication is excellent. Lovely guy to deal with. Would recommend."},
+    {"placeholder": False, "who": "Shelby H. · Google review",
+     "text": "Shannon came and mowed/snipped our front and back lawn. Affordable, with a quick turn around. Did a great job also"},
 ]
 
 # Pricing language — CD r13: a property cannot be quoted without inspection.

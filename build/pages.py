@@ -211,13 +211,14 @@ def home():
       <p>Read all {rc} on our <a href="{gbp}" target="_blank" rel="noopener">Google Business Profile</a>
       or our <a href="{fb}" target="_blank" rel="noopener">Facebook page</a>.</p>
     </div>
-    <div class="reviews">
+    <div class="reviews" data-count="{n}">
       {quotes}
     </div>
     <p class="reviews__note reveal">Five-star Google reviews, quoted as written. Full, dated reviews live on Google — tap through to read them all.</p>
   </div>
 </section>""".format(stars=icon("star", "icon icon--sm"), gbp=BIZ["gbp"], fb=BIZ["facebook"],
                      rv=GOOGLE_RATING["value"], rc=GOOGLE_RATING["count"],
+                     n=len(REVIEWS),
                      quotes="\n      ".join(
                          '<blockquote class="review reveal" style="--d:%dms"><div class="stars" aria-hidden="true">%s</div>'
                          '<p>“%s”</p><cite>%s</cite></blockquote>'

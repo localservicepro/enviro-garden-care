@@ -271,21 +271,18 @@ Mon–Fri 8:00–17:00 and Sat 8:00–12:00. The site and the GBP must match —
 client corrects the GBP to 7–5 / 7–3, or tells us the GBP is right and `BIZ["hours"]` in
 `build/data.py` changes. Until then Google may show the site's hours as inconsistent.
 
-### 3. Review quotes — rating verified, quotes still placeholders
+### 3. Reviews — real, verbatim
 
-The **4.9 from 62 Google reviews** in the hero and the Reviews header is real: it comes
-from the Business Profile listing data on 23 Sep (60 five-star, 1 two-star, 1 one-star).
-It is visible text only — it is deliberately *not* in schema, because Google disallows
-self-serving `aggregateRating` on a `LocalBusiness`.
+The **4.9 from 62 Google reviews** in the hero and the Reviews header comes from the
+Business Profile listing data (checked 23 Sep). It is visible text only — deliberately
+*not* in schema, because Google disallows self-serving `aggregateRating` on a
+`LocalBusiness`.
 
-The client has approved picking any three five-star reviews. The review text itself could
-not be fetched from the build environment (Google Maps, Localsearch, Needa Trades and
-Growerslink are all blocked, and the Zapier Google Business Profile app needs an OAuth
-connection that cannot be completed non-interactively). So the three quotes are still the
-representative placeholders, now held in `REVIEWS` in `build/data.py` with
-`placeholder: True`, and **`check.py` warns on every build until they are replaced**.
-To finish: open the GBP reviews, copy three five-star reviews verbatim (text, first
-name, suburb if given), paste them into `REVIEWS`, set `placeholder` to `False`, rebuild.
+The five quotes are real five-star Google reviews, supplied by LSP as screenshots on
+29 Sep and quoted exactly as written (including the customer's own spelling). Names are
+first name + initial. They live in `REVIEWS` in `build/data.py`; the grid lays out five
+as 3 + 2 centred. To swap one, edit that list — `check.py` warns if any entry is marked
+`placeholder: True`.
 
 ### 4. Images — localise before launch
 
