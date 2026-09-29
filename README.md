@@ -160,9 +160,9 @@ comments in `POOL` in `build/data.py`. What the look revealed:
   parked car), `commercial 2` (other businesses' signage and a "FOR SALE" sign in the ute),
   two 14 Sep uploads with readable plates on customers'/neighbours' cars, and the sunset
   trailer frame whose own plate is readable (the side-on frame from the same evening is
-  used instead). `garden cleanup.png` (7.5 MB) still cannot be fetched to check; the client
-  asked for it to be used (29 Sep), so it sits in the green-waste gallery **unseen** —
-  eyeball it on the preview before launch.
+  used instead). `garden cleanup.png` arrived as a 2.4 MB re-save on 29 Sep, was checked
+  (before/after of a side-path clean-up, no faces or plates) and sits in the green-waste
+  gallery.
 - **Two things for the client to confirm:** (1) the About-page gallery now uses the photo
   of Shanon with his two children behind the mower, and the daughter thumbs-up photo stays
   on the home, lawn-mowing and odd-jobs pages as requested in the Loom — both show
@@ -293,7 +293,9 @@ See **Photos** above. Everything is hot-linked from Google Drive's image CDN, wh
 rate-limits and depends on folder sharing. Download, convert to WebP, drop in
 `assets/img/`, and change `drive()` in `build/data.py`. Two photos are portrait
 (the family photo and the sunset ride-on); the gallery tiles crop them with
-`object-fit: cover`, so check them once on a phone.
+`object-fit: cover`, so check them once on a phone. The garden clean-up collage is
+square and stacked before/after, so it also crops in a landscape tile; if the crop
+hides the "before" half, give it the 2x2 feature slot or split the collage.
 
 ---
 

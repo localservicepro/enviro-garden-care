@@ -135,13 +135,11 @@ POOL = {
     "acreage_2":     "1kA25zHtvNTMa4nXHo0saucEXvgbfADqs",  # Hustler beside a wall of unmown chest-high grass
     "garden_mulch":  "1-NptyUyR1DZT8ub444JoBER1JVny8fGT",  # freshly mulched bed of golden canes along a colorbond fence
     "commercial_1":  "1iacBzoG5NBUfnn2uMoH8kNWj0Yo_kgTY",  # branded trailer outside industrial units at sunset
-    # UNCHECKED: "garden cleanup.png" is a 7.5 MB PNG the Drive connector cannot
-    # deliver (transport dies on the payload), so nobody here has seen it. The
-    # client named it and asked for it to be used (29 Sep), so it is placed on
-    # the green-waste page from its ID; Google's image CDN resizes it on the fly.
-    # Eyeball it on the preview before launch — if it shows a face or a plate,
-    # swap it for "hedge_beds".
-    "garden_cleanup":"16k50GRdF6J5Ou2iKEg4JmInioB4WOY2o",  # garden clean-up (client's name; not viewed)
+    # "garden cleanup.png" — 2.4 MB re-save uploaded 29 Sep (the 7.5 MB original,
+    # 16k50GRdF6J5Ou2iKEg4JmInioB4WOY2o, could not be fetched). Viewed: 1920x1920
+    # before/after collage of a side path — weeds and overgrowth on top, mulched
+    # bed and swept pavers below. No faces, no plates.
+    "garden_cleanup":"1wtZYfH-p0ljOPUd9MXxm2g04pUafMxlI",
     # not used: "commercial 2" (third-party signage, FOR SALE sign), "commercial 3"
     # (night shot, readable plate), "trailer tip"/"van 3"/"sunset 1"/"sunset 2"/
     # "image0 (6)" (640px copies of photos already on the site at full size).
@@ -256,7 +254,7 @@ GALLERY_BY_SERVICE = {
         _g("trailer_tip_grey", "Trailer tipping a load of green waste at the facility — green waste removal Gold Coast"),
         _g("before_after",     "Before and after: overgrown nature strip and front yard cut back and tidied — yard clean-up Gold Coast"),
         _g("acreage_dam",      "Acreage block cut back to the dam — site clean-up Northern Gold Coast"),
-        _g("garden_cleanup",   "Garden clean-up in progress — yard clean-ups and green waste removal Northern Gold Coast"),
+        _g("garden_cleanup",   "Before and after: side path weeded, bed mulched and pavers cleared — garden clean-up and green waste removal Northern Gold Coast"),
     ],
     "commercial-property-maintenance": [  # CD r66: vehicles outside commercial properties.
         # commercial_1 is this page's hero/card image, so it is not repeated here.
