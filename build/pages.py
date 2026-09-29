@@ -553,7 +553,7 @@ def contact():
          "mowing gets an approximate price, pending inspection; acreage and clean-ups need a look "
          "at the block first. Photos of the property help us get it right."),
         ("What are your hours?",
-         "We are on the tools Monday to Friday from 7am to 5pm. Saturday 7am to 3pm is phone "
+         "We are on the tools Monday to Friday from 8am to 5pm. Saturday 8am to 12pm is phone "
          "enquiries only — no on-site work."),
         ("Which suburbs do you cover?",
          "Nineteen suburbs of the Northern Gold Coast: Coomera, Upper Coomera, Coomera Waters, "

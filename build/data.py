@@ -36,12 +36,11 @@ BIZ = {
     "lng": "153.32468",
     "facebook": "https://www.facebook.com/p/Enviro-Garden-Care-Odd-Jobs-100088271821117/",
     "gbp": "https://maps.app.goo.gl/Q28zDvYDuuXLZRQh9",
-    # Confirmed by the client (23 Sep): these hours are correct. Saturday is
-    # phone enquiries only — no on-site work. NOTE: the Google Business Profile
-    # currently shows Mon–Fri 8–5, Sat 8–12; the client should align it.
+    # Confirmed by the client 29 Sep: Mon–Fri 8–5, Sat 8–12, matching the Google
+    # Business Profile. Saturday is phone enquiries only — no on-site work.
     "hours": [
-        (["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], "07:00", "17:00", "Mon – Fri"),
-        (["Saturday"], "07:00", "15:00", "Saturday (phone only)"),
+        (["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"], "08:00", "17:00", "Mon – Fri"),
+        (["Saturday"], "08:00", "12:00", "Saturday (phone only)"),
     ],
     # CD r10 / r81 / r86: no Sunday wording, no battery wording here.
     "hours_note": "Saturday is phone enquiries only — no on-site work.",

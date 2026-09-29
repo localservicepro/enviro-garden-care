@@ -259,17 +259,12 @@ the Vercel project (done, per client); run `scripts/list-custom-fields.mjs` once
 confirm the Job Photos field **ID** and that the duplicated custom-field keys resolve
 to the intended twins; then the iPhone test in `api/README.md`.
 
-### 2. Trading hours — confirmed, but the GBP disagrees
+### 2. Trading hours — confirmed 29 Sep
 
-The client confirmed `Mon–Fri 7:00–17:00, Sat 7:00–15:00` on 23 Sep and added that
-**Saturday is phone enquiries only — no on-site work**. The footer now labels Saturday
-"phone only" with a note, and the contact FAQ says the same. Both stay in
-`openingHoursSpecification` because the business is reachable on Saturdays.
-
-**Mismatch to fix on Google:** the Business Profile listing data (checked 23 Sep) shows
-Mon–Fri 8:00–17:00 and Sat 8:00–12:00. The site and the GBP must match — either the
-client corrects the GBP to 7–5 / 7–3, or tells us the GBP is right and `BIZ["hours"]` in
-`build/data.py` changes. Until then Google may show the site's hours as inconsistent.
+`Mon–Fri 08:00–17:00, Sat 08:00–12:00`, matching the Google Business Profile. Saturday
+is phone enquiries only, no on-site work: the footer labels it "phone only" with a note,
+and the contact FAQ says the same. Both days stay in `openingHoursSpecification`
+because the business is reachable. Source: `BIZ["hours"]` in `build/data.py`.
 
 ### 3. Reviews — real, verbatim
 
