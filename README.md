@@ -160,8 +160,9 @@ comments in `POOL` in `build/data.py`. What the look revealed:
   parked car), `commercial 2` (other businesses' signage and a "FOR SALE" sign in the ute),
   two 14 Sep uploads with readable plates on customers'/neighbours' cars, and the sunset
   trailer frame whose own plate is readable (the side-on frame from the same evening is
-  used instead). `garden cleanup.png` (7.5 MB) could not be fetched to check and is unused
-  — a JPG export of it would be usable.
+  used instead). `garden cleanup.png` (7.5 MB) still cannot be fetched to check; the client
+  asked for it to be used (29 Sep), so it sits in the green-waste gallery **unseen** —
+  eyeball it on the preview before launch.
 - **Two things for the client to confirm:** (1) the About-page gallery now uses the photo
   of Shanon with his two children behind the mower, and the daughter thumbs-up photo stays
   on the home, lawn-mowing and odd-jobs pages as requested in the Loom — both show
