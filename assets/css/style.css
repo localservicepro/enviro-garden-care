@@ -577,7 +577,7 @@ strong{font-weight:650;color:var(--green-900)}
   .steps{grid-template-columns:1fr}
   .steps .step:not(:last-child)::after{display:none}
   .reviews{grid-template-columns:1fr}
-  .reviews .review:nth-child(n){grid-column:auto}
+  .reviews[data-count] .review:nth-child(n){grid-column:auto}
   .trust__list{grid-template-columns:1fr 1fr}
   .shots{grid-template-columns:repeat(2,1fr)}
   .shot--feature{grid-column:span 2;grid-row:span 1}
