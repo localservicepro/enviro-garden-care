@@ -51,19 +51,22 @@ def main():
             if crop:
                 im = im.crop(crop)
             im = im.convert("RGBA" if im.mode in ("RGBA", "LA", "P") and "transparency" in im.info or im.mode == "RGBA" else "RGB")
-            for width in sorted(data.IMAGE_SIZES[key]):
-                name = "%s-%d.webp" % (key.replace("_", "-"), width)
+            for width, fmt in sorted(data.IMAGE_SIZES[key]):
+                name = "%s-%d.%s" % (key.replace("_", "-"), width, fmt)
                 wanted.add(name)
                 out = im
                 if im.width > width:
                     out = im.resize((width, round(im.height * width / im.width)), Image.LANCZOS)
                 path = os.path.join(OUT, name)
-                q = data.IMAGE_QUALITY.get(key, args.quality)
-                out.save(path, "WEBP", quality=q, method=6)  # no exif= -> metadata stripped
+                if fmt == "png":
+                    out.save(path, "PNG", optimize=True)  # icons: favicon, apple-touch-icon
+                else:
+                    q = data.IMAGE_QUALITY.get(key, args.quality)
+                    out.save(path, "WEBP", quality=q, method=6)  # no exif= -> metadata stripped
                 total += os.path.getsize(path)
                 print("%-34s %4dx%-4d %6.0f KB" % (name, out.width, out.height, os.path.getsize(path) / 1024))
 
-    stale = [f for f in os.listdir(OUT) if f.endswith(".webp") and f not in wanted]
+    stale = [f for f in os.listdir(OUT) if f.endswith((".webp", ".png")) and f not in wanted]
     for f in stale:
         os.remove(os.path.join(OUT, f))
         print("removed stale", f)

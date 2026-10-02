@@ -165,7 +165,7 @@ for path in pages:
             err(rel, "missing background image: %s" % u)
 
     def photo_key(u):                                      # /assets/img/resi-2-1200.webp -> /assets/img/resi-2
-        return re.sub(r"-\d+\.webp$", "", u)
+        return re.sub(r"-\d+\.(webp|png)$", "", u)
     keys = [photo_key(u) for u in re.findall(r'<img\b[^>]*\bsrc="([^"]+)"', src)]
     # hero / cta backgrounds: one style attribute may carry a desktop and a
     # phone variant of the same photo, which counts as one use.
@@ -176,7 +176,7 @@ for path in pages:
         seen_src[key] = seen_src.get(key, 0) + 1
     for key, n in seen_src.items():
         # The logo sits in both header and footer by design.
-        if n > 1 and not key.endswith(("/logo", "/logo-mark")) and not key.endswith(".svg"):
+        if n > 1 and not key.endswith(("/logo", "/logo-icon")) and not key.endswith(".svg"):
             err(rel, "same photo used %d times on the page: …%s" % (n, key[-30:]))
 
     # --- tracking + analytics -------------------------------------------
