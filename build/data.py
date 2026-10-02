@@ -324,7 +324,7 @@ SERVICES = [
             "schedule, from our base ten minutes up the road in Pimpama."),
         "body": [
             ("What a standard mow includes", [
-                "Cut to the right height for your grass type — we do not scalp couch or buffalo in summer",
+                "Cut to the right height to suit your grass type",
                 "All edges trimmed: fence lines, paths, driveway, garden beds and around the letterbox",
                 "Hard surfaces blown down so the clippings end up in the bin, not on your porch",
                 # CD r41
@@ -333,7 +333,7 @@ SERVICES = [
             ]),
             # CD r42, simplified by the client 23 Sep: fortnightly; three-weekly through winter; one-off.
             ("Schedules that suit south-east Queensland grass", [
-                "<strong>Fortnightly through the growing season</strong> — couch and kikuyu run hard through the wet season",
+                "<strong>Fortnightly through the growing season</strong> — zoysia and buffalo run hard through the wet season",
                 "<strong>Three-weekly through winter</strong> — growth slows, and so does your bill",
                 "<strong>One-off tidy-ups</strong> for inspections, end of lease, or a block that has got away from you",
                 "<strong>Holiday cover</strong> so you are not coming home to knee-high grass",
@@ -460,7 +460,7 @@ SERVICES = [
                 "<strong>Hedges</strong> — two to three trims a year on the Gold Coast; more for lilly pilly and murraya through the wet",
                 "<strong>Mulch</strong> — top up before summer to cut watering and suppress weeds",
                 "<strong>Pruning</strong> — late winter for most shrubs, straight after flowering for the rest",
-                "<strong>Pre-sale and pre-inspection resets</strong> — book a week out so the garden has time to settle and look established, not freshly attacked",
+                "<strong>Pre-sale and pre-inspection resets</strong> — book in advance so we can carry the work out one week before inspection",
             ]),
         ],
         "faqs": [
