@@ -84,8 +84,8 @@ def local_business_schema():
         "url": SITE + "/",
         "telephone": BIZ["phone_e164"],
         "email": BIZ["email"],
-        "image": IMG["hero"],
-        "logo": IMG["logo"],
+        "image": SITE + IMG["hero"],
+        "logo": SITE + IMG["logo"],
         "priceRange": "$$",
         "currenciesAccepted": "AUD",
         # CD r94 (awaiting client): street kept in hidden schema only so the NAP
@@ -220,7 +220,6 @@ def head(page):
 <meta name="twitter:image" content="{og_image}">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="preconnect" href="https://lh3.googleusercontent.com">
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,700;9..144,800&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
 <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml">
 <link rel="apple-touch-icon" href="/assets/img/favicon.svg">
@@ -230,7 +229,7 @@ def head(page):
 <body class="{body_class}">
 <a class="skip" href="#main">Skip to content</a>
 """.format(title=page["title"], desc=page["desc"], canonical=page["canonical"],
-           og_image=page.get("og_image", IMG["hero"]),
+           og_image=SITE + page.get("og_image", IMG["hero"]),
            og_type=page.get("og_type", "website"),
            biz=BIZ["name"], lat=BIZ["lat"], lng=BIZ["lng"],
            body_class=page.get("body_class", ""),
@@ -293,7 +292,7 @@ def header(active=""):
     </div>
   </div>
 </header>
-""".format(biz=BIZ["name"], logo=IMG["logo"], links="\n        ".join(links),
+""".format(biz=BIZ["name"], logo=IMG["logo_mark"], links="\n        ".join(links),
            tel=BIZ["phone_e164"], phone=BIZ["phone_display"], svc=svc_items,
            ph_icon=icon("phone", "icon icon--sm"), ar=icon("arrow", "icon icon--sm"))
 
@@ -361,7 +360,7 @@ def footer():
 <script src="https://link.msgsndr.com/js/external-tracking.js" data-tracking-id="{track}"></script>
 </body>
 </html>
-""".format(biz=BIZ["name"], logo=IMG["logo"], svc=svc_links, areas=areas,
+""".format(biz=BIZ["name"], logo=IMG["logo_mark"], svc=svc_links, areas=areas,
            tel=BIZ["phone_e164"], phone=BIZ["phone_display"], email=BIZ["email"],
            street=BIZ["street"], sub=BIZ["suburb"], reg=BIZ["region"], pc=BIZ["postcode"],
            hours=hours,

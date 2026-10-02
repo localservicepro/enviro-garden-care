@@ -584,6 +584,7 @@ strong{font-weight:650;color:var(--green-900)}
   .shot--feature img{aspect-ratio:16/9}
 }
 @media (max-width:640px){
+  .hero__bg{background-image:linear-gradient(105deg,rgba(12,42,29,.96) 0%,rgba(12,42,29,.86) 42%,rgba(12,42,29,.55) 100%),var(--hero-img-sm,var(--hero-img))}
   .svcs{grid-template-columns:1fr}
   .why__grid,.facts{grid-template-columns:1fr}
   .quote__grid{grid-template-columns:1fr}

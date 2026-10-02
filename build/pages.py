@@ -73,7 +73,7 @@ def home():
                     "speakable": speakable(), "inLanguage": "en-AU"}],
     }
 
-    hero = """<section class="hero" style="--hero-img:url('{img}')">
+    hero = """<section class="hero" style="--hero-img:url('{img}');--hero-img-sm:url('{img_sm}')">
   <div class="hero__bg" aria-hidden="true"></div>
   <div class="wrap hero__inner">
     <div class="hero__copy">
@@ -103,7 +103,7 @@ def home():
     <div class="marquee__track">{marq}{marq}</div>
   </div>
 </section>""".format(
-        img=IMG["hero"], citable=CITABLE, tel=TEL, phone=PHONE,
+        img=IMG["hero"], img_sm=IMG["hero_sm"], citable=CITABLE, tel=TEL, phone=PHONE,
         ck=icon("check", "icon icon--sm icon--tick"),
         ph=icon("phone", "icon icon--sm"), gbp=BIZ["gbp"],
         stars="".join(icon("star", "icon icon--star") for _ in range(5)),
@@ -185,7 +185,7 @@ def home():
     process = """<section class="section section--process">
   <div class="wrap">
     <div class="section__head reveal">
-      <span class="eyebrow">How it works</span>
+      <span class="eyebrow">Lawn mowing Gold Coast · How it works</span>
       <h2>Booking lawn mowing on the Gold Coast is an easy three-step process</h2>
       <p>No contracts, no lock-in, and no waiting a week just to get a price.</p>
     </div>
