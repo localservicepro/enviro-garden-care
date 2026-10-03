@@ -2,7 +2,7 @@
 
 Vercel serverless function. The quote form POSTs JSON here; the function upserts
 the contact into the GHL sub-account and uploads the customer's photos into the
-**Job Photos** file-upload custom field. Zero dependencies, Node 18+.
+**property photo** file-upload custom field (`{{contact.property_photo}}`). Zero dependencies, Node 18+.
 
 Order of operations: **contact first, photos second.** A photo failure returns
 `ok:true, photoError:true` — a bad image never loses a lead.
@@ -13,14 +13,14 @@ Order of operations: **contact first, photos second.** A photo failure returns
 |---|---|
 | `GHL_LOCATION_ID` | `T4thSQ8YoNDiusrGSEhY` |
 | `GHL_PIT_TOKEN` | Private Integration Token (server-side only, never in the browser) |
-| `GHL_JOB_PHOTOS_FIELD_ID` | *optional* — the Job Photos field's ID, **or** its key (`job_photos`, `contact.job_photos` or `{{contact.job_photos}}`) |
+| `GHL_JOB_PHOTOS_FIELD_ID` | *optional* — the Job Photos field's ID, **or** its key (`property_photo`, `contact.property_photo` or `{{contact.property_photo}}`) |
 
 Missing `GHL_LOCATION_ID` or `GHL_PIT_TOKEN` → `500 server_misconfigured`, logged.
 
 The upload endpoint needs the field **ID**. If `GHL_JOB_PHOTOS_FIELD_ID` holds an ID it is
 used as-is. If it holds the key, or is unset, the function looks the ID up once via
 `GET /locations/{locationId}/customFields`, picks the **contact** field with key
-`contact.job_photos` (ignoring an opportunity twin), and caches it for the life of the
+`contact.property_photo` (ignoring an opportunity twin), and caches it for the life of the
 function instance. A failed lookup only costs the photos: the contact is still created
 and the response carries `photoError:true`, with the reason in the function log.
 
@@ -127,7 +127,7 @@ upsert failure → 502, no-JS fallback → 303.
    Thumbnails should appear within a second or two — that's the resize.
 3. Submit. You should land on `/thank-you/`.
 4. In GHL, open the contact: name/phone (E.164)/email/custom fields populated,
-   and the **Job Photos** field showing the images.
+   and the **property photo** field (`{{contact.property_photo}}`) showing the images.
 5. If photos are missing but the contact exists, check the function logs in
    Vercel for `[quote] photo upload failed` — the response will have carried
    `photoError:true`. Usual causes: wrong `GHL_JOB_PHOTOS_FIELD_ID` (key used

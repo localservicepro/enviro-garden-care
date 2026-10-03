@@ -391,12 +391,15 @@ def quote_form(form_id="quote-form", compact=False, preselect=None, heading=None
                        % (form_id, name, name, merge, req, "".join(opts)))
         elif kind == "file":
             # CD r20. Photos are resized in the browser and sent to /api/quote,
-            # which uploads them into the Job Photos custom field in GHL.
-            control = ('<input type="file" id="%s-%s" name="%s" data-ghl="%s" '
+            # which uploads them into the photo field in GHL. Deliberately NO
+            # name attribute: the GHL tracking script reads named inputs and
+            # would write file details without the image into the same field.
+            # main.js finds the input by type, not name.
+            control = ('<input type="file" id="%s-%s" data-photo-field="%s" '
                        'accept="image/*" multiple>'
                        '<span class="field__hint">%s</span>'
                        '<div class="field__thumbs" aria-live="polite"></div>'
-                       % (form_id, name, name, merge, placeholder))
+                       % (form_id, name, merge, placeholder))
             rows.append('<div class="field field--wide field--file">'
                         '<label for="%s-%s">%s</label>%s</div>'
                         % (form_id, name, label, control))

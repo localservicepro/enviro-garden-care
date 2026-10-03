@@ -13,8 +13,8 @@
 // Env (Vercel project settings, server-side only):
 //   GHL_LOCATION_ID, GHL_PIT_TOKEN          required
 //   GHL_JOB_PHOTOS_FIELD_ID                 optional: the Job Photos field's
-//     ID, or its key ("job_photos", "contact.job_photos" or
-//     "{{contact.job_photos}}"). Unset or a key -> the ID is looked up once
+//     ID, or its key ("property_photo", "contact.property_photo" or
+//     "{{contact.property_photo}}"). Unset or a key -> the ID is looked up once
 //     via GET /locations/{id}/customFields and cached.
 //
 // Node 18+ runtime. No dependencies: global fetch, FormData, Blob, crypto.
@@ -40,10 +40,10 @@ const FIELDS = {
   // photos: see PHOTO_FIELD_KEY below.
 };
 
-// File-upload field that receives the photos ({{contact.job_photos}}, type
+// File-upload field that receives the photos ({{contact.property_photo}}, type
 // "File upload", Contact folder). The upload endpoint needs the field's ID;
 // it is resolved from this key unless GHL_JOB_PHOTOS_FIELD_ID holds an ID.
-const PHOTO_FIELD_KEY = 'job_photos';
+const PHOTO_FIELD_KEY = 'property_photo';
 
 const GHL = {
   base: 'https://services.leadconnectorhq.com',
@@ -207,7 +207,7 @@ function findFieldArray(node, depth = 0) {
   return null;
 }
 
-// Contact custom fields by key ("job_photos" -> { id, type, multi, max }).
+// Contact custom fields by key ("property_photo" -> { id, type, multi, max }).
 // Cached per warm function instance for FIELD_CACHE_MS.
 const FIELD_CACHE_MS = 10 * 60 * 1000;
 let fieldCache = null;   // { at, map }
@@ -320,6 +320,9 @@ async function diagnose() {
   out.jobPhotosField = pf ? { id: pf.id, name: pf.name, fieldKey: pf.fieldKey, type: pf.type,
     allowsMultipleFiles: pf.multi ?? 'not reported', maxFiles: pf.max ?? 'not reported' } : 'NOT FOUND';
   const problems = [];
+  if (photoSetting && !looksLikeFieldId(photoSetting) && photoKey !== PHOTO_FIELD_KEY) {
+    problems.push(`GHL_JOB_PHOTOS_FIELD_ID points photos at contact.${photoKey}, not contact.${PHOTO_FIELD_KEY}: delete that variable (or set it to {{contact.${PHOTO_FIELD_KEY}}}) and redeploy`);
+  }
   if (!pf) problems.push('no contact field contact.' + photoKey);
   else if (pf.type && !/file/i.test(pf.type)) problems.push('Job Photos is type ' + pf.type + ', not a file upload');
   else if (pf.multi === false) problems.push('Job Photos allows only ONE file: turn on multiple files in the field settings');
