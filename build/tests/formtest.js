@@ -37,7 +37,7 @@ const { chromium } = require('playwright');
     await p.goto('http://127.0.0.1:8123'+url,{waitUntil:'domcontentloaded'});
     const forms = await p.$$eval('.quote__form', fs => fs.map(f => ({
       id: f.id, action: f.getAttribute('action'), method: (f.getAttribute('method')||'').toLowerCase(),
-      fields: [...f.querySelectorAll('[name]')].filter(c=>!['company_website','_t'].includes(c.name))
+      fields: [...f.querySelectorAll('[name]')].filter(c=>!['egc_trap','_t'].includes(c.name))
         .map(c=>({name:c.name, ghl:c.dataset.ghl, tag:c.tagName.toLowerCase()}))
     })));
     for (const f of forms) {
@@ -85,7 +85,7 @@ const { chromium } = require('playwright');
   T('email sent as typed (server lowercases)', j && j.email === 'Sam@Example.com');
   T('job_type carries the once-off / regular choice (CD r83)', j && /One-off/.test(j.job_type), j && j.job_type);
   T('minimum-fill timestamp _t is sent', j && typeof j._t === 'number' && Date.now() - j._t < 60000);
-  T('honeypot field is not in the JSON', j && !('company_website' in j));
+  T('spam trap sent empty for a real person', j && j.egc_trap === '');
   T('no photos → empty photos array', j && Array.isArray(j.photos) && j.photos.length === 0);
   const h1 = await p.$eval('h1', e=>e.textContent.trim()).catch(()=>'');
   T('thank-you page renders', /Thanks/i.test(h1), h1);
@@ -110,7 +110,7 @@ const { chromium } = require('playwright');
   await fillContact(p);
   await p.click('#contact-quote button[type=submit]');
   const cap = await p.evaluate(() => window.__captured);
-  T('tracking-style listener received the submit', !!cap, cap ? Object.keys(cap).filter(k=>!['company_website','_t'].includes(k)).join(',') : 'nothing captured');
+  T('tracking-style listener received the submit', !!cap, cap ? Object.keys(cap).filter(k=>!['egc_trap','_t'].includes(k)).join(',') : 'nothing captured');
   T('captured values are the real field values', cap && cap.full_name === 'Sam Tester' && cap.phone === '0407 276 574');
   const stillHere = !/thank-you/.test(p.url());
   T('redirect is deferred, not immediate', stillHere);
@@ -124,16 +124,17 @@ const { chromium } = require('playwright');
   await mockApi(p);
   await p.addInitScript(() => { window.__captured = null; document.addEventListener('submit', () => { window.__captured = 'yes'; }); });
   await p.goto('http://127.0.0.1:8123/contact/',{waitUntil:'networkidle'});
-  const hp = await p.$eval('#contact-quote [name=company_website]', e=>({
-    off: e.getBoundingClientRect().left < 0, tab: e.tabIndex, display: getComputedStyle(e).display }));
-  T('honeypot is off-screen, untabbable, not display:none', hp.off && hp.tab === -1 && hp.display !== 'none', JSON.stringify(hp));
+  const hp = await p.$eval('#contact-quote [name=egc_trap]', e=>({
+    off: e.getBoundingClientRect().left < 0, tab: e.tabIndex, display: getComputedStyle(e).display,
+    label: e.closest('label').textContent.trim(), ac: e.getAttribute('autocomplete') }));
+  T('spam trap is off-screen, untabbable, not display:none', hp.off && hp.tab === -1 && hp.display !== 'none', JSON.stringify(hp));
+  T('spam trap name/label give autofill nothing to match', !/company|website|url|name|email|phone|address/i.test('egc_trap ' + hp.label), hp.label);
   await fillContact(p);
-  await p.evaluate(() => { document.querySelector('#contact-quote [name=company_website]').value = 'http://spam.example'; });
+  await p.evaluate(() => { document.querySelector('#contact-quote [name=egc_trap]').value = 'http://spam.example'; });
   await p.click('#contact-quote button[type=submit]');
   await p.waitForURL('**/thank-you/',{timeout:5000}).catch(()=>{});
-  T('honeypot submission is NOT passed to the tracker', (await p.evaluate(() => window.__captured)) === null);
-  T('honeypot submission never calls /api/quote', posted.length === 0, `${posted.length} requests`);
-  T('honeypot submission still lands on thank-you (fails silently)', /\/thank-you\/$/.test(p.url()), p.url());
+  T('filled trap is sent to the server to judge (and logged there)', posted.length === 1 && posted[0].json.egc_trap === 'http://spam.example', `${posted.length} requests`);
+  T('filled trap still lands on thank-you', /\/thank-you\/$/.test(p.url()), p.url());
   await p.close();
 
   // ---- 7. Photos: thumbnails, rejection, resize to JPEG, base64 in JSON --

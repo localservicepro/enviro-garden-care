@@ -295,7 +295,7 @@
   function payloadOf(form, photoInput) {
     var data = {};
     $$('[name]', form).forEach(function (c) {
-      if (c.type === 'file' || c.name === 'company_website') return; // honeypot handled before we get here
+      if (c.type === 'file') return;   // photos go separately, resized
       data[c.name] = (c.value || '').trim();
     });
     data._t = Number(data._t) || 0;
@@ -328,7 +328,8 @@
     var pot = document.createElement('div');
     pot.setAttribute('aria-hidden', 'true');
     pot.style.cssText = 'position:absolute;left:-9999px;top:auto;width:1px;height:1px;overflow:hidden';
-    pot.innerHTML = '<label>Do not fill this in<input type="text" name="company_website" tabindex="-1" autocomplete="off"></label>';
+    // Name and label must not look like anything autofill knows; see TRAP_FIELD in api/quote.js.
+    pot.innerHTML = '<label>Leave this empty<input type="text" name="egc_trap" tabindex="-1" autocomplete="off" data-lpignore="true" data-1p-ignore></label>';
     form.appendChild(pot);
 
     // Minimum fill time — stamped when the page renders, checked server-side.
@@ -359,14 +360,9 @@
         return;
       }
 
-      // Bots that fill the honeypot get the thank-you page and nothing else —
-      // and the tracking script does not see the event either.
-      var honey = form.querySelector('[name="company_website"]');
-      if (honey && honey.value) {
-        e.stopImmediatePropagation();
-        goToThankYou(form);
-        return;
-      }
+      // The spam trap is judged on the server (api/quote.js), which logs every
+      // skip on its check page. Judging it here as well dropped real people
+      // silently when autofill filled the old trap.
 
       if (button) button.classList.add('is-sending');
       form.classList.add('is-sending');

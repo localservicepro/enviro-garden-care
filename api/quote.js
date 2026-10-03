@@ -62,6 +62,11 @@ const LIMITS = {
 const ALLOWED_TYPES = { 'image/jpeg': 'jpg', 'image/png': 'png', 'image/gif': 'gif' };
 
 const SOURCE = 'Website quote form';
+// Spam trap: a hidden input bots fill and people never see. The name must not
+// look like anything browser autofill knows (company, website, url, name...):
+// it used to be "company_website" and Chrome filled it with the visitor's
+// saved company name, so real enquiries were dropped as spam.
+const TRAP_FIELD = 'egc_trap';
 const TAGS = ['website-quote-form'];
 const THANK_YOU = '/thank-you/';
 
@@ -87,10 +92,14 @@ module.exports = async function handler(req, res) {
   }
   const isForm = body.__urlencoded === true;
 
-  // --- spam: honeypot + minimum fill time. Both look like success. ---------
-  if (str(body.company_website)) return finish(res, isForm, { ok: true, skipped: 'honeypot' });
+  // --- spam: trap field + minimum fill time. Both look like success. -------
+  if (str(body[TRAP_FIELD])) {
+    lastSkip = { at: new Date().toISOString(), reason: 'trap field filled', value: str(body[TRAP_FIELD]).slice(0, 60) };
+    return finish(res, isForm, { ok: true, skipped: 'honeypot' });
+  }
   const started = Number(body._t);
   if (started && Date.now() - started < LIMITS.minFillMs) {
+    lastSkip = { at: new Date().toISOString(), reason: 'submitted too fast', ms: Date.now() - started };
     return finish(res, isForm, { ok: true, skipped: 'too_fast' });
   }
 
@@ -275,6 +284,7 @@ async function upsert(env, contact) {
 // ---------------------------------------------------------------------------
 let lastPhotoError = null;   // best effort: only this warm instance remembers it
 let lastUpsertError = null;
+let lastSkip = null;         // last submission treated as spam
 
 async function diagnose() {
   const ghlVars = Object.keys(process.env).filter(k => /^GHL_|LEADCONNECTOR|HIGHLEVEL/i.test(k)).sort();
@@ -291,6 +301,7 @@ async function diagnose() {
     fields: null,
     jobPhotosField: null,
     lastUpsertErrorOnThisInstance: lastUpsertError,
+    lastSpamSkipOnThisInstance: lastSkip,
     lastPhotoErrorOnThisInstance: lastPhotoError,
   };
   const env = readEnv();
@@ -422,9 +433,16 @@ function sanitiseFilename(name, ext, i) {
 }
 
 // 0412 345 678 / (04) 1234 5678 / 61412345678 / +61 412 345 678 -> +61412345678
+// Australian numbers -> +61 E.164. A number already written in international
+// form (+ and 8-15 digits, e.g. +63 448 772 677) is kept as is, so overseas
+// enquiries and testers are not rejected.
 function normaliseAuPhone(raw) {
-  const digits = String(raw).replace(/\D/g, '');
+  const s = String(raw).trim();
+  const digits = s.replace(/\D/g, '');
   if (!digits) return null;
+  if (s.startsWith('+') && !digits.startsWith('61')) {
+    return digits.length >= 8 && digits.length <= 15 ? '+' + digits : null;
+  }
   let n;
   if (digits.startsWith('61') && digits.length >= 11) n = digits.slice(2);
   else if (digits.startsWith('0') && digits.length === 10) n = digits.slice(1);
@@ -508,4 +526,5 @@ function err(code, message, status) { const e = new Error(message); e.code = cod
 module.exports.normaliseAuPhone = normaliseAuPhone;
 module.exports.FIELDS = FIELDS;
 module.exports.LIMITS = LIMITS;
-module.exports._resetFieldCache = () => { fieldCache = null; lastPhotoError = null; lastUpsertError = null; };
+module.exports._resetFieldCache = () => { fieldCache = null; lastPhotoError = null; lastUpsertError = null; lastSkip = null; };
+module.exports.TRAP_FIELD = TRAP_FIELD;

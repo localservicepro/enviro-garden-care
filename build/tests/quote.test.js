@@ -183,7 +183,7 @@ test('declared image type with non-image bytes rejected', async () => {
 test('honeypot short-circuits: ok:true, no GHL call', async () => {
   const calls = mockFetch();
   const body = good();
-  body.company_website = 'http://spam.example';
+  body.egc_trap = 'http://spam.example';
   const r = res();
   await handler(req(body), r);
   assert.equal(r.statusCode, 200);
@@ -436,6 +436,41 @@ test('photos go to contact.property_photo by default, and the check page flags a
   });
 });
 
+test('autofill in the old company_website field no longer blocks the enquiry', async () => {
+  const calls = mockFetch();
+  const body = good();
+  body.company_website = 'Hunter Valley Training & Trucking';   // what Chrome autofill put there
+  const r = res();
+  await handler(req(body), r);
+  const j = r.json();
+  assert.equal(j.ok, true);
+  assert.equal(j.skipped, undefined);
+  assert.equal(j.photos.uploaded, 2);
+  assert.ok(calls.some(c => c.url.endsWith('/contacts/upsert')));
+});
+
+test('overseas tester number (+63) is accepted and sent as entered', async () => {
+  const calls = mockFetch();
+  const body = good();
+  body.phone = '+63448772677';
+  const r = res();
+  await handler(req(body), r);
+  assert.equal(r.statusCode, 200, r.body);
+  const up = JSON.parse(calls.find(c => c.url.endsWith('/contacts/upsert')).init.body);
+  assert.equal(up.phone, '+63448772677');
+});
+
+test('spam skips are shown on the check page', async () => {
+  mockFetch();
+  const body = good();
+  body.egc_trap = 'bot text';
+  await handler(req(body), res());
+  const r = res();
+  await handler(getReq('/api/quote?check'), r);
+  const skip = r.json().lastSpamSkipOnThisInstance;
+  assert.ok(skip && skip.reason === 'trap field filled' && skip.value === 'bot text', JSON.stringify(skip));
+});
+
 test('GET is 405; missing env is 500 without calling GHL', async () => {
   const calls = mockFetch();
   let r = res();
@@ -461,5 +496,8 @@ test('phone normalisation table', () => {
   assert.equal(n('(07) 5555 1234'), '+61755551234');
   assert.equal(n('1300 123 456'), '+611300123456');
   assert.equal(n('12345'), null);
+  assert.equal(n('+63 448 772 677'), '+63448772677', 'international kept as is');
+  assert.equal(n('+63448772677'), '+63448772677');
+  assert.equal(n('+1 23'), null, 'too short');
   assert.equal(n(''), null);
 });

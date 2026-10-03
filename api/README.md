@@ -87,9 +87,13 @@ to E.164 (`0412 345 678` → `+61412345678`); email lowercased; photos ≤ 6,
 ≤ 1.5 MB each, ≤ 3.2 MB total, types `image/jpeg|png|gif` **checked by magic
 bytes**, filenames sanitised. Body cap 4.4 MB (Vercel's limit is 4.5).
 
-Spam: honeypot `company_website` and a minimum fill time via `_t` (page-render
+Spam: trap field `egc_trap` and a minimum fill time via `_t` (page-render
 timestamp, set by the site script). Both answer `200 ok:true` without calling
-GHL.
+GHL, and the last skip shows on `/api/quote?check`. Do not rename the trap to anything
+autofill recognises (company, website, url, name, email, phone, address).
+
+Phone: Australian numbers are normalised to `+61…`. A number already written in
+international form (`+` and 8–15 digits) is kept as entered.
 
 Responses: `200 {ok, contactId, photos:{received,uploaded}, photoError?}` ·
 `400 {error}` (`phone_required`, `email_invalid`, `name_required`, `photo_type`,
