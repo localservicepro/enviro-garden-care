@@ -744,8 +744,10 @@ FORM_FIELDS = [
      ["One-off job",
       "Regular maintenance (fortnightly, three-weekly in winter)"]),
     # CD r20: photos of the property. Files cannot travel through the tracking
-    # script — uploaded by api/quote.js into the "Job Photos" file field (key contact.job_photos).
-    ("property_photos", "Photos of the property", "{{contact.job_photos}}", "file", False,
+    # script — uploaded by api/quote.js into the file field {{contact.property_photo}}.
+    # The input has no name attribute (see templates.py) so the tracking script
+    # cannot write metadata-only stubs into that field.
+    ("property_photos", "Photos of the property", "{{contact.property_photo}}", "file", False,
      "Up to 6 photos of the current condition — front, back, anything overgrown. "
      "Phone photos are fine; we shrink them before sending.", None),
     ("job_notes", "Job Notes", "{{contact.job_notes}}", "textarea", False,

@@ -31,7 +31,7 @@ const { chromium } = require('playwright');
   const merge = {full_name:'{{contact.full_name}}',email:'{{contact.email}}',phone:'{{contact.phone}}',
     property_address:'{{contact.property_address}}',property_size:'{{contact.property_size}}',
     service_needed:'{{contact.service_needed}}',job_type:'{{contact.job_type}}',job_notes:'{{contact.job_notes}}',
-    property_photos:'{{contact.job_photos}}'};
+    property_photos:'{{contact.property_photo}}'};
   for (const url of ['/','/contact/','/services/lawn-mowing/']) {
     const p = await b.newPage();
     await p.goto('http://127.0.0.1:8123'+url,{waitUntil:'domcontentloaded'});
@@ -45,7 +45,7 @@ const { chromium } = require('playwright');
       T(`${url} #${f.id} has all 8 GHL text fields`, expected.every(e=>names.includes(e)), names.join(','));
       T(`${url} #${f.id} merge tags correct`, f.fields.every(x=>merge[x.name]===x.ghl));
       T(`${url} #${f.id} posts to /api/quote`, f.action === '/api/quote' && f.method === 'post', `${f.method} ${f.action}`);
-      T(`${url} #${f.id} photo field present and visible`, names.includes('property_photos'));
+      T(`${url} #${f.id} photo input has no name (tracker cannot stub it)`, !names.includes('property_photos'));
     }
     const fileDisplay = await p.$eval('.quote__form .field--file', e => getComputedStyle(e).display).catch(()=>'missing');
     T(`${url} photo field is rendered (computed display)`, fileDisplay !== 'none' && fileDisplay !== 'missing', fileDisplay);

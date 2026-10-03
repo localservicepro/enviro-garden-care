@@ -1,7 +1,9 @@
 'use strict';
 // Vercel serverless function: quote form -> GoHighLevel.
 //
-//   1. Upsert the contact  (POST /contacts/upsert, custom fields by key or id)
+//   1. Upsert the contact  (POST /contacts/upsert; custom fields sent as
+//                           { id, key, field_value } — id is required by
+//                           GHL's spec, so IDs come from the field listing)
 //   2. Upload photos       (POST /forms/upload-custom-files, multipart, parts
 //                           keyed "<fieldId>_<uuid>")
 //
@@ -11,8 +13,8 @@
 // Env (Vercel project settings, server-side only):
 //   GHL_LOCATION_ID, GHL_PIT_TOKEN          required
 //   GHL_JOB_PHOTOS_FIELD_ID                 optional: the Job Photos field's
-//     ID, or its key ("job_photos", "contact.job_photos" or
-//     "{{contact.job_photos}}"). Unset or a key -> the ID is looked up once
+//     ID, or its key ("property_photo", "contact.property_photo" or
+//     "{{contact.property_photo}}"). Unset or a key -> the ID is looked up once
 //     via GET /locations/{id}/customFields and cached.
 //
 // Node 18+ runtime. No dependencies: global fetch, FormData, Blob, crypto.
@@ -38,10 +40,10 @@ const FIELDS = {
   // photos: see PHOTO_FIELD_KEY below.
 };
 
-// File-upload field that receives the photos ({{contact.job_photos}}, type
+// File-upload field that receives the photos ({{contact.property_photo}}, type
 // "File upload", Contact folder). The upload endpoint needs the field's ID;
 // it is resolved from this key unless GHL_JOB_PHOTOS_FIELD_ID holds an ID.
-const PHOTO_FIELD_KEY = 'job_photos';
+const PHOTO_FIELD_KEY = 'property_photo';
 
 const GHL = {
   base: 'https://services.leadconnectorhq.com',
@@ -110,6 +112,13 @@ module.exports = async function handler(req, res) {
   }
 
   // --- 1. upsert contact ---------------------------------------------------
+  // Custom fields need their IDs (GHL spec: id required, value in
+  // field_value). Fetched once per warm instance; if the listing fails the
+  // contact is still saved, just without the custom fields.
+  let fieldMap = null;
+  try { fieldMap = await loadContactFields(env); }
+  catch (e) { console.error('[quote] custom-field listing failed:', e.message); }
+
   const contact = {
     locationId: env.locationId,
     firstName,
@@ -120,25 +129,35 @@ module.exports = async function handler(req, res) {
     country: 'AU',
     source: SOURCE,
     tags: TAGS,
-    customFields: buildCustomFields(body),
+    customFields: buildCustomFields(body, fieldMap),
   };
 
   let contactId;
+  let fieldsError = false;
   try {
-    const r = await ghlJson('POST', '/contacts/upsert', env.token, contact);
-    contactId = r && r.contact && r.contact.id;
-    if (!contactId) throw new Error('upsert returned no contact id');
+    contactId = await upsert(env, contact);
   } catch (e) {
-    console.error('[quote] upsert failed:', e.message);
-    return send(res, 502, { ok: false, error: 'upsert_failed' });
+    // A rejected custom field must never cost the lead: retry once without them.
+    if (contact.customFields.length && (e.status === 400 || e.status === 422)) {
+      console.error('[quote] upsert rejected custom fields, retrying without them:', e.message);
+      lastUpsertError = { at: new Date().toISOString(), reason: e.message.slice(0, 400) };
+      fieldsError = true;
+      try { contactId = await upsert(env, Object.assign({}, contact, { customFields: [] })); }
+      catch (e2) { e = e2; }
+    }
+    if (!contactId) {
+      console.error('[quote] upsert failed:', e.message);
+      lastUpsertError = { at: new Date().toISOString(), reason: e.message.slice(0, 400) };
+      return send(res, 502, { ok: false, error: 'upsert_failed' });
+    }
   }
 
   // --- 2. upload photos (never fatal) -------------------------------------
   const out = { ok: true, contactId, photos: { received: photos.length, uploaded: 0 } };
+  if (fieldsError) out.fieldsError = true;
   if (photos.length) {
     try {
-      await uploadPhotos(env, contactId, photos);
-      out.photos.uploaded = photos.length;
+      out.photos.uploaded = await uploadPhotos(env, contactId, photos);
     } catch (e) {
       console.error('[quote] photo upload failed for', contactId, ':', e.message);
       lastPhotoError = { at: new Date().toISOString(), photos: photos.length, reason: e.message.slice(0, 400) };
@@ -164,7 +183,7 @@ async function ghlJson(method, path, token, payload) {
     signal: AbortSignal.timeout(GHL.timeoutMs),
   });
   const text = await r.text();
-  if (!r.ok) throw new Error(`${method} ${path} -> ${r.status} ${text.slice(0, 300)}`);
+  if (!r.ok) { const e = new Error(`${method} ${path} -> ${r.status} ${text.slice(0, 300)}`); e.status = r.status; throw e; }
   try { return JSON.parse(text); } catch { throw new Error(`${path} returned non-JSON`); }
 }
 
@@ -188,35 +207,65 @@ function findFieldArray(node, depth = 0) {
   return null;
 }
 
-const fieldIdCache = new Map();   // key -> id, per warm function instance
+// Contact custom fields by key ("property_photo" -> { id, type, multi, max }).
+// Cached per warm function instance for FIELD_CACHE_MS.
+const FIELD_CACHE_MS = 10 * 60 * 1000;
+let fieldCache = null;   // { at, map }
 
-async function resolvePhotoFieldId(env) {
-  const configured = String(env.photoField || '').trim();
-  if (configured && looksLikeFieldId(configured)) return configured;
-  const key = normaliseFieldKey(configured) || PHOTO_FIELD_KEY;
-  if (fieldIdCache.has(key)) return fieldIdCache.get(key);
-
-  const r = await fetch(`${GHL.base}/locations/${encodeURIComponent(env.locationId)}/customFields`, {
+async function fetchContactFields(env) {
+  const url = `${GHL.base}/locations/${encodeURIComponent(env.locationId)}/customFields?model=contact`;
+  const r = await fetch(url, {
     headers: { Authorization: 'Bearer ' + env.token, Version: GHL.version, Accept: 'application/json' },
     signal: AbortSignal.timeout(GHL.timeoutMs),
   });
   const text = await r.text();
-  if (!r.ok) throw new Error(`customFields -> ${r.status} ${text.slice(0, 300)}`);
+  if (!r.ok) { const e = new Error(`customFields -> ${r.status} ${text.slice(0, 300)}`); e.status = r.status; throw e; }
   let fields;
   try { fields = findFieldArray(JSON.parse(text)); } catch { fields = null; }
   if (!fields) throw new Error('customFields: could not find a field list in the response');
-
-  // Match the contact field first; an opportunity twin may share the key.
-  const fk = f => String(f.fieldKey ?? f.key ?? '');
-  const hits = fields.filter(f => fk(f) === 'contact.' + key);
-  const pool = hits.length ? hits : fields.filter(f => fk(f) === key);
-  if (pool.length !== 1) {
-    throw new Error(`customFields: ${pool.length ? 'more than one' : 'no'} field with key "contact.${key}"`);
+  const map = new Map();
+  for (const f of fields) {
+    const fk = String(f.fieldKey ?? f.key ?? '');
+    if (fk && !fk.startsWith('contact.') && fk.includes('.')) continue;   // opportunity twins etc.
+    const key = fk.replace(/^contact\./, '');
+    if (!key || map.has(key)) continue;
+    map.set(key, {
+      id: f.id, name: f.name, fieldKey: fk, type: String(f.dataType ?? f.type ?? ''),
+      multi: f.isMultiFileAllowed, max: f.maxFileLimit,
+    });
   }
-  const type = String(pool[0].dataType ?? pool[0].type ?? '');
-  if (type && !/file/i.test(type)) console.warn(`[quote] "${key}" field type is "${type}", expected a file upload`);
-  fieldIdCache.set(key, pool[0].id);
-  return pool[0].id;
+  return map;
+}
+
+async function loadContactFields(env, { fresh = false } = {}) {
+  if (!fresh && fieldCache && Date.now() - fieldCache.at < FIELD_CACHE_MS) return fieldCache.map;
+  const map = await fetchContactFields(env);
+  fieldCache = { at: Date.now(), map };
+  return map;
+}
+
+async function resolvePhotoField(env) {
+  const configured = String(env.photoField || '').trim();
+  const map = await loadContactFields(env).catch(e => {
+    if (configured && looksLikeFieldId(configured)) return null;   // can still upload by ID
+    throw e;
+  });
+  if (configured && looksLikeFieldId(configured)) {
+    const meta = map && [...map.values()].find(f => f.id === configured);
+    return meta || { id: configured };
+  }
+  const key = normaliseFieldKey(configured) || PHOTO_FIELD_KEY;
+  const meta = map.get(key);
+  if (!meta) throw new Error(`customFields: no contact field with key "contact.${key}"`);
+  if (meta.type && !/file/i.test(meta.type)) console.warn(`[quote] "${key}" field type is "${meta.type}", expected a file upload`);
+  return meta;
+}
+
+async function upsert(env, contact) {
+  const r = await ghlJson('POST', '/contacts/upsert', env.token, contact);
+  const id = r && r.contact && r.contact.id;
+  if (!id) throw new Error('upsert returned no contact id');
+  return id;
 }
 
 // ---------------------------------------------------------------------------
@@ -225,6 +274,7 @@ async function resolvePhotoFieldId(env) {
 // read call to GHL (the custom-field listing); writes nothing.
 // ---------------------------------------------------------------------------
 let lastPhotoError = null;   // best effort: only this warm instance remembers it
+let lastUpsertError = null;
 
 async function diagnose() {
   const ghlVars = Object.keys(process.env).filter(k => /^GHL_|LEADCONNECTOR|HIGHLEVEL/i.test(k)).sort();
@@ -238,46 +288,64 @@ async function diagnose() {
       ghl_variable_names_seen: ghlVars,
     },
     customFieldLookup: null,
+    fields: null,
     jobPhotosField: null,
+    lastUpsertErrorOnThisInstance: lastUpsertError,
     lastPhotoErrorOnThisInstance: lastPhotoError,
   };
   const env = readEnv();
   if (env.error) { out.verdict = 'Missing GHL_LOCATION_ID or GHL_PIT_TOKEN (check the exact names) and redeploy.'; return out; }
+  let map;
   try {
-    const r = await fetch(`${GHL.base}/locations/${encodeURIComponent(env.locationId)}/customFields`, {
-      headers: { Authorization: 'Bearer ' + env.token, Version: GHL.version, Accept: 'application/json' },
-      signal: AbortSignal.timeout(GHL.timeoutMs),
-    });
-    const text = await r.text();
-    out.customFieldLookup = { status: r.status, ok: r.ok };
-    if (!r.ok) {
-      out.customFieldLookup.body = text.slice(0, 300);
-      out.verdict = r.status === 401 || r.status === 403
-        ? 'GHL rejected the token. Check it is a Private Integration token for this sub-account, with custom fields (view), contacts (edit) and forms (edit) allowed.'
-        : 'GHL returned an error listing custom fields; see body.';
-      return out;
-    }
-    let fields = null;
-    try { fields = findFieldArray(JSON.parse(text)); } catch { /* fall through */ }
-    if (!fields) { out.verdict = 'Custom-field listing had an unexpected shape.'; return out; }
-    const fk = f => String(f.fieldKey ?? f.key ?? '');
-    const key = normaliseFieldKey(photoSetting && !looksLikeFieldId(photoSetting) ? photoSetting : '') || PHOTO_FIELD_KEY;
-    const matches = fields.filter(f => fk(f).endsWith('.' + key) || fk(f) === key || (photoSetting && f.id === photoSetting));
-    out.jobPhotosField = matches.map(f => ({ id: f.id, name: f.name, fieldKey: fk(f), type: f.dataType ?? f.type ?? null }));
-    out.verdict = matches.some(f => fk(f) === 'contact.' + key || f.id === photoSetting)
-      ? 'Setup looks right. If photos still go missing, see lastPhotoErrorOnThisInstance or the Vercel function log.'
-      : 'No contact field with key contact.' + key + ' was found.';
+    map = await loadContactFields(env, { fresh: true });
+    out.customFieldLookup = { status: 200, ok: true, contactFields: map.size };
   } catch (e) {
-    out.customFieldLookup = { error: e.message };
-    out.verdict = 'Could not reach GHL from the function.';
+    out.customFieldLookup = { status: e.status || null, ok: false, error: e.message.slice(0, 300) };
+    out.verdict = e.status === 401 || e.status === 403
+      ? 'GHL rejected the token. It needs these Private Integration scopes: contacts.write, locations/customFields.readonly, forms.write.'
+      : 'Could not list custom fields; see customFieldLookup.';
+    return out;
   }
+  out.fields = {};
+  const missing = [];
+  for (const [name, m] of Object.entries(FIELDS)) {
+    if (!m.key) continue;
+    const f = map.get(m.key);
+    out.fields[name] = f ? `${f.fieldKey} -> ${f.id} (${f.type})` : 'NOT FOUND';
+    if (!f) missing.push('contact.' + m.key);
+  }
+  const photoKey = normaliseFieldKey(photoSetting && !looksLikeFieldId(photoSetting) ? photoSetting : '') || PHOTO_FIELD_KEY;
+  const pf = photoSetting && looksLikeFieldId(photoSetting)
+    ? [...map.values()].find(f => f.id === photoSetting) : map.get(photoKey);
+  out.jobPhotosField = pf ? { id: pf.id, name: pf.name, fieldKey: pf.fieldKey, type: pf.type,
+    allowsMultipleFiles: pf.multi ?? 'not reported', maxFiles: pf.max ?? 'not reported' } : 'NOT FOUND';
+  const problems = [];
+  if (photoSetting && !looksLikeFieldId(photoSetting) && photoKey !== PHOTO_FIELD_KEY) {
+    problems.push(`GHL_JOB_PHOTOS_FIELD_ID points photos at contact.${photoKey}, not contact.${PHOTO_FIELD_KEY}: delete that variable (or set it to {{contact.${PHOTO_FIELD_KEY}}}) and redeploy`);
+  }
+  if (!pf) problems.push('no contact field contact.' + photoKey);
+  else if (pf.type && !/file/i.test(pf.type)) problems.push('Job Photos is type ' + pf.type + ', not a file upload');
+  else if (pf.multi === false) problems.push('Job Photos allows only ONE file: turn on multiple files in the field settings');
+  if (missing.length) problems.push('missing contact fields: ' + missing.join(', '));
+  if (lastUpsertError) problems.push('a recent contact save was rejected: see lastUpsertErrorOnThisInstance');
+  if (lastPhotoError) problems.push('a recent photo upload failed: see lastPhotoErrorOnThisInstance');
+  out.verdict = problems.length ? 'Problems: ' + problems.join('; ') + '.'
+    : 'Setup looks right. If photos still go missing, submit once and reload this page straight after.';
   return out;
 }
 
 async function uploadPhotos(env, contactId, photos) {
-  const fieldId = await resolvePhotoFieldId(env);
+  const field = await resolvePhotoField(env);
+  const fieldId = field.id;
+  // Respect the field's own settings: a single-file field keeps one photo.
+  let limit = photos.length;
+  if (field.multi === false) limit = 1;
+  if (Number(field.max) > 0) limit = Math.min(limit, Number(field.max));
+  if (limit < photos.length) {
+    console.warn(`[quote] Job Photos field accepts ${limit} file(s); sending ${limit} of ${photos.length}`);
+  }
   const fd = new FormData();
-  for (const p of photos) {
+  for (const p of photos.slice(0, limit)) {
     // One part per file. Key = "<customFieldId>_<uuid>"; all parts sharing the
     // field id land in the same custom field.
     const part = fieldId + '_' + crypto.randomUUID();
@@ -291,18 +359,25 @@ async function uploadPhotos(env, contactId, photos) {
     signal: AbortSignal.timeout(GHL.timeoutMs),
   });
   if (!r.ok) throw new Error(`upload-custom-files -> ${r.status} ${(await r.text()).slice(0, 300)}`);
+  return limit;
 }
 
 // ---------------------------------------------------------------------------
 // Mapping + validation
 // ---------------------------------------------------------------------------
-function buildCustomFields(body) {
+// GHL spec for upsert customFields: { id (required), key, field_value }.
+// Without the field listing (fieldMap null) send key + field_value as a best
+// effort; the handler retries without custom fields if GHL rejects them.
+function buildCustomFields(body, fieldMap) {
   const out = [];
   for (const [name, map] of Object.entries(FIELDS)) {
     if (!map.key && !map.id) continue;
     const value = str(body[name]);
     if (!value) continue;
-    out.push(map.id ? { id: map.id, value } : { key: map.key, value });
+    const id = map.id || (fieldMap && fieldMap.get(map.key) && fieldMap.get(map.key).id);
+    if (id) out.push({ id, key: map.key, field_value: value });
+    else if (!fieldMap) out.push({ key: map.key, field_value: value });
+    else console.warn(`[quote] no contact field with key "contact.${map.key}"; "${name}" not saved`);
   }
   return out;
 }
@@ -433,4 +508,4 @@ function err(code, message, status) { const e = new Error(message); e.code = cod
 module.exports.normaliseAuPhone = normaliseAuPhone;
 module.exports.FIELDS = FIELDS;
 module.exports.LIMITS = LIMITS;
-module.exports._resetFieldCache = () => fieldIdCache.clear();
+module.exports._resetFieldCache = () => { fieldCache = null; lastPhotoError = null; lastUpsertError = null; };

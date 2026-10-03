@@ -222,7 +222,7 @@ Input `name` attributes are the GHL contact field keys exactly:
 | Property Size | `property_size` | `{{contact.property_size}}` |
 | Service Needed | `service_needed` | `{{contact.service_needed}}` |
 | Job Type *(CD r83)* | `job_type` | `{{contact.job_type}}` |
-| Photos of the property *(CD r20)* | `property_photos` | `{{contact.job_photos}}` (file field, via the API) |
+| Photos of the property *(CD r20)* | `property_photos` | `{{contact.property_photo}}` (file field, via the API) |
 | Job Notes | `job_notes` | `{{contact.job_notes}}` |
 
 Each field also carries `data-ghl="{{contact.…}}"` so the mapping is readable in the
@@ -256,8 +256,8 @@ registers its listeners first.
 
 **Deploy checklist:** `GHL_LOCATION_ID` and `GHL_PIT_TOKEN` set in the Vercel project
 (done, per client). `GHL_JOB_PHOTOS_FIELD_ID` may hold the Job Photos field's ID *or* its
-key `contact.job_photos`, or be left unset: the function finds the contact field's ID
-itself. Photos land in **Job Photos** ({{contact.job_photos}}, File upload, Contact
+key `contact.property_photo`, or be left unset: the function finds the contact field's ID
+itself. Photos land in the **property photo** field ({{contact.property_photo}}, file upload, Contact
 folder). After any change to these settings, **redeploy**, since Vercel only applies env
 changes to new deployments. Then do the iPhone test in `api/README.md`.
 

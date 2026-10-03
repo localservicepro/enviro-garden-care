@@ -39,10 +39,17 @@ function res() {
 // Listing as the sub-account has it: Job Photos on the contact, plus an
 // opportunity twin sharing the key (the CRM has twins for job_type etc.).
 const RESOLVED_ID = 'Zp7LmQ2rTx9VbN4cYw8K';
+const CF = {   // contact field ids as GHL would return them
+  property_address: 'PropAddr000000000001', property_size: 'PropSize000000000001',
+  service_needed: 'SvcNeed0000000000001', job_type: 'JobType0000000000001',
+  job_notes: 'JobNotes000000000001',
+};
 const FIELD_LIST = { customFields: [
-  { id: 'OppTwin0000000000001', name: 'Job Photos', fieldKey: 'opportunity.job_photos', dataType: 'FILE_UPLOAD' },
-  { id: RESOLVED_ID,            name: 'Job Photos', fieldKey: 'contact.job_photos',     dataType: 'FILE_UPLOAD' },
-  { id: 'Other000000000000001', name: 'Job Notes',  fieldKey: 'contact.job_notes',      dataType: 'LARGE_TEXT' },
+  { id: 'OppTwin0000000000001', name: 'Job Photos', fieldKey: 'opportunity.property_photo', dataType: 'FILE_UPLOAD' },
+  { id: 'OppTwin0000000000002', name: 'Job Type',   fieldKey: 'opportunity.job_type',   dataType: 'TEXT' },
+  { id: 'OldJobPhotos00000001', name: 'Job Photos', fieldKey: 'contact.job_photos',   dataType: 'FILE_UPLOAD' },
+  { id: RESOLVED_ID,            name: 'Job Photos', fieldKey: 'contact.property_photo',     dataType: 'FILE_UPLOAD', isMultiFileAllowed: true, maxFileLimit: 10 },
+  ...Object.entries(CF).map(([k, id]) => ({ id, name: k, fieldKey: 'contact.' + k, dataType: 'TEXT' })),
 ] };
 
 function mockFetch(overrides = {}) {
@@ -51,7 +58,7 @@ function mockFetch(overrides = {}) {
   global.fetch = async (url, init = {}) => {
     calls.push({ url: String(url), init });
     const u = String(url);
-    if (u.endsWith(`/locations/${LOCATION}/customFields`)) {
+    if (u.includes(`/locations/${LOCATION}/customFields`)) {
       if (overrides.fields) return overrides.fields(url, init);
       return new Response(JSON.stringify(FIELD_LIST), { status: 200 });
     }
@@ -103,7 +110,12 @@ test('phone normalised to E.164, email lowercased, every custom field mapped', a
   assert.equal(upsert.init.headers.Version, '2021-07-28');
   assert.equal(upsert.init.headers.Authorization, 'Bearer pit-test-token');
 
-  const cf = Object.fromEntries(body.customFields.map(f => [f.key || f.id, f.value]));
+  // GHL spec: { id (required), key, field_value }, contact field ids, not the opportunity twins.
+  for (const f of body.customFields) {
+    assert.equal(f.id, CF[f.key], 'id resolved from the contact field listing: ' + f.key);
+    assert.ok('field_value' in f && !('value' in f), 'value sent as field_value');
+  }
+  const cf = Object.fromEntries(body.customFields.map(f => [f.key, f.field_value]));
   assert.deepEqual(cf, {
     property_address: '12 Example St, Ormeau',
     property_size: 'Half to 1 acre',
@@ -119,8 +131,9 @@ test('photos: every part prefixed with the field ID, unique uuids, locationId in
   await handler(req(good()), r);
   assert.equal(r.json().photos.uploaded, 2);
 
-  assert.ok(calls[0].url.endsWith('/contacts/upsert'), 'upsert happens before upload');
-  const up = calls[1];
+  const order = calls.map(c => c.url.includes('/customFields') ? 'fields' : c.url.endsWith('/contacts/upsert') ? 'upsert' : 'upload');
+  assert.deepEqual(order, ['fields', 'upsert', 'upload'], 'field ids, then contact, then photos');
+  const up = calls[2];
   const u = new URL(up.url);
   assert.equal(u.pathname, '/forms/upload-custom-files');
   assert.equal(u.searchParams.get('locationId'), LOCATION);
@@ -216,7 +229,8 @@ test('upsert failure returns 502 and does not attempt upload', async () => {
   const r = res();
   await handler(req(good()), r);
   assert.equal(r.statusCode, 502);
-  assert.equal(calls.length, 1);
+  assert.equal(calls.filter(c => c.url.endsWith('/contacts/upsert')).length, 1, '401 is not retried');
+  assert.equal(calls.filter(c => c.url.includes('/forms/upload-custom-files')).length, 0);
 });
 
 test('too many photos rejected', async () => {
@@ -236,10 +250,11 @@ test('no-JS urlencoded fallback upserts and redirects 303 to /thank-you/', async
   await handler(req(form.toString(), { headers: { 'content-type': 'application/x-www-form-urlencoded' } }), r);
   assert.equal(r.statusCode, 303);
   assert.equal(r.headers.location, '/thank-you/');
-  const body = JSON.parse(calls[0].init.body);
+  const ups = calls.filter(c => c.url.endsWith('/contacts/upsert'));
+  const body = JSON.parse(ups[0].init.body);
   assert.equal(body.phone, '+61412345678');
   assert.equal(body.email, 'sam@example.com');
-  assert.equal(calls.length, 1, 'no photo upload for the fallback');
+  assert.equal(calls.filter(c => c.url.includes('/forms/upload-custom-files')).length, 0, 'no photo upload for the fallback');
 });
 
 // --- Job Photos field: ID or key in GHL_JOB_PHOTOS_FIELD_ID --------------
@@ -252,7 +267,7 @@ async function withPhotoEnv(value, fn) {
 const partKeys = c => [...c.init.body.keys()];
 const upload = calls => calls.find(c => c.url.includes('/forms/upload-custom-files'));
 
-for (const value of ['contact.job_photos', '{{contact.job_photos}}', 'job_photos', undefined]) {
+for (const value of ['contact.property_photo', '{{contact.property_photo}}', 'property_photo', undefined]) {
   test(`photo field given as ${value === undefined ? 'nothing (default key)' : JSON.stringify(value)} resolves to the contact field ID`, async () => {
     await withPhotoEnv(value, async () => {
       const calls = mockFetch();
@@ -262,7 +277,7 @@ for (const value of ['contact.job_photos', '{{contact.job_photos}}', 'job_photos
       assert.equal(j.ok, true);
       assert.equal(j.photoError, undefined, r.body);
       assert.equal(j.photos.uploaded, 2);
-      const lookups = calls.filter(c => c.url.endsWith('/customFields'));
+      const lookups = calls.filter(c => c.url.includes('/customFields'));
       assert.equal(lookups.length, 1, 'one lookup');
       assert.equal(lookups[0].init.headers.Version, '2021-07-28');
       for (const k of partKeys(upload(calls))) assert.ok(k.startsWith(RESOLVED_ID + '_'), k);
@@ -271,24 +286,24 @@ for (const value of ['contact.job_photos', '{{contact.job_photos}}', 'job_photos
 }
 
 test('resolved field ID is cached: second submission does not look it up again', async () => {
-  await withPhotoEnv('contact.job_photos', async () => {
+  await withPhotoEnv('contact.property_photo', async () => {
     const calls = mockFetch();
     await handler(req(good()), res());
     await handler(req(good()), res());
-    assert.equal(calls.filter(c => c.url.endsWith('/customFields')).length, 1);
+    assert.equal(calls.filter(c => c.url.includes('/customFields')).length, 1);
     assert.equal(calls.filter(c => c.url.includes('/forms/upload-custom-files')).length, 2);
   });
 });
 
-test('a real field ID is used as-is, with no lookup', async () => {
+test('a real field ID in the setting is used as-is for the photos', async () => {
   const calls = mockFetch();           // env holds FIELD_ID
   await handler(req(good()), res());
-  assert.equal(calls.filter(c => c.url.endsWith('/customFields')).length, 0);
+  assert.equal(calls.filter(c => c.url.includes('/customFields')).length, 1, 'one shared listing, for the text fields');
   for (const k of partKeys(upload(calls))) assert.ok(k.startsWith(FIELD_ID + '_'));
 });
 
 test('field lookup failure keeps the lead: ok:true, photoError, no upload', async () => {
-  await withPhotoEnv('contact.job_photos', async () => {
+  await withPhotoEnv('contact.property_photo', async () => {
     const calls = mockFetch({ fields: () => new Response(JSON.stringify({ customFields: [] }), { status: 200 }) });
     const r = res();
     await handler(req(good()), r);
@@ -305,18 +320,23 @@ test('field lookup failure keeps the lead: ok:true, photoError, no upload', asyn
 function getReq(url) { const r = req({}, { method: 'GET' }); r.url = url; return r; }
 
 test('?check reports setup, finds the contact Job Photos field, never leaks the token', async () => {
-  const calls = mockFetch();
-  const r = res();
-  await handler(getReq('/api/quote?check'), r);
-  assert.equal(r.statusCode, 200);
-  const j = r.json();
-  assert.match(j.env.GHL_PIT_TOKEN, /^set \(\d+ chars/);
-  assert.ok(!r.body.includes('pit-test-token'), 'token must not appear in the output');
-  assert.equal(j.customFieldLookup.status, 200);
-  assert.ok(j.jobPhotosField.some(f => f.id === RESOLVED_ID && f.fieldKey === 'contact.job_photos'));
-  assert.match(j.verdict, /Setup looks right/);
-  assert.equal(calls.length, 1, 'one read call, no writes');
-  assert.equal(calls[0].init.method, undefined, 'GET');
+  await withPhotoEnv('{{contact.property_photo}}', async () => {
+    const calls = mockFetch();
+    const r = res();
+    await handler(getReq('/api/quote?check'), r);
+    assert.equal(r.statusCode, 200);
+    const j = r.json();
+    assert.match(j.env.GHL_PIT_TOKEN, /^set \(\d+ chars/);
+    assert.ok(!r.body.includes('pit-test-token'), 'token must not appear in the output');
+    assert.equal(j.customFieldLookup.status, 200);
+    assert.equal(j.jobPhotosField.id, RESOLVED_ID);
+    assert.equal(j.jobPhotosField.fieldKey, 'contact.property_photo');
+    assert.equal(j.jobPhotosField.allowsMultipleFiles, true);
+    assert.equal(j.fields.job_type, 'contact.job_type -> ' + CF.job_type + ' (TEXT)', 'contact twin, not opportunity');
+    assert.match(j.verdict, /Setup looks right/);
+    assert.equal(calls.length, 1, 'one read call, no writes');
+    assert.equal(calls[0].init.method, undefined, 'GET');
+  });
 });
 
 test('?check explains a rejected token', async () => {
@@ -350,6 +370,70 @@ test('?check shows the last photo-upload failure on this instance', async () => 
   await handler(getReq('/api/quote?check'), r);
   const last = r.json().lastPhotoErrorOnThisInstance;
   assert.ok(last && /403/.test(last.reason), JSON.stringify(last));
+});
+
+test('custom fields rejected by GHL: contact retried without them, photos still uploaded', async () => {
+  let n = 0;
+  const calls = mockFetch({ upsert: (url, init) => {
+    n++;
+    const b = JSON.parse(init.body);
+    if (b.customFields.length) return new Response('{"message":["customFields.0.id should not be empty"]}', { status: 422 });
+    return new Response(JSON.stringify({ contact: { id: 'contact_123' } }), { status: 200 });
+  } });
+  const r = res();
+  await handler(req(good()), r);
+  const j = r.json();
+  assert.equal(r.statusCode, 200);
+  assert.equal(j.ok, true);
+  assert.equal(j.fieldsError, true);
+  assert.equal(n, 2, 'retried once');
+  assert.equal(j.photos.uploaded, 2, 'photos still go up');
+  const chk = res();
+  await handler(getReq('/api/quote?check'), chk);
+  assert.match(chk.json().lastUpsertErrorOnThisInstance.reason, /422/);
+});
+
+test('field listing down: contact still saved (key + field_value), photos reported as failed', async () => {
+  await withPhotoEnv('{{contact.property_photo}}', async () => {
+    const calls = mockFetch({ fields: () => new Response('down', { status: 503 }) });
+    const r = res();
+    await handler(req(good()), r);
+    const j = r.json();
+    assert.equal(j.ok, true);
+    assert.equal(j.contactId, 'contact_123');
+    assert.equal(j.photoError, true);
+    const body = JSON.parse(calls.find(c => c.url.endsWith('/contacts/upsert')).init.body);
+    assert.ok(body.customFields.every(f => f.key && 'field_value' in f));
+  });
+});
+
+test('single-file Job Photos field: only one photo sent, check page says so', async () => {
+  const single = { customFields: FIELD_LIST.customFields.map(f =>
+    f.id === RESOLVED_ID ? Object.assign({}, f, { isMultiFileAllowed: false, maxFileLimit: 1 }) : f) };
+  await withPhotoEnv('contact.property_photo', async () => {
+    const calls = mockFetch({ fields: () => new Response(JSON.stringify(single), { status: 200 }) });
+    const r = res();
+    await handler(req(good()), r);
+    assert.equal(r.json().photos.uploaded, 1);
+    assert.equal(partKeys(upload(calls)).length, 1);
+    const chk = res();
+    await handler(getReq('/api/quote?check'), chk);
+    assert.match(chk.json().verdict, /only ONE file/);
+  });
+});
+
+test('photos go to contact.property_photo by default, and the check page flags an old job_photos setting', async () => {
+  await withPhotoEnv(undefined, async () => {
+    const calls = mockFetch();
+    await handler(req(good()), res());
+    for (const k of partKeys(upload(calls))) assert.ok(k.startsWith(RESOLVED_ID + '_'), 'property_photo field id: ' + k);
+  });
+  await withPhotoEnv('{{contact.job_photos}}', async () => {
+    mockFetch();
+    const r = res();
+    await handler(getReq('/api/quote?check'), r);
+    assert.match(r.json().verdict, /points photos at contact\.job_photos, not contact\.property_photo/);
+  });
 });
 
 test('GET is 405; missing env is 500 without calling GHL', async () => {
