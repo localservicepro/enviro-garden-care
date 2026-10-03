@@ -13,15 +13,21 @@ Order of operations: **contact first, photos second.** A photo failure returns
 |---|---|
 | `GHL_LOCATION_ID` | `T4thSQ8YoNDiusrGSEhY` |
 | `GHL_PIT_TOKEN` | Private Integration Token (server-side only, never in the browser) |
-| `GHL_JOB_PHOTOS_FIELD_ID` | the **ID** (not the key) of the Job Photos field — see below |
+| `GHL_JOB_PHOTOS_FIELD_ID` | *optional* — the Job Photos field's ID, **or** its key (`job_photos`, `contact.job_photos` or `{{contact.job_photos}}`) |
 
-Missing any of them → the function answers `500 server_misconfigured` and logs
-which ones.
+Missing `GHL_LOCATION_ID` or `GHL_PIT_TOKEN` → `500 server_misconfigured`, logged.
 
-## Getting the Job Photos field ID
+The upload endpoint needs the field **ID**. If `GHL_JOB_PHOTOS_FIELD_ID` holds an ID it is
+used as-is. If it holds the key, or is unset, the function looks the ID up once via
+`GET /locations/{locationId}/customFields`, picks the **contact** field with key
+`contact.job_photos` (ignoring an opportunity twin), and caches it for the life of the
+function instance. A failed lookup only costs the photos: the contact is still created
+and the response carries `photoError:true`, with the reason in the function log.
 
-The upload endpoint takes the custom field **ID**. `contact.job_photos` is the
-merge-field *key* and will not work there.
+## Getting the Job Photos field ID (optional)
+
+Not required any more (see above), but pinning the ID saves one lookup per cold start
+and removes any doubt about which field is used.
 
 ```bash
 GHL_PIT_TOKEN=... GHL_LOCATION_ID=T4thSQ8YoNDiusrGSEhY node scripts/list-custom-fields.mjs

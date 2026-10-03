@@ -254,10 +254,12 @@ Load order matters and is already correct: the tracking script is a plain
 (non-deferred) tag at the end of `<body>`, and `main.js` is deferred, so the tracker
 registers its listeners first.
 
-**Deploy checklist:** `GHL_LOCATION_ID`, `GHL_PIT_TOKEN`, `GHL_JOB_PHOTOS_FIELD_ID` set in
-the Vercel project (done, per client); run `scripts/list-custom-fields.mjs` once to
-confirm the Job Photos field **ID** and that the duplicated custom-field keys resolve
-to the intended twins; then the iPhone test in `api/README.md`.
+**Deploy checklist:** `GHL_LOCATION_ID` and `GHL_PIT_TOKEN` set in the Vercel project
+(done, per client). `GHL_JOB_PHOTOS_FIELD_ID` may hold the Job Photos field's ID *or* its
+key `contact.job_photos`, or be left unset: the function finds the contact field's ID
+itself. Photos land in **Job Photos** ({{contact.job_photos}}, File upload, Contact
+folder). After any change to these settings, **redeploy**, since Vercel only applies env
+changes to new deployments. Then do the iPhone test in `api/README.md`.
 
 ### 2. Trading hours — confirmed 29 Sep
 

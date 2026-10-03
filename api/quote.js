@@ -9,7 +9,11 @@
 // the response is still ok:true with a photoError flag.
 //
 // Env (Vercel project settings, server-side only):
-//   GHL_LOCATION_ID, GHL_PIT_TOKEN, GHL_JOB_PHOTOS_FIELD_ID
+//   GHL_LOCATION_ID, GHL_PIT_TOKEN          required
+//   GHL_JOB_PHOTOS_FIELD_ID                 optional: the Job Photos field's
+//     ID, or its key ("job_photos", "contact.job_photos" or
+//     "{{contact.job_photos}}"). Unset or a key -> the ID is looked up once
+//     via GET /locations/{id}/customFields and cached.
 //
 // Node 18+ runtime. No dependencies: global fetch, FormData, Blob, crypto.
 
@@ -31,9 +35,13 @@ const FIELDS = {
   service_needed:   { key: 'service_needed' },
   job_type:         { key: 'job_type' },
   job_notes:        { key: 'job_notes' },
-  // photos: uploaded to the file field whose ID is GHL_JOB_PHOTOS_FIELD_ID
-  //         (key contact.job_photos — the upload endpoint needs the ID).
+  // photos: see PHOTO_FIELD_KEY below.
 };
+
+// File-upload field that receives the photos ({{contact.job_photos}}, type
+// "File upload", Contact folder). The upload endpoint needs the field's ID;
+// it is resolved from this key unless GHL_JOB_PHOTOS_FIELD_ID holds an ID.
+const PHOTO_FIELD_KEY = 'job_photos';
 
 const GHL = {
   base: 'https://services.leadconnectorhq.com',
@@ -156,12 +164,64 @@ async function ghlJson(method, path, token, payload) {
   try { return JSON.parse(text); } catch { throw new Error(`${path} returned non-JSON`); }
 }
 
+// GHL custom-field IDs are ~20 mixed-case alphanumerics; keys contain "_",
+// "." or braces. Anything that is not clearly an ID is treated as a key.
+function looksLikeFieldId(v) { return /^[A-Za-z0-9]{16,40}$/.test(v); }
+function normaliseFieldKey(v) {
+  return String(v || '').trim().replace(/^\{\{\s*/, '').replace(/\s*\}\}$/, '').replace(/^contact\./, '');
+}
+
+// Response shape of the custom-field listing is not part of the verified
+// contract, so find the first array of field-shaped objects (same approach as
+// scripts/list-custom-fields.mjs) rather than assume a property name.
+function findFieldArray(node, depth = 0) {
+  if (depth > 4 || !node || typeof node !== 'object') return null;
+  if (Array.isArray(node)) {
+    return node.length && node.every(x => x && typeof x === 'object' && 'id' in x && ('fieldKey' in x || 'key' in x))
+      ? node : null;
+  }
+  for (const v of Object.values(node)) { const f = findFieldArray(v, depth + 1); if (f) return f; }
+  return null;
+}
+
+const fieldIdCache = new Map();   // key -> id, per warm function instance
+
+async function resolvePhotoFieldId(env) {
+  const configured = String(env.photoField || '').trim();
+  if (configured && looksLikeFieldId(configured)) return configured;
+  const key = normaliseFieldKey(configured) || PHOTO_FIELD_KEY;
+  if (fieldIdCache.has(key)) return fieldIdCache.get(key);
+
+  const r = await fetch(`${GHL.base}/locations/${encodeURIComponent(env.locationId)}/customFields`, {
+    headers: { Authorization: 'Bearer ' + env.token, Version: GHL.version, Accept: 'application/json' },
+    signal: AbortSignal.timeout(GHL.timeoutMs),
+  });
+  const text = await r.text();
+  if (!r.ok) throw new Error(`customFields -> ${r.status} ${text.slice(0, 300)}`);
+  let fields;
+  try { fields = findFieldArray(JSON.parse(text)); } catch { fields = null; }
+  if (!fields) throw new Error('customFields: could not find a field list in the response');
+
+  // Match the contact field first; an opportunity twin may share the key.
+  const fk = f => String(f.fieldKey ?? f.key ?? '');
+  const hits = fields.filter(f => fk(f) === 'contact.' + key);
+  const pool = hits.length ? hits : fields.filter(f => fk(f) === key);
+  if (pool.length !== 1) {
+    throw new Error(`customFields: ${pool.length ? 'more than one' : 'no'} field with key "contact.${key}"`);
+  }
+  const type = String(pool[0].dataType ?? pool[0].type ?? '');
+  if (type && !/file/i.test(type)) console.warn(`[quote] "${key}" field type is "${type}", expected a file upload`);
+  fieldIdCache.set(key, pool[0].id);
+  return pool[0].id;
+}
+
 async function uploadPhotos(env, contactId, photos) {
+  const fieldId = await resolvePhotoFieldId(env);
   const fd = new FormData();
   for (const p of photos) {
     // One part per file. Key = "<customFieldId>_<uuid>"; all parts sharing the
     // field id land in the same custom field.
-    const part = env.photoFieldId + '_' + crypto.randomUUID();
+    const part = fieldId + '_' + crypto.randomUUID();
     fd.append(part, new Blob([p.bytes], { type: p.type }), p.filename);
   }
   const qs = new URLSearchParams({ contactId, locationId: env.locationId });
@@ -252,13 +312,15 @@ function splitName(full) {
 function readEnv() {
   const locationId = process.env.GHL_LOCATION_ID;
   const token = process.env.GHL_PIT_TOKEN;
-  const photoFieldId = process.env.GHL_JOB_PHOTOS_FIELD_ID;
-  if (!locationId || !token || !photoFieldId) {
-    console.error('[quote] missing env: ' + ['GHL_LOCATION_ID', 'GHL_PIT_TOKEN', 'GHL_JOB_PHOTOS_FIELD_ID']
+  // Optional: a missing or key-shaped value is resolved at upload time, so a
+  // photo-field problem can never block the contact itself.
+  const photoField = process.env.GHL_JOB_PHOTOS_FIELD_ID || '';
+  if (!locationId || !token) {
+    console.error('[quote] missing env: ' + ['GHL_LOCATION_ID', 'GHL_PIT_TOKEN']
       .filter(k => !process.env[k]).join(', '));
     return { error: 'server_misconfigured' };
   }
-  return { locationId, token, photoFieldId };
+  return { locationId, token, photoField };
 }
 
 // JSON from the site script (with base64 photos), or urlencoded from the
@@ -312,3 +374,4 @@ function err(code, message, status) { const e = new Error(message); e.code = cod
 module.exports.normaliseAuPhone = normaliseAuPhone;
 module.exports.FIELDS = FIELDS;
 module.exports.LIMITS = LIMITS;
+module.exports._resetFieldCache = () => fieldIdCache.clear();

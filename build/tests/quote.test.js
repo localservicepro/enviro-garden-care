@@ -8,7 +8,7 @@ const { Readable } = require('node:stream');
 const path = require('node:path');
 
 const LOCATION = 'T4thSQ8YoNDiusrGSEhY';
-const FIELD_ID = 'aBc123FieldId';
+const FIELD_ID = 'Kq3vT8xYbN2mR7cWp1Za';   // shape of a real GHL custom-field id
 process.env.GHL_LOCATION_ID = LOCATION;
 process.env.GHL_PIT_TOKEN = 'pit-test-token';
 process.env.GHL_JOB_PHOTOS_FIELD_ID = FIELD_ID;
@@ -36,11 +36,25 @@ function res() {
 }
 
 // Captures every fetch call. Defaults to a healthy GHL.
+// Listing as the sub-account has it: Job Photos on the contact, plus an
+// opportunity twin sharing the key (the CRM has twins for job_type etc.).
+const RESOLVED_ID = 'Zp7LmQ2rTx9VbN4cYw8K';
+const FIELD_LIST = { customFields: [
+  { id: 'OppTwin0000000000001', name: 'Job Photos', fieldKey: 'opportunity.job_photos', dataType: 'FILE_UPLOAD' },
+  { id: RESOLVED_ID,            name: 'Job Photos', fieldKey: 'contact.job_photos',     dataType: 'FILE_UPLOAD' },
+  { id: 'Other000000000000001', name: 'Job Notes',  fieldKey: 'contact.job_notes',      dataType: 'LARGE_TEXT' },
+] };
+
 function mockFetch(overrides = {}) {
   const calls = [];
+  handler._resetFieldCache();
   global.fetch = async (url, init = {}) => {
     calls.push({ url: String(url), init });
     const u = String(url);
+    if (u.endsWith(`/locations/${LOCATION}/customFields`)) {
+      if (overrides.fields) return overrides.fields(url, init);
+      return new Response(JSON.stringify(FIELD_LIST), { status: 200 });
+    }
     if (u.endsWith('/contacts/upsert')) {
       if (overrides.upsert) return overrides.upsert(url, init);
       return new Response(JSON.stringify({ contact: { id: 'contact_123' } }), { status: 200 });
@@ -226,6 +240,65 @@ test('no-JS urlencoded fallback upserts and redirects 303 to /thank-you/', async
   assert.equal(body.phone, '+61412345678');
   assert.equal(body.email, 'sam@example.com');
   assert.equal(calls.length, 1, 'no photo upload for the fallback');
+});
+
+// --- Job Photos field: ID or key in GHL_JOB_PHOTOS_FIELD_ID --------------
+async function withPhotoEnv(value, fn) {
+  const saved = process.env.GHL_JOB_PHOTOS_FIELD_ID;
+  if (value === undefined) delete process.env.GHL_JOB_PHOTOS_FIELD_ID;
+  else process.env.GHL_JOB_PHOTOS_FIELD_ID = value;
+  try { await fn(); } finally { process.env.GHL_JOB_PHOTOS_FIELD_ID = saved; }
+}
+const partKeys = c => [...c.init.body.keys()];
+const upload = calls => calls.find(c => c.url.includes('/forms/upload-custom-files'));
+
+for (const value of ['contact.job_photos', '{{contact.job_photos}}', 'job_photos', undefined]) {
+  test(`photo field given as ${value === undefined ? 'nothing (default key)' : JSON.stringify(value)} resolves to the contact field ID`, async () => {
+    await withPhotoEnv(value, async () => {
+      const calls = mockFetch();
+      const r = res();
+      await handler(req(good()), r);
+      const j = r.json();
+      assert.equal(j.ok, true);
+      assert.equal(j.photoError, undefined, r.body);
+      assert.equal(j.photos.uploaded, 2);
+      const lookups = calls.filter(c => c.url.endsWith('/customFields'));
+      assert.equal(lookups.length, 1, 'one lookup');
+      assert.equal(lookups[0].init.headers.Version, '2021-07-28');
+      for (const k of partKeys(upload(calls))) assert.ok(k.startsWith(RESOLVED_ID + '_'), k);
+    });
+  });
+}
+
+test('resolved field ID is cached: second submission does not look it up again', async () => {
+  await withPhotoEnv('contact.job_photos', async () => {
+    const calls = mockFetch();
+    await handler(req(good()), res());
+    await handler(req(good()), res());
+    assert.equal(calls.filter(c => c.url.endsWith('/customFields')).length, 1);
+    assert.equal(calls.filter(c => c.url.includes('/forms/upload-custom-files')).length, 2);
+  });
+});
+
+test('a real field ID is used as-is, with no lookup', async () => {
+  const calls = mockFetch();           // env holds FIELD_ID
+  await handler(req(good()), res());
+  assert.equal(calls.filter(c => c.url.endsWith('/customFields')).length, 0);
+  for (const k of partKeys(upload(calls))) assert.ok(k.startsWith(FIELD_ID + '_'));
+});
+
+test('field lookup failure keeps the lead: ok:true, photoError, no upload', async () => {
+  await withPhotoEnv('contact.job_photos', async () => {
+    const calls = mockFetch({ fields: () => new Response(JSON.stringify({ customFields: [] }), { status: 200 }) });
+    const r = res();
+    await handler(req(good()), r);
+    const j = r.json();
+    assert.equal(r.statusCode, 200);
+    assert.equal(j.ok, true);
+    assert.equal(j.contactId, 'contact_123');
+    assert.equal(j.photoError, true);
+    assert.equal(upload(calls), undefined);
+  });
 });
 
 test('GET is 405; missing env is 500 without calling GHL', async () => {
