@@ -213,7 +213,9 @@
       }
       setError(wrap, '');
       wrap.classList.add('is-busy');
-      Promise.all(files.map(resizeImage)).then(function (results) {
+      // Submit waits on this, so a quick tap on Send cannot drop photos that
+      // are still being shrunk.
+      input._pending = Promise.all(files.map(resizeImage)).then(function (results) {
         var total = 0;
         results.forEach(function (r) {
           if (!r) return;
@@ -372,7 +374,8 @@
       // Tracker still receives this submit event (no stopPropagation). Wait
       // for the API and a grace period before navigating.
       var grace = new Promise(function (r) { window.setTimeout(r, CAPTURE_GRACE_MS); });
-      var api = postQuote(payloadOf(form, photoInput));
+      var ready = (photoInput && photoInput._pending) || Promise.resolve();
+      var api = ready.catch(function () {}).then(function () { return postQuote(payloadOf(form, photoInput)); });
 
       Promise.all([grace, api]).then(function (results) {
         var r = results[1];

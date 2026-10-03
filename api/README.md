@@ -44,6 +44,14 @@ GHL_JOB_PHOTOS_FIELD_ID=<id>
 If a key resolves to the wrong twin, switch that entry in the `FIELDS` map at
 the top of `api/quote.js` from `{ key: '…' }` to `{ id: '…' }`.
 
+## Photos not arriving? Open the setup check
+
+`GET /api/quote?check` (e.g. `https://enviro-garden-care.vercel.app/api/quote?check`)
+returns a read-only report: which GHL variables the function can see (names only, the
+token is never shown), whether GHL accepts the token, the Job Photos field it found, a
+one-line verdict, and the last photo-upload error if this function instance has had
+one. It makes one read call to GHL and writes nothing. Paste the output to LSP.
+
 ## Request contract
 
 `POST /api/quote`, `Content-Type: application/json`:

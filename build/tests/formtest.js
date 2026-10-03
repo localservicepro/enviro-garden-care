@@ -168,6 +168,26 @@ const { chromium } = require('playwright');
   T('JPEG magic bytes present', bytes[0] === 0xFF && bytes[1] === 0xD8, bytes.slice(0,2).toString('hex'));
   await p.close();
 
+  // ---- 7b. Tapping Send straight after choosing photos still sends them ----
+  posted.length = 0;
+  p = await b.newPage();
+  await mockApi(p, { body: { ok: true, contactId: 'c_1', photos: { received: 3, uploaded: 3 } } });
+  await p.goto('http://127.0.0.1:8123/contact/',{waitUntil:'networkidle'});
+  await fillContact(p);
+  // Big enough that shrinking takes a moment.
+  const big = await p.evaluate(async () => {
+    const c = document.createElement('canvas'); c.width = 3000; c.height = 2200;
+    const x = c.getContext('2d'); for (let i = 0; i < 400; i++) { x.fillStyle = `hsl(${i % 360},60%,50%)`; x.fillRect(Math.random()*3000, Math.random()*2200, 300, 300); }
+    return c.toDataURL('image/png').split(',')[1];
+  });
+  const bigBuf = Buffer.from(big, 'base64');
+  await p.setInputFiles('#contact-quote-property_photos', [1,2,3].map(i => ({ name: `big${i}.png`, mimeType: 'image/png', buffer: bigBuf })));
+  await p.click('#contact-quote button[type=submit]');          // no waiting for thumbnails
+  await p.waitForURL('**/thank-you/',{timeout:15000}).catch(()=>{});
+  const fast = posted[0] && posted[0].json;
+  T('Send tapped mid-resize still sends every photo', fast && fast.photos && fast.photos.length === 3, fast && fast.photos && fast.photos.length);
+  await p.close();
+
   // ---- 8. Server errors surface, no redirect -----------------------------
   posted.length = 0;
   p = await b.newPage();
