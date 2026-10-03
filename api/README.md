@@ -44,6 +44,22 @@ GHL_JOB_PHOTOS_FIELD_ID=<id>
 If a key resolves to the wrong twin, switch that entry in the `FIELDS` map at
 the top of `api/quote.js` from `{ key: '…' }` to `{ id: '…' }`.
 
+## What GHL's API spec requires (checked against GoHighLevel/highlevel-api-docs)
+
+| Call | Endpoint | Token scope |
+|---|---|---|
+| List contact custom fields | `GET /locations/{locationId}/customFields?model=contact` | `locations/customFields.readonly` |
+| Find-or-create the contact | `POST /contacts/upsert` | `contacts.write` |
+| Upload photos | `POST /forms/upload-custom-files?contactId=&locationId=` (multipart, parts keyed `<fieldId>_<uuid>`) | `forms.write` |
+
+All with `Authorization: Bearer <Private Integration token>` and `Version: 2021-07-28`.
+
+Custom fields in the upsert must be `{ id, key, field_value }`. GHL marks `id` as
+required, so the function looks every field's ID up from the listing (cached 10 minutes
+per warm instance). If GHL still rejects the custom fields, the contact is saved again
+without them, so the lead is never lost, and the photos still upload. A Job Photos field
+set to one file only receives the first photo; the check page flags that.
+
 ## Photos not arriving? Open the setup check
 
 `GET /api/quote?check` (e.g. `https://enviro-garden-care.vercel.app/api/quote?check`)
