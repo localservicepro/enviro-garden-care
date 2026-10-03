@@ -4,7 +4,7 @@ const { chromium } = require('playwright');
   const b = await chromium.launch({ executablePath: '/opt/pw-browsers/chromium-1194/chrome-linux/chrome' });
   for (const [name,w] of [['gallery-desktop',1440],['gallery-mobile',390]]) {
     const p = await b.newPage({ viewport:{width:w,height:900} });
-    await p.goto('http://127.0.0.1:8123/index.html',{waitUntil:'domcontentloaded'});
+    await p.goto('http://127.0.0.1:8123/',{waitUntil:'domcontentloaded'});
     // stand-in tiles so the mosaic geometry is visible without the blocked CDN
     await p.addStyleTag({content:`.shot img{background:repeating-linear-gradient(45deg,#2a8154,#2a8154 14px,#1f6343 14px,#1f6343 28px)!important;min-height:80px}
       .reveal{opacity:1!important;transform:none!important}`});
