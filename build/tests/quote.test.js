@@ -301,6 +301,57 @@ test('field lookup failure keeps the lead: ok:true, photoError, no upload', asyn
   });
 });
 
+// --- GET /api/quote?check -------------------------------------------------
+function getReq(url) { const r = req({}, { method: 'GET' }); r.url = url; return r; }
+
+test('?check reports setup, finds the contact Job Photos field, never leaks the token', async () => {
+  const calls = mockFetch();
+  const r = res();
+  await handler(getReq('/api/quote?check'), r);
+  assert.equal(r.statusCode, 200);
+  const j = r.json();
+  assert.match(j.env.GHL_PIT_TOKEN, /^set \(\d+ chars/);
+  assert.ok(!r.body.includes('pit-test-token'), 'token must not appear in the output');
+  assert.equal(j.customFieldLookup.status, 200);
+  assert.ok(j.jobPhotosField.some(f => f.id === RESOLVED_ID && f.fieldKey === 'contact.job_photos'));
+  assert.match(j.verdict, /Setup looks right/);
+  assert.equal(calls.length, 1, 'one read call, no writes');
+  assert.equal(calls[0].init.method, undefined, 'GET');
+});
+
+test('?check explains a rejected token', async () => {
+  mockFetch({ fields: () => new Response('{"message":"Invalid JWT"}', { status: 401 }) });
+  const r = res();
+  await handler(getReq('/api/quote?check'), r);
+  const j = r.json();
+  assert.equal(j.customFieldLookup.status, 401);
+  assert.match(j.verdict, /rejected the token/);
+});
+
+test('?check flags missing env by name without calling GHL', async () => {
+  const calls = mockFetch();
+  const saved = process.env.GHL_PIT_TOKEN;
+  delete process.env.GHL_PIT_TOKEN;
+  process.env.GHL_API_KEY = 'x';
+  try {
+    const r = res();
+    await handler(getReq('/api/quote?check'), r);
+    const j = r.json();
+    assert.equal(j.env.GHL_PIT_TOKEN, 'MISSING');
+    assert.ok(j.env.ghl_variable_names_seen.includes('GHL_API_KEY'), 'shows misnamed variables');
+    assert.equal(calls.length, 0);
+  } finally { process.env.GHL_PIT_TOKEN = saved; delete process.env.GHL_API_KEY; }
+});
+
+test('?check shows the last photo-upload failure on this instance', async () => {
+  mockFetch({ upload: () => new Response('{"message":"scope"}', { status: 403 }) });
+  await handler(req(good()), res());
+  const r = res();
+  await handler(getReq('/api/quote?check'), r);
+  const last = r.json().lastPhotoErrorOnThisInstance;
+  assert.ok(last && /403/.test(last.reason), JSON.stringify(last));
+});
+
 test('GET is 405; missing env is 500 without calling GHL', async () => {
   const calls = mockFetch();
   let r = res();

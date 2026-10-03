@@ -66,6 +66,9 @@ const THANK_YOU = '/thank-you/';
 // ---------------------------------------------------------------------------
 
 module.exports = async function handler(req, res) {
+  if (req.method === 'GET' && new URL(req.url || '/', 'http://x').searchParams.has('check')) {
+    return send(res, 200, await diagnose());
+  }
   if (req.method !== 'POST') {
     res.setHeader('Allow', 'POST');
     return send(res, 405, { ok: false, error: 'method_not_allowed' });
@@ -138,6 +141,7 @@ module.exports = async function handler(req, res) {
       out.photos.uploaded = photos.length;
     } catch (e) {
       console.error('[quote] photo upload failed for', contactId, ':', e.message);
+      lastPhotoError = { at: new Date().toISOString(), photos: photos.length, reason: e.message.slice(0, 400) };
       out.photoError = true;
     }
   }
@@ -213,6 +217,61 @@ async function resolvePhotoFieldId(env) {
   if (type && !/file/i.test(type)) console.warn(`[quote] "${key}" field type is "${type}", expected a file upload`);
   fieldIdCache.set(key, pool[0].id);
   return pool[0].id;
+}
+
+// ---------------------------------------------------------------------------
+// GET /api/quote?check  — read-only setup check, for when photos go missing
+// and the Vercel logs are not to hand. Never returns the token. Makes one
+// read call to GHL (the custom-field listing); writes nothing.
+// ---------------------------------------------------------------------------
+let lastPhotoError = null;   // best effort: only this warm instance remembers it
+
+async function diagnose() {
+  const ghlVars = Object.keys(process.env).filter(k => /^GHL_|LEADCONNECTOR|HIGHLEVEL/i.test(k)).sort();
+  const photoSetting = String(process.env.GHL_JOB_PHOTOS_FIELD_ID || '').trim();
+  const out = {
+    env: {
+      GHL_LOCATION_ID: process.env.GHL_LOCATION_ID ? 'set (' + process.env.GHL_LOCATION_ID + ')' : 'MISSING',
+      GHL_PIT_TOKEN: process.env.GHL_PIT_TOKEN ? 'set (' + process.env.GHL_PIT_TOKEN.length + ' chars, starts "' + process.env.GHL_PIT_TOKEN.slice(0, 4) + '…")' : 'MISSING',
+      GHL_JOB_PHOTOS_FIELD_ID: !photoSetting ? 'not set (fine: looked up by key)'
+        : looksLikeFieldId(photoSetting) ? 'set to an ID: ' + photoSetting : 'set to a key: ' + photoSetting,
+      ghl_variable_names_seen: ghlVars,
+    },
+    customFieldLookup: null,
+    jobPhotosField: null,
+    lastPhotoErrorOnThisInstance: lastPhotoError,
+  };
+  const env = readEnv();
+  if (env.error) { out.verdict = 'Missing GHL_LOCATION_ID or GHL_PIT_TOKEN (check the exact names) and redeploy.'; return out; }
+  try {
+    const r = await fetch(`${GHL.base}/locations/${encodeURIComponent(env.locationId)}/customFields`, {
+      headers: { Authorization: 'Bearer ' + env.token, Version: GHL.version, Accept: 'application/json' },
+      signal: AbortSignal.timeout(GHL.timeoutMs),
+    });
+    const text = await r.text();
+    out.customFieldLookup = { status: r.status, ok: r.ok };
+    if (!r.ok) {
+      out.customFieldLookup.body = text.slice(0, 300);
+      out.verdict = r.status === 401 || r.status === 403
+        ? 'GHL rejected the token. Check it is a Private Integration token for this sub-account, with custom fields (view), contacts (edit) and forms (edit) allowed.'
+        : 'GHL returned an error listing custom fields; see body.';
+      return out;
+    }
+    let fields = null;
+    try { fields = findFieldArray(JSON.parse(text)); } catch { /* fall through */ }
+    if (!fields) { out.verdict = 'Custom-field listing had an unexpected shape.'; return out; }
+    const fk = f => String(f.fieldKey ?? f.key ?? '');
+    const key = normaliseFieldKey(photoSetting && !looksLikeFieldId(photoSetting) ? photoSetting : '') || PHOTO_FIELD_KEY;
+    const matches = fields.filter(f => fk(f).endsWith('.' + key) || fk(f) === key || (photoSetting && f.id === photoSetting));
+    out.jobPhotosField = matches.map(f => ({ id: f.id, name: f.name, fieldKey: fk(f), type: f.dataType ?? f.type ?? null }));
+    out.verdict = matches.some(f => fk(f) === 'contact.' + key || f.id === photoSetting)
+      ? 'Setup looks right. If photos still go missing, see lastPhotoErrorOnThisInstance or the Vercel function log.'
+      : 'No contact field with key contact.' + key + ' was found.';
+  } catch (e) {
+    out.customFieldLookup = { error: e.message };
+    out.verdict = 'Could not reach GHL from the function.';
+  }
+  return out;
 }
 
 async function uploadPhotos(env, contactId, photos) {
