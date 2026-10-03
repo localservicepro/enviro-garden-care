@@ -235,11 +235,12 @@ cap and turns iPhone HEIC into JPEG, which GHL accepts. The server re-checks typ
 magic bytes and size. Contact first, photos second: a failed upload still returns
 `ok:true` with `photoError:true`, so a bad image never loses a lead.
 
-**Spam.** A visually hidden honeypot (`company_website`, off-screen, not
-`display:none`) and a minimum fill time (`_t`, stamped at render). Both are handled
-client-side *and* server-side, and both send the bot to `/thank-you/` without creating a
-contact; the honeypot path also calls `stopImmediatePropagation()` so the tracker never
-sees it.
+**Spam.** A visually hidden trap field (`egc_trap`, labelled "Leave this empty",
+off-screen, not `display:none`) and a minimum fill time (`_t`, stamped at render). Both
+are judged on the **server only**; a skipped submission still gets `/thank-you/` and is
+recorded on `/api/quote?check`. The trap's name and label deliberately match nothing
+browser autofill knows: it used to be `company_website`, and Chrome filled it with the
+visitor's saved company name, so real enquiries were silently dropped as spam.
 
 **No-JS fallback.** The native urlencoded POST hits the same function, which upserts the
 text fields and answers `303 → /thank-you/`. Nothing ever lands in the URL.
